@@ -20,8 +20,6 @@ bool FFDemux::open(const char *url) {
         LOGE("open ffdemux failed %s", url);
         return false;
     }
-//    LOGI("open ffdemux success %s", url);
-
     re = avformat_find_stream_info(ic, 0);
     if (re != 0) {
         char buf[1024] = {0};
@@ -29,8 +27,6 @@ bool FFDemux::open(const char *url) {
         LOGE("avformat_find_stream_info failed %s", url);
         return false;
     }
-    this->totalMs = ic->duration / (TIMER_ABSTIME / 1000);
-//    LOGI("total ms = %d", totalMs);
 
     return true;
 }
@@ -68,5 +64,10 @@ FFDemux::FFDemux() {
         avformat_network_init();
         LOGI("regsist ffmpeg");
     }
+}
+
+FFDemux::~FFDemux() {
+    delete ic;
+    LOGI("~FFDemux");
 }
 

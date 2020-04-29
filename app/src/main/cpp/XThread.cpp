@@ -4,22 +4,26 @@
 
 #include "XThread.h"
 #include "XLog.h"
+#include "FFDemux.h"
 #include <thread>
 #include <chrono>
 
 using namespace std;
 
 void XSleep(int mis) {
-    std::chrono::milliseconds du(mis);
-    std::this_thread::sleep_for(du);
+    std::chrono::milliseconds duration(mis);
+    std::this_thread::sleep_for(duration);
 }
 
 void XThread::start() {
     isExit = false;
     thread th(&XThread::ThreadMain, this);
     th.detach();
+    string str = "aaa";
 
 }
+
+
 
 void XThread::stop() {
     isExit = true;

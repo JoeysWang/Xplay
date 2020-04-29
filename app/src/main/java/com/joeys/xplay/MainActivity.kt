@@ -13,9 +13,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-
-
         AndPermission.with(this)
             .runtime()
             .permission(Permission.Group.STORAGE)

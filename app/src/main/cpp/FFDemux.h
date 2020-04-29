@@ -19,6 +19,8 @@ public:
 
     FFDemux();
 
+    ~FFDemux();
+
 private:
     AVFormatContext *ic = 0;
 };
