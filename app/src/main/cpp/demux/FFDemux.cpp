@@ -28,7 +28,8 @@ bool FFDemux::open(const char *url) {
         LOGE("avformat_find_stream_info failed %s", url);
         return false;
     }
-
+    getVideoParameter();
+    getAudioParameter();
     return true;
 }
 
@@ -44,16 +45,23 @@ XData FFDemux::read() {
         av_packet_free(&avPacket);
         return XData();
     }
-//    LOGI("pack size %d ,ptss %ld", avPacket->size, avPacket->pts);
-    d.data = (avPacket);
+    d.data = (unsigned char *) (avPacket);
     d.size = avPacket->size;
 
+    if (avPacket->stream_index == audioStreamIndex)
+        d.isAudio = true;
+    else if (avPacket->stream_index == videoStreamIndex)
+        d.isAudio = false;
+    else {
+        av_packet_free(&avPacket);
+        return XData();
+    }
 
     return d;
 }
 
-XParameter FFDemux::getVideoParamter() {
-    if (!ic){
+XParameter FFDemux::getVideoParameter() {
+    if (!ic) {
         LOGE("get video param failed ic is null");
         return XParameter();
     }
@@ -63,9 +71,30 @@ XParameter FFDemux::getVideoParamter() {
         LOGE("av_find_best_stream video is empty");
         return XParameter();
     }
+    this->videoStreamIndex = videoIndex;
+    LOGI("getVideoParameter success");
 
     XParameter para;
     para.parameters = ic->streams[videoIndex]->codecpar;
+    return para;
+}
+
+XParameter FFDemux::getAudioParameter() {
+    if (!ic) {
+        LOGE("get audio param failed ic is null");
+        return XParameter();
+    }
+    //获取音频流索引
+    int audioIndex = av_find_best_stream(ic, AVMEDIA_TYPE_AUDIO, -1, -1, 0, 0);
+    if (audioIndex < 0) {
+        LOGE("av_find_best_stream audio is empty");
+        return XParameter();
+    }
+    this->audioStreamIndex = audioIndex;
+    LOGI("getAudioParameter success");
+
+    XParameter para;
+    para.parameters = ic->streams[audioIndex]->codecpar;
     return para;
 }
 

@@ -21,10 +21,15 @@ public:
 
     ~FFDemux();
 
-    XParameter getVideoParamter() override;
+    XParameter getVideoParameter() override;
+
+    XParameter getAudioParameter() override;
 
 private:
     AVFormatContext *ic = 0;
+    int audioStreamIndex =0;
+    int videoStreamIndex =0;
+
 };
 
 

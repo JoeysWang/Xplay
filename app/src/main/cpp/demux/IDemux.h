@@ -21,7 +21,8 @@ public:
     //读取一帧数据，数据由调用者清理
     virtual XData read() = 0;
 
-    virtual XParameter getVideoParamter()=0;
+    virtual XParameter getVideoParameter()=0;
+    virtual XParameter getAudioParameter()=0;
 
     //总时长
     int totalMs = 0;

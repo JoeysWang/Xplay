@@ -8,9 +8,8 @@
 void IDemux::Main() {
     while (!isExit) {
         XData d = read();
-//        LOGD("IDemux Read %d", d.size);
-        if (d.size <= 0)break;
-        notify(&d);
+        if (d.size > 0)
+            notify(&d);
 
     }
 }

@@ -10,32 +10,29 @@ extern "C" {
 #include "libavcodec/avcodec.h"
 }
 
-class Test : public IObserver {
-public:
-    void update(XData *data) override {
-        AVPacket *avpac = data->data;
-    }
 
-};
 
 extern "C"
 JNIEXPORT jboolean JNICALL
 Java_com_joeys_xplay_Xplay_open(JNIEnv *env, jobject thiz, jstring _url) {
     using namespace std;
-    FFDemux *de = new FFDemux();
-
-    Test *pTest = new Test();
-    de->addObserver(pTest);
-
+    FFDemux *demux = new FFDemux();
     const char *url = env->GetStringUTFChars(_url, 0);
-    de->open(url);
-    de->start();
+    demux->open(url);
 
-    IDecode *vdecode = new FFDecode();
-    vdecode->open(de->getVideoParamter());
+    IDecode *videoDecode = new FFDecode();
+    videoDecode->open(demux->getVideoParameter());
 
-    XSleep(300);
-    de->stop();
+    IDecode *audioDecode = new FFDecode();
+    audioDecode->open(demux->getAudioParameter());
+
+    demux->start();
+
+    videoDecode->start();
+    audioDecode->start();
+
+    demux->addObserver(videoDecode);
+    demux->addObserver(audioDecode);
 
     return 0;
 }

@@ -5,6 +5,7 @@
 #include "FFDecode.h"
 #include "../XLog.h"
 #include "../data/XParameter.h"
+#include "../data/XData.h"
 
 extern "C" {
 #include "libavcodec/avcodec.h"
@@ -38,4 +39,49 @@ bool FFDecode::open(XParameter parameter) {
 
 
     return true;
+}
+
+bool FFDecode::sendPacket(XData *pkt) {
+    if (!codecContext) {
+        return false;
+    }
+    if (!pkt || !pkt->data) {
+        return false;
+    }
+
+    codecContext->thread_count = 8;
+    int re = avcodec_send_packet(codecContext, (AVPacket *) pkt->data);
+    if (re != 0) {
+        LOGE("avcodec_send_packet failed ");
+        return false;
+    }
+
+
+    return true;
+}
+
+XData FFDecode::receiveFrame() {
+    if (!codecContext) {
+        return XData();
+    }
+
+    if (!avFrame) {
+        avFrame = av_frame_alloc();
+    }
+
+    int re = avcodec_receive_frame(codecContext, avFrame);
+    if (re != 0) {
+        LOGE("解码失败 avcodec_receive_frame");
+        return XData();
+    }
+    XData d;
+    d.data = (unsigned char *) (avFrame);
+
+    if (codecContext->codec_type == AVMEDIA_TYPE_VIDEO)
+        d.size = (avFrame->linesize[0] +
+                  avFrame->linesize[1] +
+                  avFrame->linesize[2]) * avFrame->height;
+
+
+    return d;
 }

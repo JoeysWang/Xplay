@@ -9,12 +9,13 @@ struct AVPacket;
 
 struct XData {
 
-    AVPacket *data = 0;
+    unsigned char *data = 0;
 
     int size = 0;
 
     void Drop();
 
+    bool isAudio = false;
 };
 
 

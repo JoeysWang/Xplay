@@ -3,3 +3,8 @@
 //
 
 #include "IDecode.h"
+
+void IDecode::Main() {
+
+
+}
