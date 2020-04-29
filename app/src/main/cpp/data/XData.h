@@ -5,10 +5,12 @@
 #ifndef XPLAY_XDATA_H
 #define XPLAY_XDATA_H
 
+struct AVPacket;
 
 struct XData {
 
-    unsigned char *data = 0;
+    AVPacket *data = 0;
+
     int size = 0;
 
     void Drop();

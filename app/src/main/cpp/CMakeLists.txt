@@ -13,11 +13,15 @@ add_library(
         xplay
         SHARED
         xplay.cpp
-        IDemux.cpp
-        FFDemux.cpp
-        XData.cpp
+        demux/IDemux.cpp
+        demux/FFDemux.cpp
+        data/XData.cpp
+        data/XParameter.cpp
         XLog.cpp
         XThread.cpp
+        IObserver.cpp
+        decode/IDecode.cpp
+        decode/FFDecode.cpp
 )
 
 #find_library(

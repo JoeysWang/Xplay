@@ -4,7 +4,7 @@
 
 #include "XThread.h"
 #include "XLog.h"
-#include "FFDemux.h"
+#include "demux/FFDemux.h"
 #include <thread>
 #include <chrono>
 
@@ -19,8 +19,6 @@ void XThread::start() {
     isExit = false;
     thread th(&XThread::ThreadMain, this);
     th.detach();
-    string str = "aaa";
-
 }
 
 

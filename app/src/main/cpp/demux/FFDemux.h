@@ -8,7 +8,7 @@
 
 struct AVFormatContext;
 
-#include "XData.h"
+#include "../data/XData.h"
 #include "IDemux.h"
 
 class FFDemux : public IDemux {
@@ -20,6 +20,8 @@ public:
     FFDemux();
 
     ~FFDemux();
+
+    XParameter getVideoParamter() override;
 
 private:
     AVFormatContext *ic = 0;
