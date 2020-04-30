@@ -34,13 +34,14 @@ Java_com_joeys_xplay_Xplay_open(JNIEnv *env, jobject thiz, jstring _url) {
     audioDecode->open(demux->getAudioParameter());
 
     videoDecode->addObserver(view);
-    demux->start();
+    demux->addObserver(videoDecode);
+    demux->addObserver(audioDecode);
 
     videoDecode->start();
     audioDecode->start();
+    demux->start();
 
-    demux->addObserver(videoDecode);
-    demux->addObserver(audioDecode);
+
     return 0;
 }
 
@@ -48,8 +49,9 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_com_joeys_xplay_Xplay_initView(JNIEnv *env, jobject thiz, jobject holder) {
     window = ANativeWindow_fromSurface(env, holder);
-    LOGD("ANativeWindow_fromSurface %d",window);
-    view = new GLVideoView();
-    view->setRender(window);
-
+    LOGD("ANativeWindow_fromSurface %d", window);
+    if ( window) {
+        view = new GLVideoView();
+        view->setRender(window);
+    }
 }
