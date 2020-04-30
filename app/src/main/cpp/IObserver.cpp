@@ -14,7 +14,7 @@ void IObserver::addObserver(IObserver *observer) {
 
 }
 
-void IObserver::notify(XData *data) {
+void IObserver::notify(XData data) {
     mutex.lock();
     for (int i = 0; i < observers.size(); i++) {
         observers[i]->update(data);

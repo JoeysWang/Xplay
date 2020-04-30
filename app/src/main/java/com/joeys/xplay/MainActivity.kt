@@ -17,12 +17,15 @@ class MainActivity : AppCompatActivity() {
             .runtime()
             .permission(Permission.Group.STORAGE)
             .onGranted { permissions: List<String?>? ->
-                open()
             }
             .onDenied { permissions: List<String?>? ->
 
             }
             .start()
+        btn.setOnClickListener {
+            open()
+        }
+        xplay.setEGLContextClientVersion(2);
     }
 
     private fun open() {
@@ -30,8 +33,7 @@ class MainActivity : AppCompatActivity() {
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
             "失落沙洲.mp4"
         )
-       Xplay.open(file.absolutePath)
-
+        xplay.open(file.absolutePath)
     }
 
 

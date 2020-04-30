@@ -14,17 +14,17 @@
 class IObserver : public XThread {
 public:
     //观察者接受数据
-    virtual void update(XData *data) {}
+    virtual void update(XData  data) {}
 
     //主体函数
     //添加观察者 线程安全的
     void addObserver(IObserver *observer);
 
     //通知所有观察者
-    void notify(XData *data);
+    void notify(XData  data);
 
 protected:
-    std::vector<IObserver *> observers;
+    std::vector<IObserver  *> observers;
     std::mutex mutex;
 };
 

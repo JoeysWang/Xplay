@@ -15,7 +15,7 @@ class FFDecode : public IDecode {
 public:
     bool open(XParameter parameter) override;
 
-    bool sendPacket(XData *pkt) override;
+    bool sendPacket(XData  pkt) override;
 
     XData receiveFrame() override;
 
@@ -23,7 +23,6 @@ public:
 protected:
     AVCodecContext *codecContext = 0;
     AVFrame *avFrame = 0;
-
 };
 
 

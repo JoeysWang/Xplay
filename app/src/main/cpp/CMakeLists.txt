@@ -22,6 +22,11 @@ add_library(
         IObserver.cpp
         decode/IDecode.cpp
         decode/FFDecode.cpp
+        video/IVideoView.cpp
+        video/GLVideoView.cpp
+        texture/XEGL.cpp
+        texture/XShader.cpp
+        texture/XTexture.cpp
 )
 
 #find_library(

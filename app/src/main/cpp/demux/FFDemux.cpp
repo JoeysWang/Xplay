@@ -28,8 +28,8 @@ bool FFDemux::open(const char *url) {
         LOGE("avformat_find_stream_info failed %s", url);
         return false;
     }
-    getVideoParameter();
-    getAudioParameter();
+//    getVideoParameter();
+//    getAudioParameter();
     return true;
 }
 
@@ -49,14 +49,13 @@ XData FFDemux::read() {
     d.size = avPacket->size;
 
     if (avPacket->stream_index == audioStreamIndex)
-        d.isAudio = true;
+        d.audioOrVideo = 0;
     else if (avPacket->stream_index == videoStreamIndex)
-        d.isAudio = false;
+        d.audioOrVideo = 1;
     else {
         av_packet_free(&avPacket);
         return XData();
     }
-
     return d;
 }
 
@@ -72,10 +71,10 @@ XParameter FFDemux::getVideoParameter() {
         return XParameter();
     }
     this->videoStreamIndex = videoIndex;
-    LOGI("getVideoParameter success");
 
     XParameter para;
     para.parameters = ic->streams[videoIndex]->codecpar;
+    LOGI("getVideoParameter success codec_id= %d",para.parameters->codec_id);
     return para;
 }
 

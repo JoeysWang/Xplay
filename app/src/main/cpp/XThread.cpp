@@ -33,15 +33,11 @@ void XThread::stop() {
         XSleep(10);
     }
     LOGE("stop 线程 超时");
-
 }
 
 void XThread::ThreadMain() {
-    LOGD("线程函数进入");
     isRunning = true;
     Main();
     isRunning = false;
     LOGD("线程函数退出");
-
-
 }

@@ -9,7 +9,6 @@ void IDemux::Main() {
     while (!isExit) {
         XData d = read();
         if (d.size > 0)
-            notify(&d);
-
+            notify(d);
     }
 }
