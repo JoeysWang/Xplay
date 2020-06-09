@@ -9,15 +9,16 @@
 #include "../data/XData.h"
 #include "../IObserver.h"
 
-class IVideoView :public IObserver{
+class IVideoView : public IObserver {
 
 public:
     virtual void setRender(void *view) = 0;
 
     virtual void render(XData data) = 0;
 
-    virtual void update(XData data) ;
+    virtual void update(XData data);
 
+    virtual void setMatrix(float *matrix,int size){};
 
 };
 

@@ -79,23 +79,25 @@ XData FFDecode::receiveFrame() {
     }
     XData d;
     d.data = (unsigned char *) (avFrame);
-
     if (codecContext->codec_type == AVMEDIA_TYPE_VIDEO) {
         d.size = (avFrame->linesize[0] +
                   avFrame->linesize[1] +
                   avFrame->linesize[2]) * avFrame->height;
+
         d.width = avFrame->width;
         d.height = avFrame->height;
-
 
         d.linesize[0] = avFrame->linesize[0];
         d.linesize[1] = avFrame->linesize[1];
         d.linesize[2] = avFrame->linesize[2];
 
-        LOGD("linese 0 =%d , 1=%d , 2=%d",
-             d.linesize[0],
-             d.linesize[1],
-             d.linesize[2]);
+        LOGD("width=%d , height=%d ,ratio = %d/%d",
+             avFrame->width,
+             avFrame->height,
+             (avFrame->sample_aspect_ratio.den),
+             (avFrame->sample_aspect_ratio.num)
+
+        );
 
     } else if (codecContext->codec_type == AVMEDIA_TYPE_AUDIO) {
         //样本大小 * 单通道样本数 * 通道数

@@ -15,6 +15,7 @@ public:
     void getTexture(unsigned int index, int width, int height, unsigned char *buf);
 
     void draw();
+
     int inputTextureHandle[MAX_TEXTURES]; // 纹理句柄列表
 
 
@@ -23,6 +24,9 @@ protected:
     unsigned int fragSH = 0;
     unsigned int program = 0;
     unsigned int textures[100] = {0};
+public:
+    float *matrix = 0;
+
 };
 
 

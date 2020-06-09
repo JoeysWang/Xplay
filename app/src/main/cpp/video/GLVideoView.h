@@ -16,9 +16,13 @@ public:
 
     void render(XData data) override;
 
+    void setMatrix(float *matrix, int size) override;
+
+
 protected:
     void *view = 0;
     XTexture *texture = 0;
+    float *matrix ;
 };
 
 

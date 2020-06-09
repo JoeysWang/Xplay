@@ -19,10 +19,11 @@ char vertexShader[] =
         "#version 300 es\n"
         "layout(location = 0) in vec4 aPosition;//顶点坐标\n"
         "layout(location = 1) in vec2 aTexCoord;//材质顶点坐标\n"
+        "uniform mat4 uMVPMatrix;\n"
         "out vec2 vTexCoord;//输出的才制作表\n"
         "void main() {\n"
         "    vTexCoord = vec2(aTexCoord.x, 1.0 - aTexCoord.y);\n"
-        "    gl_Position = aPosition;\n"
+        "    gl_Position = aPosition * uMVPMatrix ;\n"
         "}";
 
 //片元着色器,软解码和部分x86硬解码
@@ -60,6 +61,12 @@ bool XShader::init() {
     inputTextureHandle[0] = glGetUniformLocation(program, "yTexture");
     inputTextureHandle[1] = glGetUniformLocation(program, "uTexture");
     inputTextureHandle[2] = glGetUniformLocation(program, "vTexture");
+
+    GLint vPMatrixHandle = glGetUniformLocation(program, "uMVPMatrix");
+    LOGD("vPMatrixHandle  %d !",vPMatrixHandle);
+    glUniformMatrix4fv(vPMatrixHandle, 1, GL_FALSE, matrix);
+
+
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     glUseProgram(program);
 

@@ -15,8 +15,12 @@ void GLVideoView::render(XData data) {
     if (!view)return;
     if (!texture) {
         texture = XTexture::create();
-        texture->init(view);
+        texture->init(view, matrix);
     }
     texture->draw(data.datas, data.linesize, data.height);
     XEGL::get()->draw();
+}
+
+void GLVideoView::setMatrix(float m[], int size) {
+    this->matrix = m;
 }

@@ -23,7 +23,7 @@ extern "C"
 JNIEXPORT jboolean JNICALL
 Java_com_joeys_xplay_Xplay_open(JNIEnv *env, jobject thiz, jstring _url) {
     using namespace std;
-    FFDemux *demux = new FFDemux();
+    auto *demux = new FFDemux();
     const char *url = env->GetStringUTFChars(_url, 0);
     demux->open(url);
 
@@ -41,7 +41,6 @@ Java_com_joeys_xplay_Xplay_open(JNIEnv *env, jobject thiz, jstring _url) {
     audioDecode->start();
     demux->start();
 
-
     return 0;
 }
 
@@ -50,8 +49,17 @@ JNIEXPORT void JNICALL
 Java_com_joeys_xplay_Xplay_initView(JNIEnv *env, jobject thiz, jobject holder) {
     window = ANativeWindow_fromSurface(env, holder);
     LOGD("ANativeWindow_fromSurface %d", window);
-    if ( window) {
+    if (window) {
         view = new GLVideoView();
         view->setRender(window);
+    }
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_joeys_xplay_Xplay_setMatrix(JNIEnv *env, jobject thiz, jfloatArray v_pmatrix) {
+    if (!view) {
+        jfloat *matrix = env->GetFloatArrayElements(v_pmatrix, JNI_FALSE);
+        view->setMatrix(matrix, sizeof(matrix));
     }
 }

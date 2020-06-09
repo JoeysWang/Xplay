@@ -6,17 +6,20 @@
 #include "GLES2/gl2.h"
 #include "XEGL.h"
 #include "XShader.h"
+#include "../XLog.h"
 
 class CXTexture : public XTexture {
 
 public:
     XShader shader;
 
-    bool init(void *win) override {
+
+    bool init(void *win, float *vp_matrix) override {
         if (!win)return false;
         XEGL *xegl = XEGL::get();
         if (!xegl) return false;
         xegl->init(win);
+        shader.matrix = vp_matrix;
         shader.init();
         return true;
     }

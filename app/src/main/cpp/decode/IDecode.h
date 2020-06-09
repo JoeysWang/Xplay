@@ -18,13 +18,13 @@ public:
     virtual bool open(XParameter parameter) = 0;
 
     //future模型, 发送数据到线程解码
-    virtual bool sendPacket(XData  pkt) = 0;
+    virtual bool sendPacket(XData pkt) = 0;
 
     //从线程获取解码结果，线程不安全
     virtual XData receiveFrame() = 0;
 
     //生产数据，如果是满的，阻塞
-    void update(XData  data) override;
+    void update(XData data) override;
 
 public:
     int audioOrVideo = -1;
@@ -34,7 +34,7 @@ public:
 
 protected:
     //消费数据，如果是空的，阻塞
-    virtual void Main();
+    virtual void Main() override;
 
     //所有的读取缓冲
     std::list<XData> packets;
