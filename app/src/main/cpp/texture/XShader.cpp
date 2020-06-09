@@ -13,7 +13,6 @@
 #include <cstdlib>
 
 
-
 //顶点着色器glsl
 #define GET_STR(x) #x
 char vertexShader[] =
@@ -64,39 +63,6 @@ bool XShader::init() {
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     glUseProgram(program);
 
-
-    ////
-
-//    //加入三维顶点数据 ，两个三角形组成正方形
-//    static float ver[] = {
-//            -1.0f, -1.0f,  // left,  bottom
-//            1.0f, -1.0f,  // right, bottom
-//            -1.0f, 1.0f,  // left,  top
-//            1.0f, 1.0f,  // right, top
-//    };
-//    glEnableVertexAttribArray(aPosition);//确定是否有效
-//    glVertexAttribPointer(
-//            aPosition, //顶点属性索引
-//            2,         //分量的数量
-//            GL_FLOAT,
-//            GL_FALSE,
-//            2 * sizeof(float),         //指定顶点索引 i和i+1 之间的位移，0代表每个顶点属性数据顺序存储，大于0表示获取下一个索引的跨距
-//            ver
-//    );
-//    static float texture[] = {
-//            0.0f, 1.0f, // left, top
-//            1.0f, 1.0f, // right, top
-//            0.0f, 0.0f, // left, bottom
-//            1.0f, 0.0f, // right, bottom
-//    };
-//    glEnableVertexAttribArray(aTexCoord);//确定是否有效
-//    glVertexAttribPointer(
-//            aTexCoord,
-//            2,
-//            GL_FLOAT,
-//            GL_FALSE,
-//            2 * sizeof(float),
-//            texture);
     ////////////////////////
     GLfloat vertices[] = { //正方形
             1.0f, -1.0f, 0.0f, // 右下
@@ -111,12 +77,16 @@ bool XShader::init() {
     GLubyte indices[] = {
             0, 1, 2, 0, 2, 3
     };
+    ///正确的绑定顺序是VAO、VBO、EBO,将后两者的信息也绑定进VAO中
     GLuint vboIds[2];
     glGenBuffers(2, vboIds);
 
+
+    ///把顶点数组复制到顶点缓冲中
     glBindBuffer(GL_ARRAY_BUFFER, vboIds[0]);///顶点缓冲
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices, GL_DYNAMIC_DRAW);
 
+    ///把索引数组复制到顶点缓冲中
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboIds[1]);///索引缓冲
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), &indices, GL_DYNAMIC_DRAW);
 
@@ -137,7 +107,6 @@ bool XShader::init() {
                           vertexSize,
                           GL_FLOAT, GL_FALSE,
                           (vertexSize + textureCount) * sizeof(float),
-            //vertices ///直接从顶点上读取
                           0 ///使用顶点缓冲对象
     );
 
@@ -145,8 +114,8 @@ bool XShader::init() {
                           textureCount,
                           GL_FLOAT, GL_FALSE,
                           (vertexSize + textureCount) * sizeof(float),
-                          (const void *) ((vertexSize) * sizeof(float)));
-
+                          (const void *) ((vertexSize) * sizeof(float))///偏移量
+    );
     ////////////////////////
 
     LOGI("egl 初始化shader  success !");
