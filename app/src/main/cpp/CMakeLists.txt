@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.4.1)
 
-
 set(ffmpeg_libs ${CMAKE_SOURCE_DIR}/../../../libs/${CMAKE_ANDROID_ARCH_ABI})
 include_directories(${CMAKE_SOURCE_DIR}/include/${CMAKE_ANDROID_ARCH_ABI})
 
@@ -27,6 +26,7 @@ add_library(
         texture/XEGL.cpp
         texture/XShader.cpp
         texture/XTexture.cpp
+        utils/OpenGLUtils.cpp
 )
 
 #find_library(
@@ -38,7 +38,7 @@ target_link_libraries(
         ${ffmpeg_libs_names}
         log
         android
-        GLESv2
+        GLESv3
         OpenSLES
         EGL
 )

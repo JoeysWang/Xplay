@@ -16,7 +16,7 @@ public:
         if (display == EGL_NO_DISPLAY || eglSurface == EGL_NO_SURFACE) {
             return;
         }
-        eglSwapBuffers(display,eglSurface);
+        eglSwapBuffers(display, eglSurface);
     }
 
     bool init(void *win) override {
@@ -46,20 +46,48 @@ public:
                 EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
                 EGL_NONE
         };
-        EGLConfig config = 0;
-        EGLint numConfigs = 0;
-        if (EGL_TRUE != eglChooseConfig(display, configSpec, &config, 1, &numConfigs)) {
+        EGLConfig config[1];
+        EGLint numConfigs = 1;
+        if (EGL_TRUE != eglChooseConfig(display, configSpec, config, 1, &numConfigs)) {
             LOGE("egl eglChooseConfig is failed");
             return false;
         }
         LOGD("egl eglChooseConfig  success");
-        eglSurface = eglCreateWindowSurface(display, config, nativeWindow, nullptr);
+        eglSurface = eglCreateWindowSurface(display, config[0], nativeWindow, nullptr);
+        if (eglSurface == EGL_NO_SURFACE) {
+            LOGE("egl eglSurface is failed");
+            switch (eglGetError()) {
+                case EGL_BAD_MATCH:
+                    LOGE("eglSurface EGL_BAD_MATCH");
+                    // Check window and EGLConfig attributes to determine
+                    // compatibility, or verify that the EGLConfig
+                    // supports rendering to a window,
+                    break;
+                case EGL_BAD_CONFIG:
+                    LOGE("eglSurface EGL_BAD_CONFIG");
+                    // Verify that provided EGLConfig is valid
+                    break;
+                case EGL_BAD_NATIVE_WINDOW:
+                    LOGE("eglSurface EGL_BAD_NATIVE_WINDOW");
+                    // Verify that provided EGLNativeWindow is valid
+                    break;
+                case EGL_BAD_ALLOC:
+                    LOGE("eglSurface EGL_BAD_ALLOC");
+                    // Not enough resources available. Handle and recover
+                    break;
+                default:
+                    LOGE("eglSurface unknown");
+                    break;
+            }
+            return false;
+        }
+        LOGD("egl eglSurface success!");
 
         //4 创建打开上下文
         EGLint ctxAttr[] = {
                 EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE
         };
-        eglContext = eglCreateContext(display, config, EGL_NO_CONTEXT, ctxAttr);
+        eglContext = eglCreateContext(display, config[0], EGL_NO_CONTEXT, ctxAttr);
         if (eglContext == EGL_NO_CONTEXT) {
             LOGE("egl eglCreateContext is failed");
             return false;

@@ -5,6 +5,7 @@
 #include "GLVideoView.h"
 #include "../texture/XTexture.h"
 #include "../XLog.h"
+#include "../texture/XEGL.h"
 
 void GLVideoView::setRender(void *view) {
     this->view = view;
@@ -16,7 +17,6 @@ void GLVideoView::render(XData data) {
         texture = XTexture::create();
         texture->init(view);
     }
-    LOGD("render %d", data.size);
-
-    texture->draw(data.datas, data.width, data.height);
+    texture->draw(data.datas, data.linesize, data.height);
+    XEGL::get()->draw();
 }

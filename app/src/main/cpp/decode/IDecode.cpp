@@ -35,7 +35,6 @@ void IDecode::Main() {
         //如果不是空的，处理数据：
         XData data = packets.front();
         packets.pop_front();
-
         //一个数据包，可能会获得多个frame
         if (sendPacket(data)) {
 

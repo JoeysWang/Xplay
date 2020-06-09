@@ -22,6 +22,8 @@ struct XData {
 
     int width = 0;
     int height = 0;
+    int linesize[3];    // 宽对齐
+
 };
 
 

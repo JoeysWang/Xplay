@@ -21,10 +21,12 @@ public:
         return true;
     }
 
-    void draw(unsigned char *data[], int width, int height) override {
-        shader.getTexture(0, width, height, data[0]); //y
-        shader.getTexture(1, width/2, height/2, data[1]); //u
-        shader.getTexture(2, width/2, height/2, data[2]); //v
+    void draw(unsigned char *data[], int width[], int height) override {
+        shader.getTexture(0, width[0], height, data[0]); //y
+        shader.getTexture(1, width[1], height / 2, data[1]); //u
+        shader.getTexture(2, width[2], height / 2, data[2]); //v
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
         shader.draw();
     }
 };

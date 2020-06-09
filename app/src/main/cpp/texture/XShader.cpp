@@ -7,176 +7,162 @@
 #include <jni.h>
 #include <unistd.h>
 
+#include "../utils/OpenGLUtils.h"
 #include "../XLog.h"
 #include <EGL/egl.h>
+#include <cstdlib>
 
 
 
 //顶点着色器glsl
 #define GET_STR(x) #x
-static const char *vertexShader = GET_STR(
-        attribute
-        vec4 aPosition; //顶点坐标
-        attribute
-        vec2 aTexCoord; //材质顶点坐标
-        varying
-        vec2 vTexCoord; //输出的才制作表
-        void main() {
-            vTexCoord = vec2(aTexCoord.x, 1.0 - aTexCoord.y);
-            gl_Position = aPosition;
-        }
-);
+char vertexShader[] =
+        "#version 300 es\n"
+        "layout(location = 0) in vec4 aPosition;//顶点坐标\n"
+        "layout(location = 1) in vec2 aTexCoord;//材质顶点坐标\n"
+        "out vec2 vTexCoord;//输出的才制作表\n"
+        "void main() {\n"
+        "    vTexCoord = vec2(aTexCoord.x, 1.0 - aTexCoord.y);\n"
+        "    gl_Position = aPosition;\n"
+        "}";
 
 //片元着色器,软解码和部分x86硬解码
-static const char *fragYUV420P = GET_STR(
-        precision
-        mediump float;//精度
-        varying
-        vec2 vTexCoord; //顶点着色器传递的坐标
-        //输入的材质(不透明灰度图，单像素)
-        uniform
-        sampler2D yTexture;
-        uniform
-        sampler2D uTexture;
-        uniform
-        sampler2D vTexture;
+char fragYUV420P[] =
+        "#version 300 es\n"
+        "precision mediump float;//精度\n"
+        "in vec2 vTexCoord; //顶点着色器传递的坐标\n"
+        "out vec4 gl_FragColor;\n"
+        "//输入的材质(不透明灰度图，单像素)\n"
+        "uniform sampler2D yTexture;\n"
+        "uniform sampler2D uTexture;\n"
+        "uniform sampler2D vTexture;\n"
+        "\n"
+        "void main() {\n"
+        "    vec3 yuv;\n"
+        "    vec3 rgb;\n"
+        "    yuv.r = texture(yTexture, vTexCoord).r - (16.0 / 255.0);   \n"
+        "    yuv.g = texture(uTexture, vTexCoord).r - 0.5;              \n"
+        "    yuv.b = texture(vTexture, vTexCoord).r - 0.5;              \n"
+        "                                                               \n"
+        "    rgb = mat3(1.164,  1.164,  1.164,                   \n"
+        "               0.0,   -0.213,  2.112,                       \n"
+        "               1.793, -0.533,    0.0) * yuv;                   \n"
+        "    //输出像素颜色\n"
+        "    gl_FragColor = vec4(rgb, 1.0);\n"
+        "\n"
+        "}";
 
-        void main() {
-            vec3 yuv;
-            vec3 rgb;
-            yuv.r = texture2D(yTexture, vTexCoord).r;
-            yuv.g = texture2D(uTexture, vTexCoord).r - 0.5;
-            yuv.b = texture2D(vTexture, vTexCoord).r - 0.5;
-
-            rgb = mat3(1.0, 1.0, 1.0,
-                       0.0, -0.39465, 2.03211,
-                       1.13983, -0.5806, 0.0) * yuv;
-            //输出像素颜色
-            gl_FragColor = vec4(rgb, 1.0);
-
-        }
-
-);
-
-static GLuint initShader(const char *code, GLint type) {
-    //创建shader
-    GLuint sh = glCreateShader(type);
-    if (sh == 0) {
-        LOGE("initShader failed %d", type);
-        return 0;
-    }
-    //加载shader
-    glShaderSource(sh,
-                   1,//shader数量
-                   &code, //shader代码
-                   0 //代码长度
-    );
-    //编译shader
-    glCompileShader(sh);
-    //获取编译情况
-    GLint glStatus;
-    glGetShaderiv(sh, GL_COMPILE_STATUS, &glStatus);
-    if (glStatus == 0) {
-        LOGE("gl compile failed %d", glStatus);
-        return 0;
-    }
-    LOGI("gl compile success ");
-    return sh;
-}
 
 bool XShader::init() {
+    program = OpenGLUtils::createProgram(vertexShader, fragYUV420P);
+    OpenGLUtils::checkGLError("createProgram");
+    GLint aPosition = glGetAttribLocation(program, "aPosition");
+    GLint aTexCoord = glGetAttribLocation(program, "aTexCoord");
+    inputTextureHandle[0] = glGetUniformLocation(program, "yTexture");
+    inputTextureHandle[1] = glGetUniformLocation(program, "uTexture");
+    inputTextureHandle[2] = glGetUniformLocation(program, "vTexture");
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glUseProgram(program);
 
-    //shader 初始化
-    vertexSH = initShader(vertexShader, GL_VERTEX_SHADER);
-    fragSH = initShader(fragYUV420P, GL_FRAGMENT_SHADER);
+    ////////////////////////
+//    GLfloat vertices[] = { //正方形
+//            1.0f, -1.0f, 0.0f, // 右下
+//            1.0f, 0.0f,   // 纹理右下
+//            -1.0f, -1.0f, 0.0f, // 左下
+//            0.0f, 0.0f,//纹理左下
+//            -1.0f, 1.0f, 0.0f, // 左上
+//            0.0f, 1.0f,// 纹理左上
+//            1.0f, 1.0f, 0.0f,  // 右上
+//            1.0f, 1.0f // 纹理右上
+//    };
+//    GLubyte indices[] = {
+//            0, 1, 2, 0, 2, 3
+//    };
+//    GLuint vboIds[2];
+//    glGenBuffers(2, vboIds);
+//
+//    glBindBuffer(GL_ARRAY_BUFFER, vboIds[0]);///顶点缓冲
+//    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices, GL_DYNAMIC_DRAW);
+//
+//    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboIds[1]);///索引缓冲
+//    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), &indices, GL_DYNAMIC_DRAW);
+//
+//    GLuint vaoId;
+//    glen
 
-    if (vertexSH == 0 || fragSH == 0) {
-        LOGE("egl initShader failed !");
-        return false;
-    }
 
-    //创建渲染程序
-    program = glCreateProgram();
-    //向程序加入着色器代码
-    glAttachShader(program, vertexSH);
-    glAttachShader(program, fragSH);
-    //链接程序
-    glLinkProgram(program);
-    GLint progremStatus;
-    glGetProgramiv(program, GL_LINK_STATUS, &progremStatus);
-    if (progremStatus != GL_TRUE) {
-        LOGE("egl progrem link  failed !");
-        return false;
-    }
-    LOGI("egl progrem link  success !");
+
 
     ////////////////////////
     //加入三维顶点数据 ，两个三角形组成正方形
     static float ver[] = {
-            1.0f, -1.0f, 0.0f,
-            -1.0f, -1.0f, 0.0f,
-            1.0f, 1.0f, 0.0f,
-            -1.0f, 1.0f, 0.0f,
+            -1.0f, -1.0f,  // left,  bottom
+            1.0f, -1.0f,  // right, bottom
+            -1.0f, 1.0f,  // left,  top
+            1.0f, 1.0f,  // right, top
     };
-    GLint aPosition = glGetAttribLocation(program, "aPosition");
     glEnableVertexAttribArray(aPosition);//确定是否有效
-    //传递顶点值
-    glVertexAttribPointer(aPosition, 3, GL_FLOAT, GL_FALSE, 12, ver);
-    //加入材质坐标数据
+    glVertexAttribPointer(
+            aPosition, //顶点属性索引
+            2,         //分量的数量
+            GL_FLOAT,
+            GL_FALSE,
+            2 * sizeof(float),         //指定顶点索引 i和i+1 之间的位移，0代表每个顶点属性数据顺序存储，大于0表示获取下一个索引的跨距
+            ver
+    );
     static float texture[] = {
-            1.0f, 0.0f,//右下
-            0.0f, 0.0f,
-            1.0f, 1.0f,
-            0.0f, 1.0f
+            0.0f, 1.0f, // left, top
+            1.0f, 1.0f, // right, top
+            0.0f, 0.0f, // left, bottom
+            1.0f, 0.0f, // right, bottom
     };
-    GLint aTexCoord = glGetAttribLocation(program, "aTexCoord");
     glEnableVertexAttribArray(aTexCoord);//确定是否有效
-    glVertexAttribPointer(aTexCoord, 2, GL_FLOAT, GL_FALSE, 8, texture);
-
-    glUniform1i(glGetUniformLocation(program, "yTexture"), 0);
-    glUniform1i(glGetUniformLocation(program, "uTexture"), 1);
-    glUniform1i(glGetUniformLocation(program, "vTexture"), 2);
+    glVertexAttribPointer(
+            aTexCoord,
+            2,
+            GL_FLOAT,
+            GL_FALSE,
+            2 * sizeof(float),
+            texture);
 
     LOGI("egl 初始化shader  success !");
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    if (textures[0] == 0) {
+        glGenTextures(3, textures);
+    }
+    for (int i = 0; i < 3; ++i) {
+        glActiveTexture(GL_TEXTURE0 + i);
+        glBindTexture(GL_TEXTURE_2D, textures[i]);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glUniform1i(inputTextureHandle[i], i);
+    }
 
     return true;
 }
 
 void XShader::draw() {
     if (!program)return;
-    LOGD("xshader draw ");
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
 }
 
-void XShader::getTexture(unsigned int index, int width, int height, unsigned char *buf) {
-//    LOGD("getTexture index=%d,  width=%d,  height=%d , bufSize =%d", index, width, height, sizeof(buf));
-    if (textures[index] == 0) {
-        //材质初始化
-        glGenTextures(1, &textures[index]);
-        glBindTexture(GL_TEXTURE_2D, textures[index]);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+void XShader::getTexture(unsigned int i, int width, int height, unsigned char *buf) {
+    glActiveTexture(GL_TEXTURE0 + i);
+    glBindTexture(GL_TEXTURE_2D, textures[i]);
 
-        glTexImage2D(GL_TEXTURE_2D,
-                     0,
-                     GL_LUMINANCE,
-                     width, height,
-                     0,
-                     GL_LUMINANCE,
-                     GL_UNSIGNED_BYTE,
-                     NULL
-        );
-    }
-
-    glActiveTexture(GL_TEXTURE0 + index);
-    glBindTexture(GL_TEXTURE_2D, textures[index]);
-    glTexSubImage2D(GL_TEXTURE_2D,
-                    0, 0, 0,
-                    width, height,
-                    GL_LUMINANCE,
-                    GL_UNSIGNED_BYTE,
-                    buf
-    );
-//    LOGD("bind success index=%d,  width=%d,  height=%d , bufSize =%d", index, width, height, sizeof(buf));
-
+    glTexImage2D(GL_TEXTURE_2D,
+                 0,
+                 GL_LUMINANCE,
+                 width,
+                 height,
+                 0,
+                 GL_LUMINANCE,
+                 GL_UNSIGNED_BYTE,
+                 buf);
+    glUniform1i(inputTextureHandle[i], i);
 }
