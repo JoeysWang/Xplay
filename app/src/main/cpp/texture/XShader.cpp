@@ -3,7 +3,7 @@
 //
 
 #include "XShader.h"
-#include <GLES2/gl2.h>
+#include <GLES3/gl3.h>
 #include <jni.h>
 #include <unistd.h>
 
@@ -64,66 +64,90 @@ bool XShader::init() {
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     glUseProgram(program);
 
-    ////////////////////////
-//    GLfloat vertices[] = { //正方形
-//            1.0f, -1.0f, 0.0f, // 右下
-//            1.0f, 0.0f,   // 纹理右下
-//            -1.0f, -1.0f, 0.0f, // 左下
-//            0.0f, 0.0f,//纹理左下
-//            -1.0f, 1.0f, 0.0f, // 左上
-//            0.0f, 1.0f,// 纹理左上
-//            1.0f, 1.0f, 0.0f,  // 右上
-//            1.0f, 1.0f // 纹理右上
+
+    ////
+
+//    //加入三维顶点数据 ，两个三角形组成正方形
+//    static float ver[] = {
+//            -1.0f, -1.0f,  // left,  bottom
+//            1.0f, -1.0f,  // right, bottom
+//            -1.0f, 1.0f,  // left,  top
+//            1.0f, 1.0f,  // right, top
 //    };
-//    GLubyte indices[] = {
-//            0, 1, 2, 0, 2, 3
+//    glEnableVertexAttribArray(aPosition);//确定是否有效
+//    glVertexAttribPointer(
+//            aPosition, //顶点属性索引
+//            2,         //分量的数量
+//            GL_FLOAT,
+//            GL_FALSE,
+//            2 * sizeof(float),         //指定顶点索引 i和i+1 之间的位移，0代表每个顶点属性数据顺序存储，大于0表示获取下一个索引的跨距
+//            ver
+//    );
+//    static float texture[] = {
+//            0.0f, 1.0f, // left, top
+//            1.0f, 1.0f, // right, top
+//            0.0f, 0.0f, // left, bottom
+//            1.0f, 0.0f, // right, bottom
 //    };
-//    GLuint vboIds[2];
-//    glGenBuffers(2, vboIds);
-//
-//    glBindBuffer(GL_ARRAY_BUFFER, vboIds[0]);///顶点缓冲
-//    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices, GL_DYNAMIC_DRAW);
-//
-//    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboIds[1]);///索引缓冲
-//    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), &indices, GL_DYNAMIC_DRAW);
-//
-//    GLuint vaoId;
-//    glen
-
-
-
-
+//    glEnableVertexAttribArray(aTexCoord);//确定是否有效
+//    glVertexAttribPointer(
+//            aTexCoord,
+//            2,
+//            GL_FLOAT,
+//            GL_FALSE,
+//            2 * sizeof(float),
+//            texture);
     ////////////////////////
-    //加入三维顶点数据 ，两个三角形组成正方形
-    static float ver[] = {
-            -1.0f, -1.0f,  // left,  bottom
-            1.0f, -1.0f,  // right, bottom
-            -1.0f, 1.0f,  // left,  top
-            1.0f, 1.0f,  // right, top
+    GLfloat vertices[] = { //正方形
+            1.0f, -1.0f, 0.0f, // 右下
+            1.0f, 0.0f,   // 纹理右下
+            -1.0f, -1.0f, 0.0f, // 左下
+            0.0f, 0.0f,//纹理左下
+            -1.0f, 1.0f, 0.0f, // 左上
+            0.0f, 1.0f,// 纹理左上
+            1.0f, 1.0f, 0.0f,  // 右上
+            1.0f, 1.0f // 纹理右上
     };
-    glEnableVertexAttribArray(aPosition);//确定是否有效
-    glVertexAttribPointer(
-            aPosition, //顶点属性索引
-            2,         //分量的数量
-            GL_FLOAT,
-            GL_FALSE,
-            2 * sizeof(float),         //指定顶点索引 i和i+1 之间的位移，0代表每个顶点属性数据顺序存储，大于0表示获取下一个索引的跨距
-            ver
+    GLubyte indices[] = {
+            0, 1, 2, 0, 2, 3
+    };
+    GLuint vboIds[2];
+    glGenBuffers(2, vboIds);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vboIds[0]);///顶点缓冲
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices, GL_DYNAMIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboIds[1]);///索引缓冲
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), &indices, GL_DYNAMIC_DRAW);
+
+    GLuint vaoId;
+    glGenVertexArrays(1, &vaoId);
+    glBindVertexArray(vaoId);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vboIds[0]);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboIds[1]);
+
+    glEnableVertexAttribArray(aPosition);
+    glEnableVertexAttribArray(aTexCoord);
+
+    GLint vertexSize = 3;
+    GLint textureCount = 2;
+
+    glVertexAttribPointer(aPosition,
+                          vertexSize,
+                          GL_FLOAT, GL_FALSE,
+                          (vertexSize + textureCount) * sizeof(float),
+            //vertices ///直接从顶点上读取
+                          0 ///使用顶点缓冲对象
     );
-    static float texture[] = {
-            0.0f, 1.0f, // left, top
-            1.0f, 1.0f, // right, top
-            0.0f, 0.0f, // left, bottom
-            1.0f, 0.0f, // right, bottom
-    };
-    glEnableVertexAttribArray(aTexCoord);//确定是否有效
-    glVertexAttribPointer(
-            aTexCoord,
-            2,
-            GL_FLOAT,
-            GL_FALSE,
-            2 * sizeof(float),
-            texture);
+
+    glVertexAttribPointer(aTexCoord,
+                          textureCount,
+                          GL_FLOAT, GL_FALSE,
+                          (vertexSize + textureCount) * sizeof(float),
+                          (const void *) ((vertexSize) * sizeof(float)));
+
+    ////////////////////////
 
     LOGI("egl 初始化shader  success !");
     glClear(GL_COLOR_BUFFER_BIT);
@@ -141,14 +165,19 @@ bool XShader::init() {
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glUniform1i(inputTextureHandle[i], i);
     }
+    glBindVertexArray(vaoId);
 
     return true;
 }
 
 void XShader::draw() {
     if (!program)return;
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
+//    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glDrawElements(GL_TRIANGLES,
+                   6,
+                   GL_UNSIGNED_BYTE,
+                   0
+    );
 }
 
 void XShader::getTexture(unsigned int i, int width, int height, unsigned char *buf) {
