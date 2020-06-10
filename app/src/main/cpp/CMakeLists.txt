@@ -27,6 +27,7 @@ add_library(
         texture/XShader.cpp
         texture/XTexture.cpp
         utils/OpenGLUtils.cpp
+        utils/vecmath.cpp
 )
 
 #find_library(

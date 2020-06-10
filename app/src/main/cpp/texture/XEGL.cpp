@@ -1,16 +1,13 @@
 //
 // Created by 王越 on 2020/4/30.
 //
-#include "EGL/egl.h"
-#include "XEGL.h"
-#include "android/native_window_jni.h"
+
 #include "../XLog.h"
+#include "XEGL.h"
 
 class CXEGL : public XEGL {
 public:
-    EGLDisplay display = EGL_NO_DISPLAY;
-    EGLSurface eglSurface = EGL_NO_SURFACE;
-    EGLContext eglContext = EGL_NO_CONTEXT;
+
 
     void draw() override {
         if (display == EGL_NO_DISPLAY || eglSurface == EGL_NO_SURFACE) {
@@ -19,9 +16,21 @@ public:
         eglSwapBuffers(display, eglSurface);
     }
 
-    bool init(void *win) override {
-        ANativeWindow *nativeWindow = static_cast<ANativeWindow *>(win);
+    bool init(void *win, int width, int height) override {
+        mWindow = static_cast<ANativeWindow *>(win);
+        mSurfaceWidth = ANativeWindow_getWidth(mWindow);
+        mSurfaceHeight = ANativeWindow_getHeight(mWindow);
+        if (mSurfaceWidth != 0 && mSurfaceHeight != 0) {
+            // 宽高比例不一致时，需要调整缓冲区的大小，这里是以宽度为基准
+            if ((mSurfaceWidth / mSurfaceHeight) != (width / height)) {
+                mSurfaceHeight = mSurfaceWidth * height / width;
+                int windowFormat = ANativeWindow_getFormat(mWindow);
 
+                ANativeWindow_setBuffersGeometry(mWindow, mSurfaceWidth, mSurfaceHeight,
+                                                 windowFormat);
+            }
+        }
+        LOGD("CXEGL init mSurfaceWidth=%d , mSurfaceHeight=%d", mSurfaceWidth, mSurfaceHeight);
         //初始化EGL
         //1。获取EGLDisplay设备
         display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
@@ -53,27 +62,21 @@ public:
             return false;
         }
         LOGD("egl eglChooseConfig  success");
-        eglSurface = eglCreateWindowSurface(display, config[0], nativeWindow, nullptr);
+        eglSurface = eglCreateWindowSurface(display, config[0], mWindow, nullptr);
         if (eglSurface == EGL_NO_SURFACE) {
             LOGE("egl eglSurface is failed");
             switch (eglGetError()) {
                 case EGL_BAD_MATCH:
                     LOGE("eglSurface EGL_BAD_MATCH");
-                    // Check window and EGLConfig attributes to determine
-                    // compatibility, or verify that the EGLConfig
-                    // supports rendering to a window,
                     break;
                 case EGL_BAD_CONFIG:
                     LOGE("eglSurface EGL_BAD_CONFIG");
-                    // Verify that provided EGLConfig is valid
                     break;
                 case EGL_BAD_NATIVE_WINDOW:
                     LOGE("eglSurface EGL_BAD_NATIVE_WINDOW");
-                    // Verify that provided EGLNativeWindow is valid
                     break;
                 case EGL_BAD_ALLOC:
                     LOGE("eglSurface EGL_BAD_ALLOC");
-                    // Not enough resources available. Handle and recover
                     break;
                 default:
                     LOGE("eglSurface unknown");

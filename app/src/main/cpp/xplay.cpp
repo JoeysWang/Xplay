@@ -16,9 +16,9 @@ extern "C" {
 }
 
 
-IVideoView *view;
+IVideoView *view = nullptr;
 ANativeWindow *window;
-
+jfloat *vpMatrix = nullptr;
 extern "C"
 JNIEXPORT jboolean JNICALL
 Java_com_joeys_xplay_Xplay_open(JNIEnv *env, jobject thiz, jstring _url) {
@@ -52,14 +52,16 @@ Java_com_joeys_xplay_Xplay_initView(JNIEnv *env, jobject thiz, jobject holder) {
     if (window) {
         view = new GLVideoView();
         view->setRender(window);
+        if (vpMatrix != nullptr)
+            view->setMatrix(vpMatrix, sizeof(vpMatrix));
     }
 }
 
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_joeys_xplay_Xplay_setMatrix(JNIEnv *env, jobject thiz, jfloatArray v_pmatrix) {
-    if (!view) {
-        jfloat *matrix = env->GetFloatArrayElements(v_pmatrix, JNI_FALSE);
-        view->setMatrix(matrix, sizeof(matrix));
+    if ( view!= nullptr) {
+        vpMatrix = env->GetFloatArrayElements(v_pmatrix, 0);
+        view->setMatrix(vpMatrix, 16);
     }
 }

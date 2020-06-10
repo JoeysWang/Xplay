@@ -9,8 +9,12 @@
 class XTexture {
 public:
     static XTexture *create();
-    virtual bool init(void *win, float *matrix  ) = 0;
-    virtual void draw(unsigned char *data[],int width[],int height)=0;
+
+    virtual bool init(void *win, int width, int height, float *matrix) = 0;
+
+    virtual void draw(unsigned char *data[], int width[], int height) = 0;
+
+
 };
 
 

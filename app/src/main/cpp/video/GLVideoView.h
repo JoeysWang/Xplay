@@ -22,7 +22,7 @@ public:
 protected:
     void *view = 0;
     XTexture *texture = 0;
-    float *matrix ;
+    float  matrix[16] ;
 };
 
 

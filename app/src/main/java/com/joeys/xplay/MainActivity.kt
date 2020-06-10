@@ -25,7 +25,6 @@ class MainActivity : AppCompatActivity() {
         btn.setOnClickListener {
             open()
         }
-        xplay.setEGLContextClientVersion(2);
     }
 
     private fun open() {

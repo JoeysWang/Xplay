@@ -25,7 +25,7 @@ protected:
     unsigned int program = 0;
     unsigned int textures[100] = {0};
 public:
-    float *matrix = 0;
+    float matrix[16];
 
 };
 

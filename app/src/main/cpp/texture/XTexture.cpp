@@ -7,6 +7,7 @@
 #include "XEGL.h"
 #include "XShader.h"
 #include "../XLog.h"
+#include "../utils/vecmath.h"
 
 class CXTexture : public XTexture {
 
@@ -14,12 +15,20 @@ public:
     XShader shader;
 
 
-    bool init(void *win, float *vp_matrix) override {
+    bool init(void *win, int width, int height, float *vp_matrix) override {
         if (!win)return false;
         XEGL *xegl = XEGL::get();
         if (!xegl) return false;
-        xegl->init(win);
-        shader.matrix = vp_matrix;
+        xegl->init(win, width, height);
+
+//        Matrix4 matrix4;
+//        if (vp_matrix == nullptr) {
+//            matrix4 = Matrix4::identity();
+//        }
+//
+//        for (int i = 0; i < 16; ++i) {
+//            shader.matrix[i] = *(matrix4.ptr() + i);
+//        }
         shader.init();
         return true;
     }
