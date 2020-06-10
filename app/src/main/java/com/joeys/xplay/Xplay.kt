@@ -12,21 +12,10 @@ import kotlin.concurrent.thread
 class Xplay : TextureView, TextureView.SurfaceTextureListener {
     constructor(context: Context) : super(context)
     constructor(context: Context, attributeSet: AttributeSet) : super(context, attributeSet)
-
-//    private var mRenderer: IGLESRenderer? = null
-//    private val mGLThread: GLESTVThread? = null
-
     init {
         System.loadLibrary("xplay")
         surfaceTextureListener = this;
     }
-//
-//    fun setRenderer(renderer: IGLESRenderer) {
-//        mRenderer = renderer
-//    }
-//    fun requestRender() {
-//        mGLThread.requestRender()
-//    }
 
     external fun open(url: String): Boolean
 
@@ -36,7 +25,6 @@ class Xplay : TextureView, TextureView.SurfaceTextureListener {
 
     override fun onSurfaceTextureSizeChanged(surface: SurfaceTexture?, width: Int, height: Int) {
         Log.d("xplay", "surfaceCreated")
-
     }
 
     override fun onSurfaceTextureUpdated(surface: SurfaceTexture?) {
