@@ -2,19 +2,51 @@ package com.joeys.xplay
 
 import android.content.Context
 import android.graphics.SurfaceTexture
+import android.net.Uri
+import android.os.Handler
+import android.os.Looper
+import android.os.Message
 import android.util.AttributeSet
 import android.util.Log
 import android.view.Surface
+import android.view.SurfaceHolder
 import android.view.TextureView
+import com.joeys.xplay.IMediaPlayer.MEDIA_INFO_VIDEO_TRACK_LAGGING
+import java.io.FileDescriptor
+import java.lang.ref.WeakReference
 import kotlin.concurrent.thread
 
 
-class Xplay : TextureView, TextureView.SurfaceTextureListener {
+class Xplay : TextureView, TextureView.SurfaceTextureListener, IMediaPlayer {
+    private var mEventHandler: EventHandler
+
+    private var mOnPreparedListener: IMediaPlayer.OnPreparedListener? = null
+    private var mOnBufferingUpdateListener: IMediaPlayer.OnBufferingUpdateListener? = null
+    private var mOnCompletionListener: IMediaPlayer.OnCompletionListener? = null
+    private var mOnSeekCompleteListener: IMediaPlayer.OnSeekCompleteListener? = null
+    private var mOnErrorListener: IMediaPlayer.OnErrorListener? = null
+    private var mOnInfoListener: IMediaPlayer.OnInfoListener? = null
+    private var mOnVideoSizeChangedListener: IMediaPlayer.OnVideoSizeChangedListener? = null
+
+    private var mNativeContext: Long = 0
+
     constructor(context: Context) : super(context)
     constructor(context: Context, attributeSet: AttributeSet) : super(context, attributeSet)
+
     init {
         System.loadLibrary("xplay")
-        surfaceTextureListener = this;
+
+        var looper = Looper.myLooper()
+
+        when {
+            looper != null -> {
+                mEventHandler = EventHandler(this, looper)
+            }
+            else -> {
+                mEventHandler = EventHandler(this, Looper.getMainLooper())
+            }
+        }
+        surfaceTextureListener = this
     }
 
     external fun open(url: String): Boolean
@@ -42,40 +74,310 @@ class Xplay : TextureView, TextureView.SurfaceTextureListener {
         }
     }
 
+    private fun stayAwake(awake: Boolean) {
 
-//    private val vPMatrix = FloatArray(16)
-//    private val projectionMatrix = FloatArray(16)
-//    private val viewMatrix = FloatArray(16)
-//
-//    override fun surfaceCreated(holder: SurfaceHolder?) {
-//        Log.d("xplay", "surfaceCreated")
-//        //初始化open gl egl显示
-//        initView(holder?.surface)
-//
-//    }
-//    override fun surfaceChanged(
-//        holder: SurfaceHolder?,
-//        format: Int, width: Int,
-//        height: Int
-//    ) {
-//        Log.d("xplay", "surfaceChanged: $width/$height")
-//        val ratio: Float = width.toFloat() / height.toFloat()
-//        Matrix.frustumM(projectionMatrix, 0, -ratio, ratio, -1f, 1f, 1.0f, 20f)
-//
-//        Matrix.setLookAtM(
-//            viewMatrix, 0,
-//            0f, 0f, -3f,
-//            0f, 0f, 0f,
-//            0f, 1.0f, 0.0f
-//        )
-//        Matrix.multiplyMM(vPMatrix, 0, projectionMatrix, 0, viewMatrix, 0)
-//
-//        Log.d("xplay", "vPMatrix: ${vPMatrix.contentToString()}")
-//        setMatrix(vPMatrix)
-//
-//    }
+    }
 
-    //    override fun surfaceDestroyed(holder: SurfaceHolder?) {
-//
-//    }
+    /**
+     * Called from native code when an interesting event happens.  This method
+     * just uses the EventHandler system to post the event back to the main app thread.
+     * We use a weak reference to the original MediaPlayer object so that the native
+     * code is safe from the object disappearing from underneath it.  (This is
+     * the cookie passed to native_setup().)
+     */
+    private fun postEventFromNative(
+        mediaplayer_ref: Any,
+        what: Int, arg1: Int, arg2: Int, obj: Any
+    ) {
+        val mp: Xplay =
+            (mediaplayer_ref as WeakReference<*>).get() as Xplay?
+                ?: return
+        if (mp.mEventHandler != null) {
+            val m: Message = mp.mEventHandler.obtainMessage(what, arg1, arg2, obj)
+            mp.mEventHandler.sendMessage(m)
+        }
+    }
+
+    companion object {
+
+        private val TAG = "xplay" // interface test message
+        private val MEDIA_NOP = 0 // interface test message
+
+        private val MEDIA_PREPARED = 1
+        private val MEDIA_PLAYBACK_COMPLETE = 2
+        private val MEDIA_BUFFERING_UPDATE = 3
+        private val MEDIA_SEEK_COMPLETE = 4
+        private val MEDIA_SET_VIDEO_SIZE = 5
+        private val MEDIA_TIMED_TEXT = 99
+        private val MEDIA_ERROR = 100
+        private val MEDIA_INFO = 200
+        private val MEDIA_CURRENT = 300
+    }
+
+    private inner class EventHandler(val mMediaPlayer: Xplay, looper: Looper?) : Handler(looper) {
+
+        override fun handleMessage(msg: Message) {
+            if (mMediaPlayer.mNativeContext == 0L) {
+                Log.w(
+                    Xplay.TAG,
+                    "mediaplayer went away with unhandled events"
+                )
+                return
+            }
+            when (msg.what) {
+                MEDIA_PREPARED -> {
+                    mOnPreparedListener?.onPrepared(mMediaPlayer)
+                    return
+                }
+                MEDIA_PLAYBACK_COMPLETE -> {
+                    if (mOnCompletionListener != null) {
+                        mOnCompletionListener?.onCompletion(mMediaPlayer)
+                    }
+                    stayAwake(false)
+                    return
+                }
+                MEDIA_BUFFERING_UPDATE -> {
+                    if (mOnBufferingUpdateListener != null) {
+                        mOnBufferingUpdateListener?.onBufferingUpdate(mMediaPlayer, msg.arg1)
+                    }
+                    return
+                }
+                MEDIA_SEEK_COMPLETE -> {
+                    if (mOnSeekCompleteListener != null) {
+                        mOnSeekCompleteListener?.onSeekComplete(mMediaPlayer)
+                    }
+                    return
+                }
+                MEDIA_SET_VIDEO_SIZE -> {
+                    if (mOnVideoSizeChangedListener != null) {
+                        mOnVideoSizeChangedListener?.onVideoSizeChanged(
+                            mMediaPlayer,
+                            msg.arg1,
+                            msg.arg2
+                        )
+                    }
+                    return
+                }
+                MEDIA_ERROR -> {
+
+                    // For PV specific error values (msg.arg2) look in
+                    // opencore/pvmi/pvmf/include/pvmf_return_codes.h
+                    Log.e(
+                        Xplay.TAG,
+                        "Error (" + msg.arg1 + "," + msg.arg2 + ")"
+                    )
+                    var error_was_handled = false
+                    if (mOnErrorListener != null) {
+                        error_was_handled =
+                            mOnErrorListener?.onError(mMediaPlayer, msg.arg1, msg.arg2) ?: false
+                    }
+                    if (mOnCompletionListener != null && !error_was_handled) {
+                        mOnCompletionListener?.onCompletion(mMediaPlayer)
+                    }
+                    stayAwake(false)
+                    return
+                }
+                MEDIA_INFO -> {
+                    if (msg.arg1 != MEDIA_INFO_VIDEO_TRACK_LAGGING) {
+                        Log.i(
+                            Xplay.TAG,
+                            "Info (" + msg.arg1 + "," + msg.arg2 + ")"
+                        )
+                    }
+                    if (mOnInfoListener != null) {
+                        mOnInfoListener?.onInfo(mMediaPlayer, msg.arg1, msg.arg2)
+                    }
+                    // No real default action so far.
+                    return
+                }
+                MEDIA_TIMED_TEXT -> {
+
+                    // do nothing
+                    return
+                }
+                MEDIA_NOP -> {
+                }
+                MEDIA_CURRENT -> {
+                    Log.d(TAG, "handleMessage: MEDIA_CURRENT")
+//                    if (mOnCurrentPositionListener != null) {
+//                        mOnCurrentPositionListener.onCurrentPosition(
+//                            msg.arg1.toLong(),
+//                            msg.arg2.toLong()
+//                        )
+//                    }
+                }
+                else -> {
+                    Log.e(
+                        Xplay.TAG,
+                        "Unknown message type " + msg.what
+                    )
+                    return
+                }
+            }
+        }
+
+
+    }
+
+    override fun getRotate(): Int {
+        Log.d(TAG, "Not yet implemented")
+        return 0
+    }
+
+    override fun setOnInfoListener(listener: IMediaPlayer.OnInfoListener?) {
+        Log.d(TAG, "Not yet implemented")
+    }
+
+    override fun isLooping(): Boolean {
+        Log.d(TAG, "Not yet implemented")
+        return false
+    }
+
+    override fun getDuration(): Long {
+        Log.d(TAG, "Not yet implemented")
+        return 0
+    }
+
+    override fun setOnCompletionListener(listener: IMediaPlayer.OnCompletionListener?) {
+        mOnCompletionListener = listener
+    }
+
+    override fun seekTo(msec: Float) {
+        Log.d(TAG, "Not yet implemented")
+    }
+
+    override fun getCurrentPosition(): Long {
+        Log.d(TAG, "Not yet implemented")
+        return 0
+
+    }
+
+    override fun setAudioSessionId(sessionId: Int) {
+        Log.d(TAG, "Not yet implemented")
+    }
+
+    override fun setOnPreparedListener(listener: IMediaPlayer.OnPreparedListener?) {
+        Log.d(TAG, "Not yet implemented")
+        mOnPreparedListener = listener
+    }
+
+    override fun setDisplay(sh: SurfaceHolder?) {
+        Log.d(TAG, "Not yet implemented")
+    }
+
+    override fun setOnVideoSizeChangedListener(listener: IMediaPlayer.OnVideoSizeChangedListener?) {
+        Log.d(TAG, "Not yet implemented")
+        mOnVideoSizeChangedListener = listener
+    }
+
+    override fun start() {
+        Log.d(TAG, "Not yet implemented")
+    }
+
+    override fun setVolume(leftVolume: Float, rightVolume: Float) {
+        Log.d(TAG, "Not yet implemented")
+    }
+
+    override fun setDataSource(context: Context, uri: Uri) {
+        Log.d(TAG, "Not yet implemented")
+    }
+
+    override fun setDataSource(context: Context, uri: Uri, headers: MutableMap<String, String>?) {
+        Log.d(TAG, "Not yet implemented")
+    }
+
+    override fun setDataSource(path: String) {
+        Log.d(TAG, "Not yet implemented")
+    }
+
+    override fun setDataSource(path: String, headers: MutableMap<String, String>?) {
+        Log.d(TAG, "Not yet implemented")
+    }
+
+    override fun setDataSource(fd: FileDescriptor?) {
+        Log.d(TAG, "Not yet implemented")
+    }
+
+    override fun setDataSource(fd: FileDescriptor?, offset: Long, length: Long) {
+        Log.d(TAG, "Not yet implemented")
+    }
+
+    override fun resume() {
+        Log.d(TAG, "Not yet implemented")
+    }
+
+    override fun reset() {
+        Log.d(TAG, "Not yet implemented")
+    }
+
+    override fun setWakeMode(context: Context?, mode: Int) {
+        Log.d(TAG, "Not yet implemented")
+    }
+
+    override fun isPlaying(): Boolean {
+        Log.d(TAG, "Not yet implemented")
+        return true
+    }
+
+    override fun prepare() {
+        Log.d(TAG, "Not yet implemented")
+    }
+
+    override fun setOnSeekCompleteListener(listener: IMediaPlayer.OnSeekCompleteListener?) {
+        Log.d(TAG, "Not yet implemented")
+    }
+
+    override fun pause() {
+        Log.d(TAG, "Not yet implemented")
+    }
+
+    override fun setOnErrorListener(listener: IMediaPlayer.OnErrorListener?) {
+        Log.d(TAG, "Not yet implemented")
+    }
+
+    override fun prepareAsync() {
+    }
+
+    override fun setMute(mute: Boolean) {
+    }
+
+    override fun setAudioStreamType(streamtype: Int) {
+    }
+
+    override fun setPitch(pitch: Float) {
+    }
+
+    override fun getVideoWidth(): Int {
+        return 0
+    }
+
+    override fun setLooping(looping: Boolean) {
+    }
+
+    override fun setScreenOnWhilePlaying(screenOn: Boolean) {
+    }
+
+    override fun getVideoHeight(): Int {
+        return 0
+    }
+
+    override fun setSurface(surface: Surface?) {
+    }
+
+    override fun stop() {
+    }
+
+    override fun setOnBufferingUpdateListener(listener: IMediaPlayer.OnBufferingUpdateListener?) {
+    }
+
+    override fun getAudioSessionId(): Int {
+        return 0
+    }
+
+    override fun release() {
+    }
+
+    override fun setRate(rate: Float) {
+    }
+
 }

@@ -62,10 +62,6 @@ bool XShader::init() {
     inputTextureHandle[1] = glGetUniformLocation(program, "uTexture");
     inputTextureHandle[2] = glGetUniformLocation(program, "vTexture");
 
-//    GLint vPMatrixHandle = glGetUniformLocation(program, "uMVPMatrix");
-//    LOGD("vPMatrixHandle  %d !", vPMatrixHandle);
-//    glUniformMatrix4fv(vPMatrixHandle, 1, GL_FALSE, matrix);
-
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     glUseProgram(program);
@@ -148,7 +144,6 @@ bool XShader::init() {
 
 void XShader::draw() {
     if (!program)return;
-//    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     glDrawElements(GL_TRIANGLES,
                    6,
                    GL_UNSIGNED_BYTE,
