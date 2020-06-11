@@ -206,6 +206,7 @@ void OpenGLUtils::createFrameBuffer(GLuint *framebuffer, GLuint *texture, int wi
 
 void OpenGLUtils::createFrameBuffers(GLuint *frambuffers, GLuint *textures, int width, int height,
                                      int size) {
+    //
     // 创建FBO
     glGenFramebuffers(size, frambuffers);
     // 创建Texture
