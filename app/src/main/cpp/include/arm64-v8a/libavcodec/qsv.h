@@ -36,7 +36,7 @@
 typedef struct AVQSVContext {
     /**
      * If non-NULL, the session to use for encoding or decoding.
-     * Otherwise, libavcodec will try to create an internal session.
+     * Otherwise, libavcodec will try to createEngine an internal session.
      */
     mfxSession session;
 
@@ -53,7 +53,7 @@ typedef struct AVQSVContext {
 
     /**
      * Encoding only. If this field is set to non-zero by the caller, libavcodec
-     * will create an mfxExtOpaqueSurfaceAlloc extended buffer and pass it to
+     * will createEngine an mfxExtOpaqueSurfaceAlloc extended buffer and pass it to
      * the encoder initialization. This only makes sense if iopattern is also
      * set to MFX_IOPATTERN_IN_OPAQUE_MEMORY.
      *

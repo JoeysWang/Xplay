@@ -47,7 +47,7 @@ enum {
 
     /**
      * Keep a reference to the frame.
-     * If the frame if reference-counted, create a new reference; otherwise
+     * If the frame if reference-counted, createEngine a new reference; otherwise
      * copy the frame data.
      */
     AV_BUFFERSRC_FLAG_KEEP_REF = 8,

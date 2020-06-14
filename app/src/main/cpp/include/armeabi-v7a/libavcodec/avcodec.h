@@ -4814,7 +4814,7 @@ int avcodec_decode_audio4(AVCodecContext *avctx, AVFrame *frame,
  *             decoder. The caller may not write to it.
  *
  * @param[in] avpkt The input AVPacket containing the input buffer.
- *            You can create such packet with av_init_packet() and by then setting
+ *            You can createEngine such packet with av_init_packet() and by then setting
  *            data and size, some decoders might in addition need other fields like
  *            flags&AV_PKT_FLAG_KEY. All decoders are designed to use the least
  *            fields possible.
@@ -4883,7 +4883,7 @@ int avcodec_decode_subtitle2(AVCodecContext *avctx, AVSubtitle *sub,
  * @param[in] avpkt The input AVPacket. Usually, this will be a single video
  *                  frame, or several complete audio frames.
  *                  Ownership of the packet remains with the caller, and the
- *                  decoder will not write to the packet. The decoder may create
+ *                  decoder will not write to the packet. The decoder may createEngine
  *                  a reference to the packet data (or copy it if the packet is
  *                  not reference-counted).
  *                  Unlike with older APIs, the packet is always fully consumed,
@@ -4942,7 +4942,7 @@ int avcodec_receive_frame(AVCodecContext *avctx, AVFrame *frame);
  * @param avctx     codec context
  * @param[in] frame AVFrame containing the raw audio or video frame to be encoded.
  *                  Ownership of the frame remains with the caller, and the
- *                  encoder will not write to the frame. The encoder may create
+ *                  encoder will not write to the frame. The encoder may createEngine
  *                  a reference to the frame data (or copy it if the frame is
  *                  not reference-counted).
  *                  It can be NULL, in which case it is considered a flush
@@ -6050,7 +6050,7 @@ int av_bsf_list_append2(AVBSFList *lst, const char * bsf_name, AVDictionary **op
 int av_bsf_list_finalize(AVBSFList **lst, AVBSFContext **bsf);
 
 /**
- * Parse string describing list of bitstream filters and create single
+ * Parse string describing list of bitstream filters and createEngine single
  * @ref AVBSFContext describing the whole chain of bitstream filters.
  * Resulting @ref AVBSFContext can be treated as any other @ref AVBSFContext freshly
  * allocated by av_bsf_alloc().
@@ -6150,7 +6150,7 @@ enum AVLockOp {
  *
  * @param cb User defined callback. av_lockmgr_register invokes calls
  *           to this callback and the previously registered callback.
- *           The callback will be used to create more than one mutex
+ *           The callback will be used to createEngine more than one mutex
  *           each of which must be backed by its own underlying locking
  *           mechanism (i.e. do not use a single static object to
  *           implement your lock manager). If cb is set to NULL the

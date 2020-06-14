@@ -10,6 +10,8 @@
 #include "texture/XShader.h"
 #include "video/IVideoView.h"
 #include "video/GLVideoView.h"
+#include "resample/IResample.h"
+#include "resample/FFResample.h"
 
 extern "C" {
 #include "libavcodec/avcodec.h"
@@ -29,11 +31,15 @@ Java_com_joeys_xplay_Xplay_open(JNIEnv *env, jobject thiz, jstring _url) {
 
     IDecode *videoDecode = new FFDecode();
     videoDecode->open(demux->getVideoParameter());
+    videoDecode->addObserver(view);
 
     IDecode *audioDecode = new FFDecode();
     audioDecode->open(demux->getAudioParameter());
 
-    videoDecode->addObserver(view);
+    IResample *resample = new FFResample();
+
+    audioDecode->addObserver(resample);
+
     demux->addObserver(videoDecode);
     demux->addObserver(audioDecode);
 

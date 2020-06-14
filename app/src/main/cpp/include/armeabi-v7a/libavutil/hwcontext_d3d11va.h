@@ -146,7 +146,7 @@ typedef struct AVD3D11VAFramesContext {
      * and it does not matter whether it was user-allocated.
      *
      * This is in particular used by the libavcodec D3D11VA hwaccel, which
-     * requires a single array texture. It will create ID3D11VideoDecoderOutputView
+     * requires a single array texture. It will createEngine ID3D11VideoDecoderOutputView
      * objects for each array texture element on decoder initialization.
      */
     ID3D11Texture2D *texture;

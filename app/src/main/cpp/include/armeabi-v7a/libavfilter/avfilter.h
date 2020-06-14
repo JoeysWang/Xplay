@@ -217,7 +217,7 @@ typedef struct AVFilter {
      * established and format negotiation is done.
      *
      * Basic filter initialization should be done here. Filters with dynamic
-     * inputs and/or outputs should create those inputs/outputs here based on
+     * inputs and/or outputs should createEngine those inputs/outputs here based on
      * provided options. No more changes to this filter's inputs/outputs can be
      * done after this callback.
      *
@@ -385,8 +385,8 @@ struct AVFilterContext {
     int is_disabled;                ///< the enabled state from the last expression evaluation
 
     /**
-     * For filters which will create hardware frames, sets the device the
-     * filter should create them in.  All other filters will ignore this field:
+     * For filters which will createEngine hardware frames, sets the device the
+     * filter should createEngine them in.  All other filters will ignore this field:
      * in particular, a filter which consumes or processes hardware frames will
      * instead use the hw_frames_ctx field in AVFilterLink to carry the
      * hardware context information.
@@ -920,7 +920,7 @@ AVFilterGraph *avfilter_graph_alloc(void);
  * Create a new filter instance in a filter graph.
  *
  * @param graph graph in which the new filter will be used
- * @param filter the filter to create an instance of
+ * @param filter the filter to createEngine an instance of
  * @param name Name to give to the new instance (will be copied to
  *             AVFilterContext.name). This may be used by the caller to identify
  *             different filters, libavfilter itself assigns no semantics to

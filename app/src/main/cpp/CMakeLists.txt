@@ -23,6 +23,8 @@ add_library(
         decode/FFDecode.cpp
         video/IVideoView.cpp
         video/GLVideoView.cpp
+        resample/IResample.cpp
+        resample/FFResample.cpp
         texture/XEGL.cpp
         texture/XShader.cpp
         texture/XTexture.cpp

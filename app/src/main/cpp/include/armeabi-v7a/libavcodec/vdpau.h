@@ -127,7 +127,7 @@ int av_vdpau_bind_context(AVCodecContext *avctx, VdpDevice device,
                           VdpGetProcAddress *get_proc_address, unsigned flags);
 
 /**
- * Gets the parameters to create an adequate VDPAU video surface for the codec
+ * Gets the parameters to createEngine an adequate VDPAU video surface for the codec
  * context using VDPAU hardware decoding acceleration.
  *
  * @note Behavior is undefined if the context was not successfully bound to a

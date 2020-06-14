@@ -56,7 +56,7 @@ void av_file_unmap(uint8_t *bufptr, size_t size);
 
 /**
  * Wrapper to work around the lack of mkstemp() on mingw.
- * Also, tries to create file in /tmp first, if possible.
+ * Also, tries to createEngine file in /tmp first, if possible.
  * *prefix can be a character constant; *filename will be allocated internally.
  * @return file descriptor of opened file (or negative value corresponding to an
  * AVERROR code on error)

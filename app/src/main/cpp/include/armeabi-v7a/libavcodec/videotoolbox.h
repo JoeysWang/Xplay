@@ -64,13 +64,13 @@ typedef struct AVVideotoolboxContext {
     OSType cv_pix_fmt_type;
 
     /**
-     * CoreMedia Format Description that Videotoolbox will use to create the decompression session.
+     * CoreMedia Format Description that Videotoolbox will use to createEngine the decompression session.
      * Set by the caller.
      */
     CMVideoFormatDescriptionRef cm_fmt_desc;
 
     /**
-     * CoreMedia codec type that Videotoolbox will use to create the decompression session.
+     * CoreMedia codec type that Videotoolbox will use to createEngine the decompression session.
      * Set by the caller.
      */
     int cm_codec_type;
@@ -80,7 +80,7 @@ typedef struct AVVideotoolboxContext {
  * Allocate and initialize a Videotoolbox context.
  *
  * This function should be called from the get_format() callback when the caller
- * selects the AV_PIX_FMT_VIDETOOLBOX format. The caller must then create
+ * selects the AV_PIX_FMT_VIDETOOLBOX format. The caller must then createEngine
  * the decoder object (using the output callback provided by libavcodec) that
  * will be used for Videotoolbox-accelerated decoding.
  *

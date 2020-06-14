@@ -6,12 +6,14 @@
 #define XPLAY_XPARAMETER_H
 
 
-struct AVCodecParameters;
+extern "C" {
 
+#include <libavcodec/avcodec.h>
+};
 
 class XParameter {
 public:
-    AVCodecParameters *parameters=0;
+    AVCodecParameters *parameters = 0;
 };
 
 

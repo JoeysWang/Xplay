@@ -49,7 +49,7 @@
  * Main lavf structure used for both muxing and demuxing is AVFormatContext,
  * which exports all information about the file being read or written. As with
  * most Libavformat structures, its size is not part of public ABI, so it cannot be
- * allocated on stack or directly with av_malloc(). To create an
+ * allocated on stack or directly with av_malloc(). To createEngine an
  * AVFormatContext, use avformat_alloc_context() (some functions, like
  * avformat_open_input() might do that for you).
  *
@@ -120,7 +120,7 @@
  * avformat_alloc_context() and do some tweaking on it before passing it to
  * avformat_open_input(). One such case is when you want to use custom functions
  * for reading input data instead of lavf internal I/O layer.
- * To do that, create your own AVIOContext with avio_alloc_context(), passing
+ * To do that, createEngine your own AVIOContext with avio_alloc_context(), passing
  * your reading callbacks to it. Then set the @em pb field of your
  * AVFormatContext to newly created AVIOContext.
  *
@@ -193,7 +193,7 @@
  * packets and av_write_trailer() for finalizing the file.
  *
  * At the beginning of the muxing process, the caller must first call
- * avformat_alloc_context() to create a muxing context. The caller then sets up
+ * avformat_alloc_context() to createEngine a muxing context. The caller then sets up
  * the muxer by filling the various fields in this context:
  *
  * - The @ref AVFormatContext.oformat "oformat" field must be set to select the
@@ -705,7 +705,7 @@ typedef struct AVInputFormat {
     /**
      * Read the format header and initialize the AVFormatContext
      * structure. Return 0 if OK. 'avformat_new_stream' should be
-     * called to create new streams.
+     * called to createEngine new streams.
      */
     int (*read_header)(struct AVFormatContext *);
 
@@ -1187,7 +1187,7 @@ typedef struct AVStream {
      *
      * If correction is enabled, there are two possibilities:
      * If the first time stamp is near the wrap point, the wrap offset
-     * will be subtracted, which will create negative time stamps.
+     * will be subtracted, which will createEngine negative time stamps.
      * Otherwise the offset will be added.
      */
     int pts_wrap_behavior;
@@ -1333,7 +1333,7 @@ typedef struct AVFormatInternal AVFormatInternal;
  * Removal, reordering and changes to existing fields require a major
  * version bump.
  * sizeof(AVFormatContext) must not be used outside libav*, use
- * avformat_alloc_context() to create an AVFormatContext.
+ * avformat_alloc_context() to createEngine an AVFormatContext.
  *
  * Fields can be accessed through AVOptions (av_opt*),
  * the name string used matches the associated command line parameter name and
