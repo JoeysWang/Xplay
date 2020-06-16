@@ -6,6 +6,11 @@
 #define XPLAY_XDATA_H
 
 struct AVPacket;
+enum XDataType {
+    AVPACKET_TYPE = 0,
+    UCHAR_TYPE = 1,
+
+};
 
 struct XData {
 
@@ -15,7 +20,9 @@ struct XData {
 
     int size = 0;
 
-    void Drop();
+    void drop();
+
+    bool alloc(int size, const char *data = 0);
 
     //audio 0,video 1
     int audioOrVideo = -1;
@@ -24,6 +31,7 @@ struct XData {
     int height = 0;
     int linesize[3];    // 宽对齐
 
+    int type = 0;
 };
 
 

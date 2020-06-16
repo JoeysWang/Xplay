@@ -21,6 +21,8 @@ add_library(
         IObserver.cpp
         decode/IDecode.cpp
         decode/FFDecode.cpp
+        audio/IAudioPlay.cpp
+        audio/SLAudioPlay.cpp
         video/IVideoView.cpp
         video/GLVideoView.cpp
         resample/IResample.cpp

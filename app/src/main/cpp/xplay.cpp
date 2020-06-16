@@ -37,6 +37,7 @@ Java_com_joeys_xplay_Xplay_open(JNIEnv *env, jobject thiz, jstring _url) {
     audioDecode->open(demux->getAudioParameter());
 
     IResample *resample = new FFResample();
+    resample->open(demux->getAudioParameter());
 
     audioDecode->addObserver(resample);
 
@@ -66,7 +67,7 @@ Java_com_joeys_xplay_Xplay_initView(JNIEnv *env, jobject thiz, jobject holder) {
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_joeys_xplay_Xplay_setMatrix(JNIEnv *env, jobject thiz, jfloatArray v_pmatrix) {
-    if ( view!= nullptr) {
+    if (view != nullptr) {
         vpMatrix = env->GetFloatArrayElements(v_pmatrix, 0);
         view->setMatrix(vpMatrix, 16);
     }

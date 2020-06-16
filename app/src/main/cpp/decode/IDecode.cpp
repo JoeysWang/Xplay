@@ -46,7 +46,7 @@ void IDecode::Main() {
                 notify(frame);
             }
         }
-        data.Drop();
+        data.drop();
         packetMutex.unlock();
     }
 }

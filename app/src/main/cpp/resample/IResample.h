@@ -13,11 +13,13 @@ class IResample : public IObserver {
 public:
     virtual bool open(XParameter in, XParameter out = XParameter()) = 0;
 
-
     virtual XData resample(XData in) = 0;
 
     void update(XData data) override;
 
+    //音频输出
+    int outChannels = 2;
+    int outFormat = 1;//AV_SAMPLE_FMT_S16
 };
 
 
