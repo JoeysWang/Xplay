@@ -14,6 +14,10 @@ extern "C" {
 class XParameter {
 public:
     AVCodecParameters *parameters = 0;
+
+    int channels = 2;
+    int sampleRate = 44100;
+
 };
 
 

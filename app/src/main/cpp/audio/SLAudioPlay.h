@@ -7,11 +7,13 @@
 
 
 #include <SLES/OpenSLES.h>
+#include <SLES/OpenSLES_Android.h>
 #include "IAudioPlay.h"
 
 class SLAudioPlay : public IAudioPlay {
 public:
     bool startPlay(XParameter out) override;
+    void pcmCallback(SLAndroidSimpleBufferQueueItf bf, void *context);
     SLEngineItf createSL();
 
 
