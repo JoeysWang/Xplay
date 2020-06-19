@@ -91,13 +91,13 @@ XData FFDecode::receiveFrame() {
         d.linesize[1] = avFrame->linesize[1];
         d.linesize[2] = avFrame->linesize[2];
 
-        LOGD("width=%d , height=%d ,ratio = %d/%d",
-             avFrame->width,
-             avFrame->height,
-             (avFrame->sample_aspect_ratio.den),
-             (avFrame->sample_aspect_ratio.num)
-
-        );
+//        LOGD("width=%d , height=%d ,ratio = %d/%d",
+//             avFrame->width,
+//             avFrame->height,
+//             (avFrame->sample_aspect_ratio.den),
+//             (avFrame->sample_aspect_ratio.num)
+//
+//        );
 
     } else if (codecContext->codec_type == AVMEDIA_TYPE_AUDIO) {
         //样本大小 * 单通道样本数 * 通道数

@@ -16,6 +16,7 @@ XData IAudioPlay::getData() {
         d = frames.front();
         frames.pop_front();
         notFull.notify_all();
+        break;
     }
 
 
@@ -23,10 +24,7 @@ XData IAudioPlay::getData() {
 }
 
 void IAudioPlay::update(XData data) {
-
     //压入缓冲队列
-    LOGD("IAudioPlay::update %d ", frames.size());
-
     if (!data.data || data.size <= 0)
         return;
     while (!isExit) {

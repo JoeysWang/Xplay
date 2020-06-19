@@ -42,11 +42,12 @@ static void pcmCallback(SLAndroidSimpleBufferQueueItf bf, void *context) {
         LOGE("pcmCallback SLAudioPlay is null");
         return;
     }
+    LOGD("pcmCallback " );
     ap->playCall((void *) bf);
 }
 
 void SLAudioPlay::playCall(void *bufferQueue) {
-    if (!bufferQueue) { return; }
+//    if (!bufferQueue) { return; }
     auto bf = (SLAndroidSimpleBufferQueueItf) bufferQueue;
 
     XData data = getData();
@@ -54,8 +55,8 @@ void SLAudioPlay::playCall(void *bufferQueue) {
         LOGE("SLAudioPlay::playCall getData size =0 ");
         return;
     }
-    if (!buffer)
-        return;
+
+    LOGD("SLAudioPlay::playCall getData size = %d ",data.size);
 
     memcpy(buffer, data.data, data.size);
 
@@ -88,11 +89,12 @@ bool SLAudioPlay::startPlay(XParameter out) {
     //缓冲队列
     SLDataLocator_AndroidSimpleBufferQueue queue = {SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE, 10};
     //音频格式
+    LOGD("音频格式 channels=%d sampleRate=%d",out.channels,out.sampleRate);
     SLDataFormat_PCM pcm = {
             SL_DATAFORMAT_PCM,
-           2,
+            (SLuint32) (out.channels),
 //            SL_SAMPLINGRATE_44_1,
-            SL_SAMPLINGRATE_48,
+            (SLuint32) (out.sampleRate * 1000),
             SL_PCMSAMPLEFORMAT_FIXED_32,
             SL_PCMSAMPLEFORMAT_FIXED_32,
             SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT,
