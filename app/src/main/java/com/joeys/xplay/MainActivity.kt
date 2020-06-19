@@ -3,6 +3,7 @@ package com.joeys.xplay
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
+import android.view.ViewManager
 import com.blankj.utilcode.util.ScreenUtils
 import com.yanzhenjie.permission.AndPermission
 import com.yanzhenjie.permission.runtime.Permission
@@ -26,6 +27,7 @@ class MainActivity : AppCompatActivity() {
         btn.setOnClickListener {
             open()
         }
+
         xplay.layoutParams.height = 1080 * ScreenUtils.getScreenWidth() / 1920
     }
 

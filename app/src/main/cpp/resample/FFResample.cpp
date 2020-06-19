@@ -11,9 +11,9 @@ bool FFResample::open(XParameter in, XParameter out) {
     //输入输出参数
     swrContext = swr_alloc_set_opts(
             swrContext,
-            av_get_default_channel_layout(2),//2声道输出
+            av_get_default_channel_layout(out.channels),//2声道输出
             AV_SAMPLE_FMT_S16,//写死
-            in.parameters->sample_rate,
+            out.parameters->sample_rate,
             av_get_default_channel_layout(in.parameters->channels),//原通道数
             (AVSampleFormat) in.parameters->format,
             in.parameters->sample_rate,
@@ -47,7 +47,7 @@ XData FFResample::resample(XData in) {
     }
     int size =
             outChannels * frame->nb_samples * av_get_bytes_per_sample((AVSampleFormat) outFormat);
-    LOGD("resample size = %d", size);
+//    LOGD("resample size = %d", size);
     if (!size) {
         return XData();
     }
@@ -66,7 +66,8 @@ XData FFResample::resample(XData in) {
         LOGE("音频重采样 swr_convert 失败  " );
         return XData();
     }
-    LOGD("音频重采样 swr_convert 成功 len=%d",len);
+//    LOGD("音频重采样 swr_convert 成功 len=%d",len);
+
 
     return out;
 }

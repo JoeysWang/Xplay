@@ -12,12 +12,20 @@
 
 class SLAudioPlay : public IAudioPlay {
 public:
+    SLAudioPlay();
+
+    virtual ~SLAudioPlay();
+
     bool startPlay(XParameter out) override;
-    void pcmCallback(SLAndroidSimpleBufferQueueItf bf, void *context);
+
     SLEngineItf createSL();
 
+    void playCall(void *bufferQueue);
 
-public:
+protected:
+    unsigned char *buffer = 0;
+
+
 };
 
 

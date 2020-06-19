@@ -94,6 +94,9 @@ XParameter FFDemux::getAudioParameter() {
 
     XParameter para;
     para.parameters = ic->streams[audioIndex]->codecpar;
+    para.channels = ic->streams[audioIndex]->codecpar->channels;
+    para.sampleRate = ic->streams[audioIndex]->codecpar->sample_rate;
+
     return para;
 }
 

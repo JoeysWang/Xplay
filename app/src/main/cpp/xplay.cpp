@@ -12,6 +12,8 @@
 #include "video/GLVideoView.h"
 #include "resample/IResample.h"
 #include "resample/FFResample.h"
+#include "audio/IAudioPlay.h"
+#include "audio/SLAudioPlay.h"
 
 extern "C" {
 #include "libavcodec/avcodec.h"
@@ -37,9 +39,17 @@ Java_com_joeys_xplay_Xplay_open(JNIEnv *env, jobject thiz, jstring _url) {
     audioDecode->open(demux->getAudioParameter());
 
     IResample *resample = new FFResample();
-    resample->open(demux->getAudioParameter());
 
+    XParameter audioOutParam = demux->getAudioParameter();
+    XParameter audioInParam = demux->getAudioParameter();
+
+    resample->open(audioInParam, audioOutParam);
     audioDecode->addObserver(resample);
+
+    IAudioPlay *audioPlay = new SLAudioPlay();
+    audioPlay->startPlay(audioOutParam);
+    resample->addObserver(audioPlay);
+
 
     demux->addObserver(videoDecode);
     demux->addObserver(audioDecode);
