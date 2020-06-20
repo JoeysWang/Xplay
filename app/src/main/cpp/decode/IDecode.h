@@ -15,7 +15,7 @@ struct XData;
 class IDecode : public IObserver {
 public:
     //打开解码器
-    virtual bool open(XParameter parameter, bool isHard=false) = 0;
+    virtual bool open(XParameter parameter, bool isHard = false) = 0;
 
     //future模型, 发送数据到线程解码
     virtual bool sendPacket(XData pkt) = 0;
@@ -27,7 +27,12 @@ public:
     void update(XData data) override;
 
 public:
+    //Audio =0
     int audioOrVideo = -1;
+
+    //同步时间，再次打开文件要清理
+    int syncPts = 0;
+    int pts=0;
 
     //最大队列缓冲
     int maxList = 100;

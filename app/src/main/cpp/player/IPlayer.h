@@ -5,7 +5,7 @@
 #ifndef XPLAY_IPLAYER_H
 #define XPLAY_IPLAYER_H
 
-
+#include <mutex>
 #include "../XThread.h"
 #include "../data/XParameter.h"
 
@@ -42,8 +42,12 @@ public:
     IPlayer();
 
     void start() override;
+
+    void Main() override;
+
 public:
     void *window;
+    std::mutex mutex;
 };
 
 

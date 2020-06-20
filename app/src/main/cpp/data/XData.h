@@ -27,6 +27,8 @@ struct XData {
     //audio 0,video 1
     int audioOrVideo = -1;
 
+    int pts = 0;
+
     int width = 0;
     int height = 0;
     int format = 0;

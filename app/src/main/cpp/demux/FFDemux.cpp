@@ -56,6 +56,12 @@ XData FFDemux::read() {
         av_packet_free(&avPacket);
         return XData();
     }
+    //转换pts
+    double ptsSeconds =
+            avPacket->pts * av_q2d(ic->streams[avPacket->stream_index]->time_base) * 1000;
+    double dtsSeconds =
+            avPacket->dts * av_q2d(ic->streams[avPacket->stream_index]->time_base) * 1000;
+    d.pts = (int) ptsSeconds;
     return d;
 }
 
@@ -74,7 +80,7 @@ XParameter FFDemux::getVideoParameter() {
 
     XParameter para;
     para.parameters = ic->streams[videoIndex]->codecpar;
-    LOGI("getVideoParameter success codec_id= %d",para.parameters->codec_id);
+    LOGI("getVideoParameter success codec_id= %d", para.parameters->codec_id);
     return para;
 }
 

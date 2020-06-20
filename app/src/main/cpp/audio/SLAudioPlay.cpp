@@ -46,7 +46,6 @@ static void pcmCallback(SLAndroidSimpleBufferQueueItf bf, void *context) {
 }
 
 void SLAudioPlay::playCall(void *bufferQueue) {
-//    if (!bufferQueue) { return; }
     auto bf = (SLAndroidSimpleBufferQueueItf) bufferQueue;
 
     XData data = getData();
@@ -55,8 +54,6 @@ void SLAudioPlay::playCall(void *bufferQueue) {
         return;
     }
 
-//    LOGD("SLAudioPlay::playCall getData size = %d ",data.size);
-//
     memcpy(buffer, data.data, data.size);
 
     (*bf)->Enqueue(bf, buffer, data.size);

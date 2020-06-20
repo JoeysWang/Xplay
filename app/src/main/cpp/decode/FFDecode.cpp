@@ -92,15 +92,6 @@ XData FFDecode::receiveFrame() {
         d.linesize[0] = avFrame->linesize[0];
         d.linesize[1] = avFrame->linesize[1];
         d.linesize[2] = avFrame->linesize[2];
-
-//        LOGD("width=%d , height=%d ,ratio = %d/%d",
-//             avFrame->width,
-//             avFrame->height,
-//             (avFrame->sample_aspect_ratio.den),
-//             (avFrame->sample_aspect_ratio.num)
-//
-//        );
-
     } else if (codecContext->codec_type == AVMEDIA_TYPE_AUDIO) {
         //样本大小 * 单通道样本数 * 通道数
         d.size = av_get_bytes_per_sample(static_cast<AVSampleFormat>(avFrame->format))
@@ -108,7 +99,7 @@ XData FFDecode::receiveFrame() {
                  * 2;
     }
     d.format = avFrame->format;
-
+    d.pts = avFrame->pts;
     memcpy(d.datas, avFrame->data, sizeof(d.datas));
 
     return d;

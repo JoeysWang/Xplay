@@ -5,23 +5,6 @@
 #include "IDecode.h"
 #include "../XLog.h"
 
-void IDecode::update(XData data) {
-    if (data.audioOrVideo != audioOrVideo && data.audioOrVideo != -1) {
-        return;
-    }
-    while (!isExit) {
-        packetMutex.lock();
-        if (packets.size() < maxList) {
-            //生产者，把数据压入list
-            packets.push_back(data);
-            packetMutex.unlock();
-            break;
-        }
-        packetMutex.unlock();
-        XSleep(1);
-    }
-}
-
 void IDecode::Main() {
     while (!isExit) {
         packetMutex.lock();
@@ -30,6 +13,10 @@ void IDecode::Main() {
             packetMutex.unlock();
             XSleep(1);
             continue;
+        }
+        if (audioOrVideo == 1 && syncPts > 0) {
+            //音视频同步
+
         }
         //消费者，把数据取出list
         //如果不是空的，处理数据：
@@ -50,4 +37,22 @@ void IDecode::Main() {
         packetMutex.unlock();
     }
 }
+
+void IDecode::update(XData data) {
+    if (data.audioOrVideo != audioOrVideo && data.audioOrVideo != -1) {
+        return;
+    }
+    while (!isExit) {
+        packetMutex.lock();
+        if (packets.size() < maxList) {
+            //生产者，把数据压入list
+            packets.push_back(data);
+            packetMutex.unlock();
+            break;
+        }
+        packetMutex.unlock();
+        XSleep(1);
+    }
+}
+
 

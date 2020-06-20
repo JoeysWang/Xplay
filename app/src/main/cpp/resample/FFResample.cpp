@@ -66,8 +66,8 @@ XData FFResample::resample(XData in) {
         LOGE("音频重采样 swr_convert 失败  " );
         return XData();
     }
-//    LOGD("音频重采样 swr_convert 成功 len=%d",len);
 
+    out.pts = in.pts;
 
     return out;
 }

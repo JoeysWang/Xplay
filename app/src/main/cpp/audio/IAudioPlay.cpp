@@ -14,11 +14,11 @@ XData IAudioPlay::getData() {
             notEmpty.wait(lock);
         }
         d = frames.front();
+        pts = d.pts;
         frames.pop_front();
         notFull.notify_all();
         break;
     }
-
 
     return d;
 }

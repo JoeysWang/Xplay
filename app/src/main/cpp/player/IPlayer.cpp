@@ -15,8 +15,25 @@ IPlayer *IPlayer::get(unsigned char index) {
     return &players[index];
 }
 
-bool IPlayer::open(const char *path) {
+void IPlayer::Main() {
+    while (!isExit) {
+        mutex.lock();
+        //音频视频同步
+        //获取音频pts，告诉视频
+        if (!audioPlay || !videoDecode) {
+            mutex.unlock();
+            XSleep(2);
+            continue;
+        }
+        int audioPts = audioPlay->pts;
+        videoDecode->syncPts = audioPts;
+        mutex.unlock();
+        XSleep(2);
+    }
+}
 
+bool IPlayer::open(const char *path) {
+    mutex.lock();
     if (!demux || !demux->open(path)) {
         LOGE("IPlayer::open demux error ");
         return false;
@@ -36,16 +53,18 @@ bool IPlayer::open(const char *path) {
     if (window) {
         videoView->setRender(window);
     }
+    mutex.unlock();
     LOGI("IPlayer::open success!");
     return true;
 }
 
 void IPlayer::start() {
+    mutex.lock();
     if (!demux) {
         LOGE("IPlayer startPlay error ");
+        mutex.unlock();
         return;
     }
-
     audioDecode->start();
 
     if (audioOutParam.sampleRate <= 0) {
@@ -60,7 +79,8 @@ void IPlayer::start() {
     resample->start();
 
     demux->start();
-
+    mutex.unlock();
+    XThread::start();
 }
 
 

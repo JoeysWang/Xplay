@@ -22,6 +22,8 @@ public:
 
 public:
     int maxFrameBuffer = 100;
+    int pts;
+
 protected:
     std::list<XData> frames;
     std::mutex framesMutex;
