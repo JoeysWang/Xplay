@@ -36,6 +36,8 @@ add_library(
         player/IPlayer.cpp
         IPlayerBuilder.cpp
         FFPlayerBuilder.cpp
+
+        proxy/IPlayerProxy.cpp
 )
 
 #find_library(
