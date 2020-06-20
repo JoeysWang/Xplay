@@ -10,7 +10,7 @@ extern "C" {
 
 void XData::drop() {
     if (!data)return;
-    if (type == AVPACKET_TYPE) {
+    if (allocType == AVPACKET_TYPE) {
         av_packet_free((AVPacket **) &data);
     } else
         delete data;
@@ -20,7 +20,7 @@ void XData::drop() {
 
 bool XData::alloc(int size, const char *data) {
     drop();
-    type = UCHAR_TYPE;
+    allocType = UCHAR_TYPE;
     if (size <= 0) { return false; }
 
     this->data = new unsigned char[size];

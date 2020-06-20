@@ -6,10 +6,15 @@
 #define XPLAY_XSHADER_H
 #define MAX_TEXTURES 32
 
+enum XShaderType {
+    XSHADER_YUV420P = 0,
+    XSHADER_NV12 = 25,
+    XSHADER_NV21 = 26,
+};
 
 class XShader {
 public:
-    virtual bool init();
+    virtual bool init(XShaderType shaderType =XSHADER_YUV420P);
 
     //获取材质并映射到内存
     void getTexture(unsigned int index, int width, int height, unsigned char *buf);

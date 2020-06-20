@@ -11,20 +11,22 @@ extern "C" {
 #include "libavcodec/avcodec.h"
 }
 
-bool FFDecode::open(XParameter parameter) {
+bool FFDecode::open(XParameter parameter, bool isHard) {
     AVCodecParameters *parameters = parameter.parameters;
     if (!parameters)return false;
 
     //1.查找解码器
     AVCodec *avCodec = avcodec_find_decoder(parameters->codec_id);
     LOGI("avcodec_find_decoder video codec_id=%d ", parameters->codec_id);
-
+    if (isHard) {
+        avCodec = avcodec_find_decoder_by_name("h264_mediacodec");
+    }
 
     if (!avCodec) {
         LOGE("avcodec_find_decoder error %d ", parameters->codec_id);
         return false;
     }
-    LOGI("avcodec_find_decoder success! ");
+    LOGI("avcodec_find_decoder success %d! ", isHard);
 
     //2.创建解码器上下文
     codecContext = avcodec_alloc_context3(avCodec);
@@ -105,6 +107,7 @@ XData FFDecode::receiveFrame() {
                  * avFrame->nb_samples
                  * 2;
     }
+    d.format = avFrame->format;
 
     memcpy(d.datas, avFrame->data, sizeof(d.datas));
 

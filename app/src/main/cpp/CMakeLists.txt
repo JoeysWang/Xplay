@@ -32,6 +32,10 @@ add_library(
         texture/XTexture.cpp
         utils/OpenGLUtils.cpp
         utils/vecmath.cpp
+
+        player/IPlayer.cpp
+        IPlayerBuilder.cpp
+        FFPlayerBuilder.cpp
 )
 
 #find_library(

@@ -29,9 +29,12 @@ struct XData {
 
     int width = 0;
     int height = 0;
+    int format = 0;
+
     int linesize[3];    // 宽对齐
 
-    int type = 0;
+
+    int allocType = 0;
 };
 
 

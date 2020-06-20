@@ -42,7 +42,6 @@ static void pcmCallback(SLAndroidSimpleBufferQueueItf bf, void *context) {
         LOGE("pcmCallback SLAudioPlay is null");
         return;
     }
-    LOGD("pcmCallback " );
     ap->playCall((void *) bf);
 }
 
@@ -56,8 +55,8 @@ void SLAudioPlay::playCall(void *bufferQueue) {
         return;
     }
 
-    LOGD("SLAudioPlay::playCall getData size = %d ",data.size);
-
+//    LOGD("SLAudioPlay::playCall getData size = %d ",data.size);
+//
     memcpy(buffer, data.data, data.size);
 
     (*bf)->Enqueue(bf, buffer, data.size);

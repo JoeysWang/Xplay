@@ -13,7 +13,9 @@ struct AVFrame;
 
 class FFDecode : public IDecode {
 public:
-    bool open(XParameter parameter) override;
+
+
+    bool open(XParameter parameter, bool isHard) override;
 
     bool sendPacket(XData  pkt) override;
 
