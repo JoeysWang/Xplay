@@ -8,6 +8,7 @@
 
 #include "IDecode.h"
 
+
 struct AVCodecContext;
 struct AVFrame;
 
@@ -15,16 +16,25 @@ class FFDecode : public IDecode {
 public:
 
 
+    FFDecode();
+
     bool open(XParameter parameter, bool isHard) override;
 
     bool sendPacket(XData  pkt) override;
 
     XData receiveFrame() override;
 
+    virtual ~FFDecode();
+
+    void start() override;
+
 
 protected:
+
     AVCodecContext *codecContext = 0;
     AVFrame *avFrame = 0;
+
+
 };
 
 

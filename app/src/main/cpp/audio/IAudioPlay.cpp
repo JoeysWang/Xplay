@@ -7,7 +7,6 @@
 
 XData IAudioPlay::getData() {
     XData d;
-
     while (!isExit) {
         std::unique_lock<std::mutex> lock(framesMutex);
         if (frames.empty()) {

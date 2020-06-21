@@ -9,7 +9,10 @@
 #include "../IObserver.h"
 #include "../data/XParameter.h"
 
+
 struct XData;
+#include "../queue/FrameQueue.h"
+#include "../queue/PacketQueue.h"
 
 //解码接口 支持硬解码
 class IDecode : public IObserver {
@@ -26,13 +29,20 @@ public:
     //生产数据，如果是满的，阻塞
     void update(XData data) override;
 
+    FrameQueue *getFrameQueue() const;
+
+    PacketQueue *getPacketQueue() const;
+
+    int getFrameSize();
+
 public:
     //Audio =0
     int audioOrVideo = -1;
 
     //同步时间，再次打开文件要清理
-    int syncPts = 0;
-    int pts=0;
+    int syncAudioPts = 0;
+    //当前播放到的位置
+    int videoPts=0;
 
     //最大队列缓冲
     int maxList = 100;
@@ -45,6 +55,8 @@ protected:
     std::list<XData> packets;
     std::mutex packetMutex;
 
+    FrameQueue *frameQueue;
+    PacketQueue *packetQueue;       // 数据包队列
 };
 
 

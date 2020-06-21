@@ -14,9 +14,15 @@ void IDecode::Main() {
             XSleep(1);
             continue;
         }
-        if (audioOrVideo == 1 && syncPts > 0) {
-            //音视频同步
 
+
+        if (audioOrVideo == 1 && syncAudioPts > 0) {
+            //音视频同步,声音pts<当前pts，等待
+            if (syncAudioPts < videoPts) {
+                packetMutex.unlock();
+                XSleep(1);
+                continue;
+            }
         }
         //消费者，把数据取出list
         //如果不是空的，处理数据：
@@ -28,6 +34,8 @@ void IDecode::Main() {
             while (!isExit) {
                 XData frame = receiveFrame();
                 if (!frame.data)break;
+
+                videoPts = frame.pts;
                 //发数据给观察者
 //                LOGD(" receiveFrame  size %d ,frame is audio= %d", frame.size, frame.audioOrVideo);
                 notify(frame);
@@ -53,6 +61,19 @@ void IDecode::update(XData data) {
         packetMutex.unlock();
         XSleep(1);
     }
+}
+
+FrameQueue *IDecode::getFrameQueue() const {
+    return frameQueue;
+}
+
+PacketQueue *IDecode::getPacketQueue() const {
+    return packetQueue;
+}
+
+int IDecode::getFrameSize() {
+    std::unique_lock<std::mutex> lock(mutex);
+    return frameQueue ? frameQueue->getFrameSize() : 0;
 }
 
 

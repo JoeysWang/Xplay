@@ -17,14 +17,18 @@ IPlayer *IPlayerBuilder::buildPlayer() {
 
     IDecode *videoDecode = createDecode();
     IDecode *audioDecode = createDecode();
-    IResample *resample = createResample();
-    audioDecode->addObserver(resample);
-
-    IAudioPlay *audioPlay = createAudioPlay();
     demux->addObserver(videoDecode);
     demux->addObserver(audioDecode);
 
+    //音频链路
+    IResample *resample = createResample();
+    audioDecode->addObserver(resample);
+    IAudioPlay *audioPlay = createAudioPlay();
+    resample->addObserver(audioPlay);
+
+    //视频链路
     IVideoView *videoView = new GLVideoView();
+    videoDecode->addObserver(videoView);
 
     iplayer->demux = demux;
     iplayer->audioPlay = audioPlay;

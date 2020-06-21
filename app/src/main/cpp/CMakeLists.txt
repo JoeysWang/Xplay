@@ -34,10 +34,18 @@ add_library(
         utils/vecmath.cpp
 
         player/IPlayer.cpp
+        player/PlayerState.cpp
         IPlayerBuilder.cpp
         FFPlayerBuilder.cpp
 
+        queue/PacketQueue.cpp
+        queue/FrameQueue.cpp
+        sync/MediaSync.cpp
+        sync/MediaClock.cpp
         proxy/IPlayerProxy.cpp
+
+
+        test/QueueTest.cpp
 )
 
 #find_library(

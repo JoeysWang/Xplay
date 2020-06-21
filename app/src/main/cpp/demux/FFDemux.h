@@ -26,7 +26,7 @@ public:
     XParameter getAudioParameter() override;
 
 private:
-    AVFormatContext *ic = 0;
+    AVFormatContext *formatContext = 0;
     int audioStreamIndex =0;
     int videoStreamIndex =0;
 

@@ -6,6 +6,9 @@
 #include "IPlayerBuilder.h"
 #include "FFPlayerBuilder.h"
 #include "proxy/IPlayerProxy.h"
+#include "test/QueueTest.h"
+#include <thread>
+#include <chrono>
 
 extern "C" {
 #include "libavcodec/avcodec.h"
@@ -28,6 +31,30 @@ Java_com_joeys_xplay_Xplay_open(JNIEnv *env, jobject thiz, jstring _url) {
     IPlayerProxy::get()->start();
     return 0;
 }
+
+void add() {
+
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_joeys_xplay_Xplay_text(JNIEnv *env, jobject thiz) {
+
+    auto *queue = new PacketQueue();
+    auto test1 = new QueueTest(queue, "thread 1");
+    auto test2 = new QueueTest(queue, "thread 2");
+    auto test3 = new QueueTest(queue, "thread 3");
+    auto test4 = new QueueTest(queue, "thread 4");
+    test1->start();
+    test2->start();
+    test3->start();
+    test4->start();
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+    LOGI("queue size is %d", queue->getPacketSize());
+
+}
+
+
 
 extern "C"
 JNIEXPORT void JNICALL

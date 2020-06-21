@@ -26,7 +26,7 @@ void IPlayer::Main() {
             continue;
         }
         int audioPts = audioPlay->pts;
-        videoDecode->syncPts = audioPts;
+        videoDecode->syncAudioPts = audioPts;
         mutex.unlock();
         XSleep(2);
     }
@@ -66,21 +66,16 @@ void IPlayer::start() {
         return;
     }
     audioDecode->start();
-
     if (audioOutParam.sampleRate <= 0) {
         audioOutParam = demux->getAudioParameter();
     }
     audioPlay->startPlay(audioOutParam);
 
-    videoDecode->addObserver(videoView);
     videoDecode->start();
-
-    resample->addObserver(audioPlay);
     resample->start();
-
     demux->start();
-    mutex.unlock();
     XThread::start();
+    mutex.unlock();
 }
 
 

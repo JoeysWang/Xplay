@@ -27,7 +27,9 @@ class MainActivity : AppCompatActivity() {
         btn.setOnClickListener {
             open()
         }
-
+        test.setOnClickListener {
+            xplay.text()
+        }
         xplay.layoutParams.height = 1080 * ScreenUtils.getScreenWidth() / 1920
     }
 
