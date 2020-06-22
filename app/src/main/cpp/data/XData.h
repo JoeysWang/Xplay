@@ -33,7 +33,8 @@ struct XData {
 
     AVRational time_base;
     AVRational frame_rate;
-    int pts = 0;
+    double pts = 0;
+    double duration = 0;
 
     int width = 0;
     int height = 0;

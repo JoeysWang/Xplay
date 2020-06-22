@@ -51,6 +51,21 @@ public:
         return false;
     }
 
+    bool peek(T &data){
+        std::unique_lock<std::mutex> lock(_mutex);
+        while (!_quit) {
+            if (!_queue.empty()) {
+                //data = std::move(_queue.front());
+                data = _queue.front();
+                _fullQue.notify_all();
+                return true;
+            } else if (_queue.empty() && _finished) {
+                return false;
+            } else {
+                _empty.wait(lock);
+            }
+        }
+    }
 
     bool pop(T &data) {
         std::unique_lock<std::mutex> lock(_mutex);

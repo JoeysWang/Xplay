@@ -8,6 +8,7 @@
 #include <mutex>
 #include "../XThread.h"
 #include "../data/XParameter.h"
+#include "../sync/MediaSync.h"
 
 class IDemux;
 
@@ -29,6 +30,8 @@ public:
     virtual bool initView(void *window);
 
 
+    PlayerState *playerState;
+    MediaSync *mediaSync;
     IDemux *demux = 0;
     IDecode *audioDecode = 0;
     IDecode *videoDecode = 0;

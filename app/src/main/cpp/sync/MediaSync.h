@@ -23,7 +23,7 @@ public:
 
     void reset();
 
-    void start(FFDecode *videoDecoder, FFDecode *audioDecoder);
+    void start(IDecode *videoDecoder, IDecode *audioDecoder);
 
     void stop();
 
@@ -82,7 +82,6 @@ private:
 
     std::mutex mMutex;
     std::condition_variable mCondition;
-    XThread *syncThread;                     // 同步线程
 
     int forceRefresh;                       // 强制刷新标志
     double maxFrameDuration;                // 最大帧延时

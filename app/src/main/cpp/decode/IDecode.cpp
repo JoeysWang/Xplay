@@ -13,9 +13,12 @@ void IDecode::Main() {
         }
         if (sendPacket(data)) {
             while (!isExit) {
+                //从解码器接收解码后的frame，此frame作为函数的输出参数供上级函数处理
                 XData frame = receiveFrame();
                 if (!frame.data)
                     break;
+                //此时的data是avFrame
+
                 videoPts = frame.pts;
                 //在这里做音视频同步
                 notify(frame);

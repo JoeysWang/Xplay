@@ -71,9 +71,13 @@ void IPlayer::start() {
     }
     audioPlay->startPlay(audioOutParam);
 
+    playerState=new PlayerState();
+    mediaSync =new MediaSync(playerState);
     videoDecode->start();
     resample->start();
     demux->start();
+    mediaSync->start(videoDecode,audioDecode);
+
     XThread::start();
     mutex.unlock();
 }

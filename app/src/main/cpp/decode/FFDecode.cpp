@@ -182,7 +182,7 @@ XData FFDecode::receiveFrame() {
                 }
                 d.format = avFrame->format;
                 d.pts = avFrame->best_effort_timestamp;
-                memcpy(d.datas, avFrame->data, sizeof(d.datas));
+                memcpy(d.datas, avFrame->data, sizeof(avFrame->data));
                 return d;
             }
         } while (ret != AVERROR(EAGAIN));

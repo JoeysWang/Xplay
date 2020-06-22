@@ -15,7 +15,7 @@ MediaSync::MediaSync(PlayerState *playerState) {
 
     mExit = true;
     abortRequest = true;
-    syncThread = nullptr;
+//    syncThread = nullptr;
 
     forceRefresh = 0;
     maxFrameDuration = 10.0;
@@ -55,7 +55,7 @@ void MediaSync::reset() {
     }
 }
 
-void MediaSync::start(FFDecode *videoDecoder, FFDecode *audioDecoder) {
+void MediaSync::start(IDecode *videoDecoder, IDecode *audioDecoder) {
     mMutex.lock();
     this->videoDecoder = videoDecoder;
     this->audioDecoder = audioDecoder;
@@ -63,9 +63,8 @@ void MediaSync::start(FFDecode *videoDecoder, FFDecode *audioDecoder) {
     mExit = false;
     mCondition.notify_all();
     mMutex.unlock();
-    if (videoDecoder && !syncThread) {
-//        syncThread = new XThread(this);
-        syncThread->start();
+    if (videoDecoder) {
+        XThread::start();
     }
 }
 
@@ -81,11 +80,12 @@ void MediaSync::stop() {
         mCondition.wait(lock);
     }
     lock.unlock();
-    if (syncThread) {
+    XThread::stop();
+//    if (syncThread) {
 //        syncThread->join();
-        delete syncThread;
-        syncThread = nullptr;
-    }
+//        delete syncThread;
+//        syncThread = nullptr;
+//    }
 }
 
 void MediaSync::setVideoDevice(IVideoView *device) {
@@ -136,21 +136,9 @@ double MediaSync::getMasterClock() {
     return val;
 }
 
-MediaClock* MediaSync::getAudioClock() {
-    return audioClock;
-}
-
-MediaClock *MediaSync::getVideoClock() {
-    return videoClock;
-}
-
-MediaClock *MediaSync::getExternalClock() {
-    return extClock;
-}
-
 void MediaSync::Main() {
 
-double remaining_time = 0.0;
+    double remaining_time = 0.0;
     while (true) {
 
         if (abortRequest || playerState->abortRequest) {
@@ -308,8 +296,8 @@ void MediaSync::refreshVideo(double *remaining_time) {
 void MediaSync::checkExternalClockSpeed() {
 //    if (videoDecoder && videoDecoder->getPacketSize() <= EXTERNAL_CLOCK_MIN_FRAMES
 //        || audioDecoder && audioDecoder->getPacketSize() <= EXTERNAL_CLOCK_MIN_FRAMES) {
-//        extClock->setSpeed(FFMAX(EXTERNAL_CLOCK_SPEED_MIN,
-//                                 extClock->getSpeed() - EXTERNAL_CLOCK_SPEED_STEP));
+        extClock->setSpeed(FFMAX(EXTERNAL_CLOCK_SPEED_MIN,
+                                 extClock->getSpeed() - EXTERNAL_CLOCK_SPEED_STEP));
 //    } else if ((!videoDecoder || videoDecoder->getPacketSize() > EXTERNAL_CLOCK_MAX_FRAMES)
 //               && (!audioDecoder || audioDecoder->getPacketSize() > EXTERNAL_CLOCK_MAX_FRAMES)) {
 //        extClock->setSpeed(FFMIN(EXTERNAL_CLOCK_SPEED_MAX,
@@ -322,39 +310,10 @@ void MediaSync::checkExternalClockSpeed() {
 //    }
 }
 
-double MediaSync::calculateDelay(double delay)  {
-    double sync_threshold, diff = 0;
-    // 如果不是同步到视频流，则需要计算延时时间
-    if (playerState->syncType != AV_SYNC_VIDEO) {
-        // 计算差值
-        diff = videoClock->getClock() - getMasterClock();
-        // 用差值与同步阈值计算延时
-        sync_threshold = FFMAX(AV_SYNC_THRESHOLD_MIN, FFMIN(AV_SYNC_THRESHOLD_MAX, delay));
-        if (!isnan(diff) && fabs(diff) < maxFrameDuration) {
-            if (diff <= -sync_threshold) {
-                delay = FFMAX(0, delay + diff);
-            } else if (diff >= sync_threshold && delay > AV_SYNC_FRAMEDUP_THRESHOLD) {
-                delay = delay + diff;
-            } else if (diff >= sync_threshold) {
-                delay = 2 * delay;
-            }
-        }
-    }
 
-    av_log(nullptr, AV_LOG_TRACE, "video: delay=%0.3f A-V=%f\n", delay, -diff);
+void MediaSync::renderVideo() {
 
-    return delay;
 }
-
-double MediaSync::calculateDuration(Frame *vp, Frame *nextvp) {
-    double duration = nextvp->pts - vp->pts;
-    if (isnan(duration) || duration <= 0 || duration > maxFrameDuration) {
-        return vp->duration;
-    } else {
-        return duration;
-    }
-}
-void MediaSync::renderVideo(){}
 //void MediaSync::renderVideo() {
 //    mMutex.lock();
 //    if (!videoDecoder || !videoDevice) {
@@ -482,3 +441,47 @@ void MediaSync::renderVideo(){}
 //    }
 //    mMutex.unlock();
 //}
+double MediaSync::calculateDelay(double delay) {
+    double sync_threshold, diff = 0;
+    // 如果不是同步到视频流，则需要计算延时时间
+    if (playerState->syncType != AV_SYNC_VIDEO) {
+        // 计算差值
+        diff = videoClock->getClock() - getMasterClock();
+        // 用差值与同步阈值计算延时
+        sync_threshold = FFMAX(AV_SYNC_THRESHOLD_MIN, FFMIN(AV_SYNC_THRESHOLD_MAX, delay));
+        if (!isnan(diff) && fabs(diff) < maxFrameDuration) {
+            if (diff <= -sync_threshold) {
+                delay = FFMAX(0, delay + diff);
+            } else if (diff >= sync_threshold && delay > AV_SYNC_FRAMEDUP_THRESHOLD) {
+                delay = delay + diff;
+            } else if (diff >= sync_threshold) {
+                delay = 2 * delay;
+            }
+        }
+    }
+
+    av_log(nullptr, AV_LOG_TRACE, "video: delay=%0.3f A-V=%f\n", delay, -diff);
+
+    return delay;
+}
+
+double MediaSync::calculateDuration(Frame *vp, Frame *nextvp) {
+    double duration = nextvp->pts - vp->pts;
+    if (isnan(duration) || duration <= 0 || duration > maxFrameDuration) {
+        return vp->duration;
+    } else {
+        return duration;
+    }
+}
+
+MediaClock *MediaSync::getAudioClock() {
+    return audioClock;
+}
+
+MediaClock *MediaSync::getVideoClock() {
+    return videoClock;
+}
+
+MediaClock *MediaSync::getExternalClock() {
+    return extClock;
+}
