@@ -9,6 +9,7 @@ import com.yanzhenjie.permission.AndPermission
 import com.yanzhenjie.permission.runtime.Permission
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
+import java.util.concurrent.locks.ReentrantLock
 
 class MainActivity : AppCompatActivity() {
 

@@ -20,7 +20,7 @@ public:
 
     bool open(XParameter parameter, bool isHard) override;
 
-    bool sendPacket(XData  pkt) override;
+    bool sendPacket(XData pkt) override;
 
     XData receiveFrame() override;
 
@@ -33,7 +33,7 @@ protected:
 
     AVCodecContext *codecContext = 0;
     AVFrame *avFrame = 0;
-
+    AVPacket flush_pkt;
 
 };
 

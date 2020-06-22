@@ -38,6 +38,7 @@ add_library(
         IPlayerBuilder.cpp
         FFPlayerBuilder.cpp
 
+        queue/Queue.cpp
         queue/PacketQueue.cpp
         queue/FrameQueue.cpp
         sync/MediaSync.cpp

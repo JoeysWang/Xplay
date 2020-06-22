@@ -8,11 +8,21 @@
 #include <list>
 #include "../IObserver.h"
 #include "../data/XParameter.h"
+#include "../queue/Queue.h"
 
-
+extern "C" {
+#include "libavformat/avformat.h"
+};
 struct XData;
+
 #include "../queue/FrameQueue.h"
 #include "../queue/PacketQueue.h"
+
+enum DecodeMediaType {
+    MEDIA_TYPE_NONE = -1,
+    MEDIA_TYPE_AUDIO = 0,
+    MEDIA_TYPE_VIDEO = 1
+};
 
 //解码接口 支持硬解码
 class IDecode : public IObserver {
@@ -31,18 +41,20 @@ public:
 
     FrameQueue *getFrameQueue() const;
 
-    PacketQueue *getPacketQueue() const;
+    Queue<XData> *getPacketQueue() const;
+
+    int pushPacket(XData  data);
 
     int getFrameSize();
 
 public:
     //Audio =0
-    int audioOrVideo = -1;
+    DecodeMediaType audioOrVideo = MEDIA_TYPE_NONE;
 
     //同步时间，再次打开文件要清理
     int syncAudioPts = 0;
     //当前播放到的位置
-    int videoPts=0;
+    int videoPts = 0;
 
     //最大队列缓冲
     int maxList = 100;
@@ -52,11 +64,21 @@ protected:
     virtual void Main() override;
 
     //所有的读取缓冲
-    std::list<XData> packets;
-    std::mutex packetMutex;
+//    std::list<XData> packets;
+    std::mutex decodeMutex;
+    std::condition_variable condition;
+
+    long next_pts;
+    AVRational next_pts_tb;
+    int packet_pending;
+    int pkt_serial;
+    int reorderVideoPts = -1;            // 视频帧重排pts
 
     FrameQueue *frameQueue;
-    PacketQueue *packetQueue;       // 数据包队列
+
+    Queue<XData> *audioQueue;       // 数据包队列
+    Queue<XData> *videoQueue;       // 数据包队列
+//    PacketQueue *packetQueue;       // 数据包队列
 };
 
 

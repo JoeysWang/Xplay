@@ -56,9 +56,12 @@ public:
 
     int isAbort();
 
+
 private:
     int put(AVPacket *pkt);
 
+public:
+    int serial;
 private:
     std::mutex mMutex;
     std::condition_variable mCondition;

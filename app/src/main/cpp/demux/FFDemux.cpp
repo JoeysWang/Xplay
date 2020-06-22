@@ -70,7 +70,7 @@ XData FFDemux::read() {
                                                 NULL);
     d.frame_rate = frame_rate;
     d.time_base = pStream->time_base;
-
+    LOGI("FFDemux::read success");
     return d;
 }
 
@@ -89,7 +89,7 @@ XParameter FFDemux::getVideoParameter() {
 
     XParameter para;
     para.parameters = formatContext->streams[videoIndex]->codecpar;
-    LOGI("getVideoParameter success codec_id= %d", para.parameters->codec_id);
+//    LOGI("getVideoParameter success codec_id= %d", para.parameters->codec_id);
     return para;
 }
 
@@ -105,7 +105,7 @@ XParameter FFDemux::getAudioParameter() {
         return XParameter();
     }
     this->audioStreamIndex = audioIndex;
-    LOGI("getAudioParameter success");
+//    LOGI("getAudioParameter success");
 
     XParameter para;
     para.parameters = formatContext->streams[audioIndex]->codecpar;

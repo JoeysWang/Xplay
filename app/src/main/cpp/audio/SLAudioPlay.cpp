@@ -113,8 +113,9 @@ bool SLAudioPlay::startPlay(XParameter out) {
     if (re != SL_RESULT_SUCCESS) {
         LOGE("(*engineItf)->CreateAudioPlayer ERROR");
         return false;
-    } else
-        LOGD("(*engineItf)->CreateAudioPlayer success");
+    }
+//    else
+//        LOGD("(*engineItf)->CreateAudioPlayer success");
 
     (*player)->Realize(player, SL_BOOLEAN_FALSE);
 
@@ -123,17 +124,11 @@ bool SLAudioPlay::startPlay(XParameter out) {
         LOGE("(*player)->GetInterface ERROR");
         return false;
     }
-    LOGD("(*player)->GetInterface success");
     re = (*player)->GetInterface(player, SL_IID_BUFFERQUEUE, &pcmQueue);
-
     (*pcmQueue)->RegisterCallback(pcmQueue, pcmCallback, this);
-    LOGD("(*player)->RegisterCallback success");
-
     (*iplayer)->SetPlayState(iplayer, SL_PLAYSTATE_PLAYING);
-    LOGD("(*player)->SetPlayState success");
     (*pcmQueue)->Enqueue(pcmQueue, "", 1);
 
-    LOGI("start audio play success");
     return true;
 
 }

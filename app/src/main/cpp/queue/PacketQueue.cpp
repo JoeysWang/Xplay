@@ -138,8 +138,6 @@ int PacketQueue::getPacket(AVPacket *pkt, int block) {
     PacketList *pkt1;
     int ret;
     std::unique_lock<std::mutex> lock(mMutex);
-
-    lock.lock();
     for (;;) {
         if (abort_request) {
             ret = -1;
@@ -166,7 +164,6 @@ int PacketQueue::getPacket(AVPacket *pkt, int block) {
             mCondition.wait(lock);
         }
     }
-    lock.unlock();
     return ret;
 }
 
