@@ -21,13 +21,31 @@ add_library(
         IObserver.cpp
         decode/IDecode.cpp
         decode/FFDecode.cpp
+        audio/IAudioPlay.cpp
+        audio/SLAudioPlay.cpp
         video/IVideoView.cpp
         video/GLVideoView.cpp
+        resample/IResample.cpp
+        resample/FFResample.cpp
         texture/XEGL.cpp
         texture/XShader.cpp
         texture/XTexture.cpp
         utils/OpenGLUtils.cpp
         utils/vecmath.cpp
+
+        player/IPlayer.cpp
+        player/PlayerState.cpp
+        IPlayerBuilder.cpp
+        FFPlayerBuilder.cpp
+
+        queue/PacketQueue.cpp
+        queue/FrameQueue.cpp
+        sync/MediaSync.cpp
+        sync/MediaClock.cpp
+        proxy/IPlayerProxy.cpp
+
+
+        test/QueueTest.cpp
 )
 
 #find_library(

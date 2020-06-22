@@ -12,10 +12,14 @@ void GLVideoView::setRender(void *view) {
 }
 
 void GLVideoView::render(XData data) {
-    if (!view)return;
+
+    if (!view){
+        LOGE("GLVideoView::render view = null");
+        return;
+    }
     if (!texture) {
         texture = XTexture::create();
-        texture->init(view, data.width, data.height, nullptr);
+        texture->init(view, data.width, data.height);
     }
     texture->draw(data.datas, data.linesize, data.height);
     XEGL::get()->draw();

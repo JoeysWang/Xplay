@@ -1,48 +1,60 @@
 #include <jni.h>
 #include <string>
-#include "demux/IDemux.h"
-#include "demux/FFDemux.h"
 #include "XLog.h"
-#include "XThread.h"
-#include "decode/FFDecode.h"
 #include "android/native_window_jni.h"
-#include "texture/XEGL.h"
-#include "texture/XShader.h"
-#include "video/IVideoView.h"
-#include "video/GLVideoView.h"
+#include "player/IPlayer.h"
+#include "IPlayerBuilder.h"
+#include "FFPlayerBuilder.h"
+#include "proxy/IPlayerProxy.h"
+#include "test/QueueTest.h"
+#include <thread>
+#include <chrono>
 
 extern "C" {
 #include "libavcodec/avcodec.h"
 }
 
 
-IVideoView *view = nullptr;
 ANativeWindow *window;
-jfloat *vpMatrix = nullptr;
+
+
 extern "C"
 JNIEXPORT jboolean JNICALL
 Java_com_joeys_xplay_Xplay_open(JNIEnv *env, jobject thiz, jstring _url) {
     using namespace std;
-    auto *demux = new FFDemux();
     const char *url = env->GetStringUTFChars(_url, 0);
-    demux->open(url);
-
-    IDecode *videoDecode = new FFDecode();
-    videoDecode->open(demux->getVideoParameter());
-
-    IDecode *audioDecode = new FFDecode();
-    audioDecode->open(demux->getAudioParameter());
-
-    videoDecode->addObserver(view);
-    demux->addObserver(videoDecode);
-    demux->addObserver(audioDecode);
-
-    videoDecode->start();
-    audioDecode->start();
-    demux->start();
-
+    IPlayerProxy::get()->init();
+    IPlayerProxy::get()->open(url);
+    if (window) {
+        IPlayerProxy::get()->initView(window);
+    }
+    IPlayerProxy::get()->start();
     return 0;
 }
+
+void add() {
+
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_joeys_xplay_Xplay_text(JNIEnv *env, jobject thiz) {
+
+    auto *queue = new PacketQueue();
+    auto test1 = new QueueTest(queue, "thread 1");
+    auto test2 = new QueueTest(queue, "thread 2");
+    auto test3 = new QueueTest(queue, "thread 3");
+    auto test4 = new QueueTest(queue, "thread 4");
+    test1->start();
+    test2->start();
+    test3->start();
+    test4->start();
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+    LOGI("queue size is %d", queue->getPacketSize());
+
+}
+
+
 
 extern "C"
 JNIEXPORT void JNICALL
@@ -50,18 +62,12 @@ Java_com_joeys_xplay_Xplay_initView(JNIEnv *env, jobject thiz, jobject holder) {
     window = ANativeWindow_fromSurface(env, holder);
     LOGD("ANativeWindow_fromSurface %d", window);
     if (window) {
-        view = new GLVideoView();
-        view->setRender(window);
-        if (vpMatrix != nullptr)
-            view->setMatrix(vpMatrix, sizeof(vpMatrix));
+        IPlayerProxy::get()->initView(window);
     }
 }
 
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_joeys_xplay_Xplay_setMatrix(JNIEnv *env, jobject thiz, jfloatArray v_pmatrix) {
-    if ( view!= nullptr) {
-        vpMatrix = env->GetFloatArrayElements(v_pmatrix, 0);
-        view->setMatrix(vpMatrix, 16);
-    }
+
 }

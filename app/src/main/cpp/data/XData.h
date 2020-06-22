@@ -5,7 +5,16 @@
 #ifndef XPLAY_XDATA_H
 #define XPLAY_XDATA_H
 
+extern "C"{
+
+#include "libavutil/rational.h"
+};
 struct AVPacket;
+enum XDataType {
+    AVPACKET_TYPE = 0,
+    UCHAR_TYPE = 1,
+
+};
 
 struct XData {
 
@@ -15,15 +24,25 @@ struct XData {
 
     int size = 0;
 
-    void Drop();
+    void drop();
+
+    bool alloc(int size, const char *data = 0);
 
     //audio 0,video 1
     int audioOrVideo = -1;
 
+    AVRational time_base;
+    AVRational frame_rate;
+    int pts = 0;
+
     int width = 0;
     int height = 0;
+    int format = 0;
+
     int linesize[3];    // 宽对齐
 
+
+    int allocType = 0;
 };
 
 

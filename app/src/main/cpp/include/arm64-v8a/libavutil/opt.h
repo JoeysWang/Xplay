@@ -163,9 +163,9 @@
  *      iterate over all available codecs with private options.
  *
  * @subsection avoptions_implement_named_constants Named constants
- *      It is possible to create named constants for options. Simply set the unit
+ *      It is possible to createEngine named constants for options. Simply set the unit
  *      field of the option the constants should apply to a string and
- *      create the constants themselves as options of type AV_OPT_TYPE_CONST
+ *      createEngine the constants themselves as options of type AV_OPT_TYPE_CONST
  *      with their unit field set to the same string.
  *      Their default_val field should contain the value of the named
  *      constant.

@@ -50,7 +50,7 @@ class Xplay : TextureView, TextureView.SurfaceTextureListener, IMediaPlayer {
     }
 
     external fun open(url: String): Boolean
-
+    external fun text()
     private external fun initView(holder: Surface?)
 
     external fun setMatrix(vPMatrix: FloatArray)

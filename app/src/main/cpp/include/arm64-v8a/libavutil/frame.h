@@ -636,7 +636,7 @@ typedef struct AVFrame {
     /**
      * AVBufferRef for free use by the API user. FFmpeg will never check the
      * contents of the buffer ref. FFmpeg calls av_buffer_unref() on it when
-     * the frame is unreferenced. av_frame_copy_props() calls create a new
+     * the frame is unreferenced. av_frame_copy_props() calls createEngine a new
      * reference with av_buffer_ref() for the target frame's opaque_ref field.
      *
      * This is unrelated to the opaque field, although it serves a similar
@@ -668,7 +668,7 @@ typedef struct AVFrame {
      * Code outside the FFmpeg libs should never check or change the contents of the buffer ref.
      *
      * FFmpeg calls av_buffer_unref() on it when the frame is unreferenced.
-     * av_frame_copy_props() calls create a new reference with av_buffer_ref()
+     * av_frame_copy_props() calls createEngine a new reference with av_buffer_ref()
      * for the target frame's private_ref field.
      */
     AVBufferRef *private_ref;
@@ -761,7 +761,7 @@ void av_frame_free(AVFrame **frame);
 /**
  * Set up a new reference to the data described by the source frame.
  *
- * Copy frame properties from src to dst and create a new reference for each
+ * Copy frame properties from src to dst and createEngine a new reference for each
  * AVBufferRef from src.
  *
  * If src is not reference counted, new buffers are allocated and the data is

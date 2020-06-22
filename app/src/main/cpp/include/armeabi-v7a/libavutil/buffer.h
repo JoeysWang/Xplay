@@ -53,7 +53,7 @@
  * buffer is considered writable if there exists only one reference to it (and
  * it has not been marked as read-only). The av_buffer_is_writable() function is
  * provided to check whether this is true and av_buffer_make_writable() will
- * automatically create a new writable buffer when necessary.
+ * automatically createEngine a new writable buffer when necessary.
  * Of course nothing prevents the calling code from violating this convention,
  * however that is safe only when all the existing references are under its
  * control.
@@ -213,7 +213,7 @@ int av_buffer_realloc(AVBufferRef **buf, int size);
  * same size (the most obvious use case being buffers for raw video or audio
  * frames).
  *
- * At the beginning, the user must call av_buffer_pool_init() to create the
+ * At the beginning, the user must call av_buffer_pool_init() to createEngine the
  * buffer pool. Then whenever a buffer is needed, call av_buffer_pool_get() to
  * get a reference to a new buffer, similar to av_buffer_alloc(). This new
  * reference works in all aspects the same way as the one created by

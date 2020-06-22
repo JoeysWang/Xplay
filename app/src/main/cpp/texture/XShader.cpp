@@ -53,7 +53,7 @@ char fragYUV420P[] =
         "}";
 
 
-bool XShader::init() {
+bool XShader::init(XShaderType shaderType) {
     program = OpenGLUtils::createProgram(vertexShader, fragYUV420P);
     OpenGLUtils::checkGLError("createProgram");
     GLint aPosition = glGetAttribLocation(program, "aPosition");

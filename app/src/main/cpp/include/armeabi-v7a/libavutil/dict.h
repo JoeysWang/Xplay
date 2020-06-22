@@ -41,7 +41,7 @@
  * @brief Simple key:value store
  *
  * @{
- * Dictionaries are used for storing key:value pairs. To create
+ * Dictionaries are used for storing key:value pairs. To createEngine
  * an AVDictionary, simply pass an address of a NULL pointer to
  * av_dict_set(). NULL can be used as an empty dictionary wherever
  * a pointer to an AVDictionary is required.
@@ -50,7 +50,7 @@
  * and all its contents.
  *
  @code
-   AVDictionary *d = NULL;           // "create" an empty dictionary
+   AVDictionary *d = NULL;           // "createEngine" an empty dictionary
    AVDictionaryEntry *t = NULL;
 
    av_dict_set(&d, "foo", "bar", 0); // add an entry

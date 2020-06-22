@@ -14,14 +14,14 @@ extern "C" {
 //打开文件、流媒体 http rtsp
 bool FFDemux::open(const char *url) {
     LOGD("open %s", url);
-    int re = avformat_open_input(&ic, url, 0, 0);
+    int re = avformat_open_input(&formatContext, url, 0, 0);
     if (re != 0) {
         char buf[1024] = {0};
         av_strerror(re, buf, sizeof(buf));
         LOGE("open ffdemux failed %s", url);
         return false;
     }
-    re = avformat_find_stream_info(ic, 0);
+    re = avformat_find_stream_info(formatContext, 0);
     if (re != 0) {
         char buf[1024] = {0};
         av_strerror(re, buf, sizeof(buf));
@@ -36,11 +36,11 @@ bool FFDemux::open(const char *url) {
 //读取一帧数据，数据由调用者清理
 XData FFDemux::read() {
 
-    if (!ic)
+    if (!formatContext)
         return XData();
     XData d;
     AVPacket *avPacket = av_packet_alloc();
-    int re = av_read_frame(ic, avPacket);
+    int re = av_read_frame(formatContext, avPacket);
     if (re != 0) {
         av_packet_free(&avPacket);
         return XData();
@@ -56,16 +56,31 @@ XData FFDemux::read() {
         av_packet_free(&avPacket);
         return XData();
     }
+    //转换pts
+    AVStream *pStream = formatContext->streams[avPacket->stream_index];
+    double ptsSeconds =
+            avPacket->pts * av_q2d(pStream->time_base) *
+            1000;
+    double dtsSeconds =
+            avPacket->dts * av_q2d(pStream->time_base) *
+            1000;
+    d.pts = (int) ptsSeconds;
+    AVRational frame_rate = av_guess_frame_rate(formatContext,
+                                                pStream,
+                                                NULL);
+    d.frame_rate = frame_rate;
+    d.time_base = pStream->time_base;
+
     return d;
 }
 
 XParameter FFDemux::getVideoParameter() {
-    if (!ic) {
+    if (!formatContext) {
         LOGE("get video param failed ic is null");
         return XParameter();
     }
     //获取视频流索引
-    int videoIndex = av_find_best_stream(ic, AVMEDIA_TYPE_VIDEO, -1, -1, 0, 0);
+    int videoIndex = av_find_best_stream(formatContext, AVMEDIA_TYPE_VIDEO, -1, -1, 0, 0);
     if (videoIndex < 0) {
         LOGE("av_find_best_stream video is empty");
         return XParameter();
@@ -73,18 +88,18 @@ XParameter FFDemux::getVideoParameter() {
     this->videoStreamIndex = videoIndex;
 
     XParameter para;
-    para.parameters = ic->streams[videoIndex]->codecpar;
-    LOGI("getVideoParameter success codec_id= %d",para.parameters->codec_id);
+    para.parameters = formatContext->streams[videoIndex]->codecpar;
+    LOGI("getVideoParameter success codec_id= %d", para.parameters->codec_id);
     return para;
 }
 
 XParameter FFDemux::getAudioParameter() {
-    if (!ic) {
+    if (!formatContext) {
         LOGE("get audio param failed ic is null");
         return XParameter();
     }
     //获取音频流索引
-    int audioIndex = av_find_best_stream(ic, AVMEDIA_TYPE_AUDIO, -1, -1, 0, 0);
+    int audioIndex = av_find_best_stream(formatContext, AVMEDIA_TYPE_AUDIO, -1, -1, 0, 0);
     if (audioIndex < 0) {
         LOGE("av_find_best_stream audio is empty");
         return XParameter();
@@ -93,7 +108,10 @@ XParameter FFDemux::getAudioParameter() {
     LOGI("getAudioParameter success");
 
     XParameter para;
-    para.parameters = ic->streams[audioIndex]->codecpar;
+    para.parameters = formatContext->streams[audioIndex]->codecpar;
+    para.channels = formatContext->streams[audioIndex]->codecpar->channels;
+    para.sampleRate = formatContext->streams[audioIndex]->codecpar->sample_rate;
+
     return para;
 }
 
@@ -113,7 +131,7 @@ FFDemux::FFDemux() {
 }
 
 FFDemux::~FFDemux() {
-    delete ic;
+    delete formatContext;
     LOGI("~FFDemux");
 }
 

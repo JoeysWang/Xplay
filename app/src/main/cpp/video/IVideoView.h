@@ -18,7 +18,7 @@ public:
 
     virtual void update(XData data);
 
-    virtual void setMatrix(float *matrix,int size){};
+    virtual void setMatrix(float *matrix, int size) {};
 
 };
 
