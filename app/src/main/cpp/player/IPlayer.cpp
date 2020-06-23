@@ -78,6 +78,7 @@ void IPlayer::start() {
     demux->start();
 
     mediaSync->setVideoDevice(videoView);
+    mediaSync->setAudioDevice(audioPlay);
     mediaSync->start(videoDecode,audioDecode);
 
 

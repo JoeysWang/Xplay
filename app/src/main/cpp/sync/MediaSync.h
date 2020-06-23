@@ -10,6 +10,7 @@
 #include "../decode/FFDecode.h"
 #include "MediaClock.h"
 #include "../player/PlayerState.h"
+#include "../audio/IAudioPlay.h"
 
 /**
  * 视频同步器
@@ -59,6 +60,8 @@ public:
 
     void update(XData data) override;
 
+    void setAudioDevice(IAudioPlay *audioDevice);
+
 private:
     void refreshVideo(double *remaining_time);
 
@@ -91,6 +94,7 @@ private:
     double frameTimer;                      // 视频时钟
 
     IVideoView *videoDevice;               // 视频输出设备
+    IAudioPlay *audioDevice;               // 音频输出设备
 
     AVFrame *pFrameARGB;
     uint8_t *mBuffer;

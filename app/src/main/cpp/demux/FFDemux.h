@@ -10,10 +10,13 @@ struct AVFormatContext;
 
 #include "../data/XData.h"
 #include "IDemux.h"
+#include <mutex>
 
 class FFDemux : public IDemux {
 public:
     bool open(const char *url) override;
+
+      void close();
 
     XData read() override;
 
@@ -27,8 +30,10 @@ public:
 
 private:
     AVFormatContext *formatContext = 0;
-    int audioStreamIndex =0;
-    int videoStreamIndex =0;
+    int audioStreamIndex = 0;
+    int videoStreamIndex = 0;
+
+    std::mutex mutex;
 
 };
 

@@ -76,9 +76,7 @@ protected:
 
     FrameQueue *frameQueue;
 
-    Queue<XData> *audioQueue;       // 数据包队列
-    Queue<XData> *videoQueue;       // 数据包队列
-//    PacketQueue *packetQueue;       // 数据包队列
+    Queue<XData> *packetQueue;       // 数据包队列
 };
 
 

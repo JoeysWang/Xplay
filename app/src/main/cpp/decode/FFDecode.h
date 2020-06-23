@@ -7,7 +7,7 @@
 
 
 #include "IDecode.h"
-
+#include <mutex>
 
 struct AVCodecContext;
 struct AVFrame;
@@ -28,8 +28,11 @@ public:
 
     void start() override;
 
+    void close();
 
 protected:
+
+    std::mutex mutex;
 
     AVCodecContext *codecContext = 0;
     AVFrame *avFrame = 0;

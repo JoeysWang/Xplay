@@ -43,21 +43,13 @@ FrameQueue *IDecode::getFrameQueue() const {
 }
 
 int IDecode::pushPacket(XData data) {
-    if (audioOrVideo == MEDIA_TYPE_AUDIO && audioQueue) {
-        return audioQueue->push(data);
-    } else if (audioOrVideo == MEDIA_TYPE_VIDEO && videoQueue) {
-        return videoQueue->push(data);
-    }
-    return 0;
+    return packetQueue->push(data);
+
 }
 
 Queue<XData> *IDecode::getPacketQueue() const {
-    if (audioOrVideo == MEDIA_TYPE_AUDIO) {
-        return audioQueue;
-    } else if (audioOrVideo == MEDIA_TYPE_VIDEO) {
-        return videoQueue;
-    } else
-        return 0;
+    return packetQueue;
+
 }
 
 int IDecode::getFrameSize() {

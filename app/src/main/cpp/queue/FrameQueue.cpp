@@ -55,7 +55,7 @@ XData *FrameQueue::lastFrame() {
 XData *FrameQueue::peekWritable() {
     std::unique_lock<std::mutex> lock(mMutex);
     if (size >= max_size && !abort_request) {
-        LOGE("frame queue 已满");
+//        LOGE("frame queue 已满");
         mNotFull.wait(lock);
     }
     if (abort_request) {
@@ -102,7 +102,7 @@ int FrameQueue::getFrameSize() {
 }
 
 void FrameQueue::unrefFrame(XData *vp) {
-    av_frame_unref((vp->frame));
+//    av_frame_unref((vp->frame));
     vp->size = 0;
     vp->resampleData = 0;
     vp->width = 0;

@@ -45,7 +45,7 @@ public:
                 return true;
             } else {
                 // wait的时候自动释放锁，如果wait到了会获取锁
-                LOGE("packet queue is full wait");
+//                LOGE("packet queue is full wait");
                 _fullQue.wait(lock);
             }
         }
@@ -91,7 +91,7 @@ public:
             } else if (_queue.empty() && _finished) {
                 return false;
             } else {
-                LOGE("packet queue is empty wait");
+//                LOGE("packet queue is empty wait");
                 _empty.wait(lock);
             }
         }

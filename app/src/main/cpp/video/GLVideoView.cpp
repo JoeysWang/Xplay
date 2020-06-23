@@ -22,10 +22,11 @@ void GLVideoView::render(XData data) {
         texture->init(view, data.width, data.height);
     }
 
-    if (!data.frame->data){
-
+    if (!data.frame||data.size == 0) {
+        return;
     }
     texture->draw(data.frame->data, data.linesize, data.height);
+//    av_frame_unref(data.frame);
     XEGL::get()->draw();
 }
 

@@ -10,6 +10,8 @@
 #include "../IObserver.h"
 #include "../data/XParameter.h"
 
+typedef void (*AudioPCMCallback) (void *userdata, uint8_t *stream, int len);
+
 class IAudioPlay : public IObserver {
 public:
     //缓冲满后会阻塞
@@ -29,6 +31,8 @@ protected:
     std::mutex framesMutex;
     std::condition_variable notEmpty;
     std::condition_variable notFull;
+    AudioPCMCallback callback;  // 音频回调
+
 };
 
 

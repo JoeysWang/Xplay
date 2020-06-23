@@ -15,8 +15,7 @@ extern "C" {
 
 FFDecode::FFDecode() {
     frameQueue = new FrameQueue(FRAME_QUEUE_SIZE, 1);
-    videoQueue = new Queue<XData>(100);
-    audioQueue = new Queue<XData>(100);
+    packetQueue = new Queue<XData>(100);
 }
 
 void FFDecode::start() {
@@ -28,10 +27,10 @@ void FFDecode::start() {
 
 FFDecode::~FFDecode() {
     mutex.lock();
-    if (audioQueue) {
-        audioQueue->quit();
-        delete audioQueue;
-        audioQueue = NULL;
+    if (packetQueue) {
+        packetQueue->quit();
+        delete packetQueue;
+        packetQueue = NULL;
     }
     if (frameQueue) {
         frameQueue->flush();
@@ -59,6 +58,7 @@ bool FFDecode::open(XParameter parameter, bool isHard) {
     LOGI("avcodec_find_decoder success %d! ", isHard);
 
     //2.创建解码器上下文
+    mutex.lock();
     codecContext = avcodec_alloc_context3(avCodec);
     avcodec_parameters_to_context(codecContext, parameters);
 
@@ -68,12 +68,14 @@ bool FFDecode::open(XParameter parameter, bool isHard) {
         char buf[1024] = {0};
         av_strerror(re, buf, sizeof(buf) - 1);
         LOGE("avcodec_open2 error %s ", buf);
+        mutex.unlock();
         return false;
     }
     if (codecContext->codec_type == AVMEDIA_TYPE_VIDEO)
         audioOrVideo = MEDIA_TYPE_VIDEO;
     else if (codecContext->codec_type == AVMEDIA_TYPE_AUDIO)
         audioOrVideo = MEDIA_TYPE_AUDIO;
+    mutex.unlock();
 
     return true;
 }
@@ -154,14 +156,15 @@ XData FFDecode::receiveFrame() {
 
             if (ret == AVERROR_EOF) {
                 LOGI("AVERROR AVERROR_EOF");
+                stop();
                 avcodec_flush_buffers(codecContext);
                 return XData();
             }
-            if (ret == AVERROR(EAGAIN)) {
-                LOGI("AVERROR，EAGAIN");
-                return XData();
-            }
-            if (ret >= 0) {
+//            if (ret == AVERROR(EAGAIN)) {
+//                LOGI("AVERROR，EAGAIN");
+//                continue;
+//            }
+            if (ret == 0) {
                 // 成功解码得到一个视频帧或一个音频帧，则返回
                 XData *d;
                 if (!(d = frameQueue->peekWritable())) {
@@ -202,55 +205,6 @@ XData FFDecode::receiveFrame() {
                 return *d;
             }
         } while (ret != AVERROR(EAGAIN));
-//        }
-//        //初始化pkt_serial
-//        do {
-//            LOGI("初始化pkt_serial");
-//            if (getPacketQueue()->length() == 0) {
-//                /// packet_queue为空则等待
-//                LOGI("  packet_queue为空则等待");
-//                std::unique_lock<std::mutex> lock(mutex);
-//                condition.wait(lock);
-//            }
-//
-////            if (d->packet_pending) {        // 有未处理的packet则先处理
-////                av_packet_move_ref(&pkt, &d->pkt);
-////                d->packet_pending = 0;
-////            } else {
-//            /// 1. 取出一个packet。使用pkt对应的serial赋值给d->pkt_serial
-//            LOGI(" 取出一个packet。使用pkt对应的serial赋值给d->pkt_serial");
-//            XData data;
-//            if (!getPacketQueue()->pop(data)) {
-//                return data;
-//            } else {
-//                packet = (AVPacket *) data.data;
-//                LOGI("getPacket success %ld", packet->duration);
-//                pkt_serial = packet->duration;
-//            }
-////            }
-//        } while (getPacketQueue()->serial != pkt_serial);
-
-        /// packet_queue中第一个总是flush_pkt。每次seek操作会插入flush_pkt，更新serial，开启新的播放序列
-//        if (packet->data == flush_pkt.data) {
-//            /// 复位解码器内部状态/刷新内部缓冲区。当seek操作或切换流时应调用此函数。
-//            //todo seek
-//            avcodec_flush_buffers(codecContext);
-////            d->finished = 0;
-////            next_pts = start_pts;
-////            next_pts_tb = start_pts_tb;
-//        } else {
-//            /// 2. 将packet发送给解码器
-//            ///    发送packet的顺序是按dts递增的顺序，如IPBBPBB
-//            ///    pkt.pos变量可以标识当前packet在视频文件中的地址偏移
-//            LOGI("将packet发送给解码器");
-//            if (avcodec_send_packet(codecContext,  packet) != 0) {
-//                LOGE("avcodec_send_packet error.\n");
-//                packet_pending = 1;
-////                av_packet_move_ref(&d->pkt, &pkt);
-//            } else
-//                LOGI("avcodec_send_packet success.\n");
-//        }
-
 
     }
 }
@@ -313,3 +267,8 @@ XData FFDecode::receiveFrame() {
 //
 //    return XData();
 //}
+void FFDecode::close() {
+    mutex.lock();
+
+    mutex.unlock();
+}

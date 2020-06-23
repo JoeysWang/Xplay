@@ -91,6 +91,11 @@ void MediaSync::setVideoDevice(IVideoView *device) {
     this->videoDevice = device;
 }
 
+void MediaSync::setAudioDevice(IAudioPlay *audioDevice) {
+    std::unique_lock<std::mutex> lock(mMutex);
+    MediaSync::audioDevice = audioDevice;
+}
+
 void MediaSync::setMaxDuration(double maxDuration) {
     this->maxFrameDuration = maxDuration;
 }
@@ -157,7 +162,11 @@ void MediaSync::Main() {
 
         // 是否立马刷新
 //        if (!playerState->pauseRequest || forceRefresh) {
-        refreshVideo(&remaining_time);
+
+
+        renderVideo();
+
+//        refreshVideo(&remaining_time);
 //        }
         if (remaining_time <= 0) {
             remaining_time = REFRESH_RATE;
@@ -328,10 +337,18 @@ void MediaSync::checkExternalClockSpeed() {
 void MediaSync::renderVideo() {
     std::unique_lock<std::mutex> lock(mMutex);
 
-    XData *vp = videoDecoder->getFrameQueue()->currentFrame();
-    LOGI("renderVideo %f",vp-> pts);
-    videoDevice->update(*vp);
 
+    XData *vp = videoDecoder->getFrameQueue()->currentFrame();
+    XData *ap = audioDecoder->getFrameQueue()->currentFrame();
+    if (vp->size > 0) {
+
+        videoDevice->update(*vp);
+        videoDecoder->getFrameQueue()->popFrame();
+    }
+    if (ap->size > 0) {
+        audioDevice->update(*ap);
+        audioDecoder->getFrameQueue()->popFrame();
+    }
 }
 
 //void MediaSync::renderVideo() {
