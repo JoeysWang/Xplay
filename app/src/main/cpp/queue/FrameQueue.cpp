@@ -1,56 +1,55 @@
-//
-// Created by cain on 2018/12/21.
-//
 
 #include "FrameQueue.h"
 
-FrameQueue::FrameQueue(int max_size, int keep_last) : Queue<XData>(max_size) {
-
-//    memset(queue, 0, sizeof(Frame) * FRAME_QUEUE_SIZE);
-//    this->max_size = FFMIN(max_size, FRAME_QUEUE_SIZE);
-//    this->keep_last = (keep_last != 0);
-//    for (int i = 0; i < this->max_size; ++i) {
-//        queue[i].frame = av_frame_alloc();
-//    }
-//    abort_request = 1;
-//    rindex = 0;
-//    windex = 0;
-//    size = 0;
-//    show_index = 0;
+FrameQueue::FrameQueue(int max_size, int keep_last) {
+    memset(queue, 0, sizeof(Frame) * FRAME_QUEUE_SIZE);
+    this->max_size = FFMIN(max_size, FRAME_QUEUE_SIZE);
+    this->keep_last = (keep_last != 0);
+    for (int i = 0; i < this->max_size; ++i) {
+        queue[i].frame = av_frame_alloc();
+    }
+    abort_request = 1;
+    rindex = 0;
+    windex = 0;
+    size = 0;
+    show_index = 0;
 }
 
+FrameQueue::~FrameQueue() {
+    for (int i = 0; i < max_size; ++i) {
+        Frame *vp = &queue[i];
+        unrefFrame(vp);
+        av_frame_free(&vp->frame);
+    }
+}
 
 void FrameQueue::start() {
-//    mMutex.lock();
-//    abort_request = 0;
-//    mCondition.notify_all();
-//    mMutex.unlock();
+    mMutex.lock();
+    abort_request = 0;
+    mCondition.notify_all();
+    mMutex.unlock();
 }
 
 void FrameQueue::abort() {
-    quit();
-//    mMutex.lock();
-//    abort_request = 1;
-//    mCondition.notify_all();
-//    mMutex.unlock();
+    mMutex.lock();
+    abort_request = 1;
+    mCondition.notify_all();
+    mMutex.unlock();
 }
 
-XData *FrameQueue::currentFrame() {
-    XData *data;
-    peek(*data);
-    return data;
-//    return &queue[(rindex + show_index) % max_size];
+Frame *FrameQueue::currentFrame() {
+    return &queue[(rindex + show_index) % max_size];
 }
 
-XData *FrameQueue::nextFrame() {
+Frame *FrameQueue::nextFrame() {
     return &queue[(rindex + show_index + 1) % max_size];
 }
 
-XData *FrameQueue::lastFrame() {
+Frame *FrameQueue::lastFrame() {
     return &queue[rindex];
 }
 
-XData *FrameQueue::peekWritable() {
+Frame *FrameQueue::peekWritable() {
     std::unique_lock<std::mutex> lock(mMutex);
     lock.lock();
 

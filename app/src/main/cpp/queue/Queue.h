@@ -51,18 +51,27 @@ public:
         return false;
     }
 
-    bool peek(T &data){
+    T *peek() {
         std::unique_lock<std::mutex> lock(_mutex);
         while (!_quit) {
             if (!_queue.empty()) {
-                //data = std::move(_queue.front());
-                data = _queue.front();
-                _fullQue.notify_all();
-                return true;
+                return &_queue.front();
             } else if (_queue.empty() && _finished) {
-                return false;
+                return nullptr;
             } else {
-                _empty.wait(lock);
+                return nullptr;
+            }
+        }
+    }
+  T *last() {
+        std::unique_lock<std::mutex> lock(_mutex);
+        while (!_quit) {
+            if (!_queue.empty()) {
+                return &_queue.back();
+            } else if (_queue.empty() && _finished) {
+                return nullptr;
+            } else {
+                return nullptr;
             }
         }
     }
@@ -91,7 +100,8 @@ public:
         _finished = true;
         _empty.notify_all();
     }
-    bool  isFinish(){
+
+    bool isFinish() {
         return _finished;
     }
 
