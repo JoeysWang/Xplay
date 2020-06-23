@@ -13,7 +13,7 @@ void GLVideoView::setRender(void *view) {
 
 void GLVideoView::render(XData data) {
 
-    if (!view){
+    if (!view) {
         LOGE("GLVideoView::render view = null");
         return;
     }
@@ -21,7 +21,11 @@ void GLVideoView::render(XData data) {
         texture = XTexture::create();
         texture->init(view, data.width, data.height);
     }
-    texture->draw(data.frameDatas, data.linesize, data.height);
+
+    if (!data.frame->data){
+
+    }
+    texture->draw(data.frame->data, data.linesize, data.height);
     XEGL::get()->draw();
 }
 

@@ -14,34 +14,9 @@ void IDecode::Main() {
             while (!isExit) {
                 //从解码器接收解码后的frame，此frame作为函数的输出参数供上级函数处理
                 XData frame = receiveFrame();
-                if (!frame.data)
+                if (!frame.resampleData)
                     break;
-                //此时的data是avFrame
 
-                XData *vp;
-                if (!(vp = frameQueue->peekWritable())) {
-                    LOGE("取出frame queue失败");
-                    break;
-                }
-                vp->width = frame.width;
-                vp->height = frame.height;
-                vp->duration = frame.duration;
-
-                memcpy(vp->frameDatas, frame.frameDatas, sizeof(frame.frameDatas));
-                frameQueue->pushFrame();
-                const char *type =
-                        (audioOrVideo == MEDIA_TYPE_VIDEO) ? "video" : "audio";
-
-                LOGE("取出%s frame queue成功 ,当前队列有%d个 rindex=%d,windex=%d",
-                     type,
-                     frameQueue->getFrameSize(),
-                     frameQueue->rindex,
-                     frameQueue->windex
-                );
-
-
-                videoPts = frame.pts;
-                //在这里做音视频同步 ,把同步好的frame 发给下游的GLVideo SLAudio
                 notify(frame);
             }
         }

@@ -5,9 +5,9 @@
 #ifndef XPLAY_XDATA_H
 #define XPLAY_XDATA_H
 
-extern "C"{
-
+extern "C" {
 #include "libavutil/rational.h"
+#include "libavformat/avformat.h"
 };
 struct AVPacket;
 enum XDataType {
@@ -18,9 +18,13 @@ enum XDataType {
 
 struct XData {
 
-    unsigned char *data = 0;
+    unsigned char *resampleData = 0;
     //解码后的数据 avFrame
-    unsigned char *frameDatas[8] = {0};
+//    unsigned char *frameDatas[8] = {0};
+
+    AVFrame *frame = 0;
+    AVPacket *packet = 0;
+
 
     int size = 0;
 

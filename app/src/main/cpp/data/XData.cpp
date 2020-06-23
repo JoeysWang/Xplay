@@ -9,12 +9,12 @@ extern "C" {
 #include "XData.h"
 
 void XData::drop() {
-    if (!data)return;
+    if (!resampleData)return;
     if (allocType == AVPACKET_TYPE) {
-        av_packet_free((AVPacket **) &data);
+        av_packet_free((AVPacket **) &resampleData);
     } else
-        delete data;
-    data = 0;
+        delete resampleData;
+    resampleData = 0;
     size = 0;
 }
 
@@ -23,10 +23,10 @@ bool XData::alloc(int size, const char *data) {
     allocType = UCHAR_TYPE;
     if (size <= 0) { return false; }
 
-    this->data = new unsigned char[size];
-    if (!this->data) { return false; }
+    this->resampleData = new unsigned char[size];
+    if (!this->resampleData) { return false; }
     if (data) {
-        memcpy(this->data, data, size);
+        memcpy(this->resampleData, data, size);
     }
     this->size = size;
     return true;

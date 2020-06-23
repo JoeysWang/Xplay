@@ -82,14 +82,14 @@ bool FFDecode::sendPacket(XData pkt) {
     if (!codecContext) {
         return false;
     }
-    if (!pkt.data) {
+    if (!pkt.packet) {
         return false;
     }
     codecContext->thread_count = 8;
-    int re = avcodec_send_packet(codecContext, (AVPacket *) pkt.data);
+    int re = avcodec_send_packet(codecContext, pkt.packet);
     if (re != 0) {
         LOGE("avcodec_send_packet failed ");
-        av_packet_unref((AVPacket *) pkt.data);
+        av_packet_unref(pkt.packet);
         return false;
     }
 
@@ -100,7 +100,6 @@ XData FFDecode::receiveFrame() {
     if (!codecContext) {
         return XData();
     }
-    XData *vp;
     int ret = AVERROR(EAGAIN);
     for (;;) {
         if (!avFrame) {
@@ -154,38 +153,53 @@ XData FFDecode::receiveFrame() {
             }
 
             if (ret == AVERROR_EOF) {
+                LOGI("AVERROR AVERROR_EOF");
                 avcodec_flush_buffers(codecContext);
                 return XData();
             }
             if (ret == AVERROR(EAGAIN)) {
+                LOGI("AVERROR，EAGAIN");
                 return XData();
             }
             if (ret >= 0) {
-//                LOGI("成功解码得到一个视频帧或一个音频帧，则返回 %d", audioOrVideo);
                 // 成功解码得到一个视频帧或一个音频帧，则返回
-                XData d;
-                d.data = (unsigned char *) (avFrame);
+                XData *d;
+                if (!(d = frameQueue->peekWritable())) {
+                    LOGE("取出frame queue失败");
+                    break;
+                }
+                d->frame = avFrame;
                 if (codecContext->codec_type == AVMEDIA_TYPE_VIDEO) {
-                    d.size = (avFrame->linesize[0] +
-                              avFrame->linesize[1] +
-                              avFrame->linesize[2]) * avFrame->height;
-                    d.width = avFrame->width;
-                    d.height = avFrame->height;
-                    d.linesize[0] = avFrame->linesize[0];
-                    d.linesize[1] = avFrame->linesize[1];
-                    d.linesize[2] = avFrame->linesize[2];
+                    d->size = (avFrame->linesize[0] +
+                               avFrame->linesize[1] +
+                               avFrame->linesize[2]) * avFrame->height;
+                    d->width = avFrame->width;
+                    d->height = avFrame->height;
+                    d->linesize[0] = avFrame->linesize[0];
+                    d->linesize[1] = avFrame->linesize[1];
+                    d->linesize[2] = avFrame->linesize[2];
                 } else if (codecContext->codec_type == AVMEDIA_TYPE_AUDIO) {
                     //样本大小 * 单通道样本数 * 通道数
-                    d.size = av_get_bytes_per_sample(
+                    d->size = av_get_bytes_per_sample(
                             static_cast<AVSampleFormat>(avFrame->format))
-                             * avFrame->nb_samples
-                             * 2;
+                              * avFrame->nb_samples
+                              * 2;
                 }
-                d.format = avFrame->format;
-                d.pts = avFrame->best_effort_timestamp;
-                memcpy(d.frameDatas, avFrame->data, sizeof(avFrame->data));
-                av_frame_unref(avFrame);
-                return d;
+                d->format = avFrame->format;
+                d->pts = avFrame->pts;
+//                memcpy(d->frameDatas, avFrame->data, sizeof(avFrame->data));
+                frameQueue->pushFrame();
+//                const char *type =
+//                        (audioOrVideo == MEDIA_TYPE_VIDEO) ? "video" : "audio";
+//                LOGE("取出%s frame queue成功handle=%d ,当前队列有%d个 rindex=%d,windex=%d",
+//                     type,
+//                     d,
+//                     frameQueue->size,
+//                     frameQueue->rindex,
+//                     frameQueue->windex
+//                );
+//                av_frame_unref(avFrame);
+                return *d;
             }
         } while (ret != AVERROR(EAGAIN));
 //        }

@@ -36,13 +36,13 @@ XData FFResample::resample(XData in) {
     //输出空间分配
     XData out;
 
-    auto *frame = (AVFrame *) in.data;
+    auto *frame =  in.frame;
     //通道数 * 单通道样本数 * 样本字节大小
 
     if (!swrContext)
         return XData();
 
-    if (in.size <= 0 || !in.data) {
+    if (in.size <= 0 || !in.resampleData) {
         return XData();
     }
     int size =
@@ -53,7 +53,7 @@ XData FFResample::resample(XData in) {
     }
     out.alloc(size);
     uint8_t *outArr[2] = {0};
-    outArr[0] = out.data;
+    outArr[0] = out.resampleData;
     int len = swr_convert(swrContext,
                           outArr,
                           frame->nb_samples,

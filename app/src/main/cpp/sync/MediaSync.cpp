@@ -157,7 +157,7 @@ void MediaSync::Main() {
 
         // 是否立马刷新
 //        if (!playerState->pauseRequest || forceRefresh) {
-//        refreshVideo(&remaining_time);
+        refreshVideo(&remaining_time);
 //        }
         if (remaining_time <= 0) {
             remaining_time = REFRESH_RATE;
@@ -192,6 +192,7 @@ void MediaSync::refreshVideo(double *remaining_time) {
             lastFrame = videoDecoder->getFrameQueue()->lastFrame();
             // 当前帧
             currentFrame = videoDecoder->getFrameQueue()->currentFrame();
+            LOGD("lastFrame =%f currentFrame=%f", lastFrame->pts, currentFrame->pts);
             // 判断是否需要强制更新帧的时间
             if (frameTimerRefresh) {
                 LOGI("判断是否需要强制更新帧的时间 true");
@@ -221,12 +222,15 @@ void MediaSync::refreshVideo(double *remaining_time) {
             }
             // 获取当前时间
             time = av_gettime_relative() / 1000000.0;
-            LOGI("  获取当前时间，计算延时 %f", time);
+            LOGI("获取当前时间 time= %f delay=%f", time, delay);
             if (isnan(frameTimer) || time < frameTimer) {
                 frameTimer = time;
             }
+            LOGI("frameTimer = %f", frameTimer);
             // 如果当前时间小于帧计时器的时间 + 延时时间，则表示还没到当前帧
             if (time < frameTimer + delay) {
+                LOGI("  如果当前时间小于帧计时器的时间 + 延时时间，则表示还没到当前帧 time=%f frameTimer=%f delay=%d ",
+                     time, frameTimer, delay);
                 *remaining_time = FFMIN(frameTimer + delay - time, *remaining_time);
                 break;
             }
@@ -254,12 +258,14 @@ void MediaSync::refreshVideo(double *remaining_time) {
                 if ((time > frameTimer + duration)
                     && (playerState->frameDrop > 0
                         || (playerState->frameDrop && playerState->syncType != AV_SYNC_VIDEO))) {
+                    LOGI("如果不处于同步到视频状态，并且处于跳帧状态，则跳过当前帧");
                     videoDecoder->getFrameQueue()->popFrame();
                     continue;
                 }
             }
 
             // 下一帧
+            LOGI("下一帧");
             videoDecoder->getFrameQueue()->popFrame();
             forceRefresh = 1;
         }
@@ -320,7 +326,12 @@ void MediaSync::checkExternalClockSpeed() {
 
 
 void MediaSync::renderVideo() {
-    LOGI("renderVideo");
+    std::unique_lock<std::mutex> lock(mMutex);
+
+    XData *vp = videoDecoder->getFrameQueue()->currentFrame();
+    LOGI("renderVideo %f",vp-> pts);
+    videoDevice->update(*vp);
+
 }
 
 //void MediaSync::renderVideo() {
@@ -475,7 +486,7 @@ double MediaSync::calculateDelay(double delay) {
 }
 
 double MediaSync::calculateDuration(XData *vp, XData *nextvp) {
-    double duration = nextvp->pts - vp->pts;
+    double duration = nextvp->frame->pts - vp->frame->pts;
     if (isnan(duration) || duration <= 0 || duration > maxFrameDuration) {
         return vp->duration;
     } else {

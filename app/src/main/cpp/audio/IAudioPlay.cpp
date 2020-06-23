@@ -10,6 +10,7 @@ XData IAudioPlay::getData() {
     while (!isExit) {
         std::unique_lock<std::mutex> lock(framesMutex);
         if (frames.empty()) {
+            LOGE("IAudioPlay empty wait");
             notEmpty.wait(lock);
         }
         d = frames.front();
@@ -24,12 +25,13 @@ XData IAudioPlay::getData() {
 
 void IAudioPlay::update(XData data) {
     //压入缓冲队列
-    if (!data.data || data.size <= 0)
+    if (!data.resampleData || data.size <= 0)
         return;
     while (!isExit) {
         std::unique_lock<std::mutex> lock(framesMutex);
 
         if (frames.size() > maxFrameBuffer) {
+            LOGE("IAudioPlay full wait");
             notFull.wait(lock);
         }
         frames.push_back(data);

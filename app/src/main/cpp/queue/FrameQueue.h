@@ -59,7 +59,6 @@ private:
 public:
     std::mutex mMutex;
     std::condition_variable mNotFull;
-    std::condition_variable mNotEmpty;
     int abort_request;
     XData queue[FRAME_QUEUE_SIZE];
     int rindex;

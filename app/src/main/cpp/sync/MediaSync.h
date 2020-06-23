@@ -68,7 +68,7 @@ private:
 
     double calculateDuration(XData *vp, XData *nextvp);
 
-    void renderVideo();
+    void renderVideo( );
 
 private:
     PlayerState *playerState;               // 播放器状态

@@ -35,17 +35,18 @@ bool FFDemux::open(const char *url) {
 
 //读取一帧数据，数据由调用者清理
 XData FFDemux::read() {
-
+//    LOGD("FFDemux::read");
     if (!formatContext)
         return XData();
     XData d;
     AVPacket *avPacket = av_packet_alloc();
     int re = av_read_frame(formatContext, avPacket);
     if (re != 0) {
+        LOGE("av_read_frame error %s",av_err2str(re));
         av_packet_free(&avPacket);
         return XData();
     }
-    d.data = (unsigned char *) (avPacket);
+    d.packet =  avPacket ;
     d.size = avPacket->size;
 
     if (avPacket->stream_index == audioStreamIndex)

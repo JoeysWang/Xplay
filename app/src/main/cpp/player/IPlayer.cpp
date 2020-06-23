@@ -76,7 +76,10 @@ void IPlayer::start() {
     videoDecode->start();
     resample->start();
     demux->start();
+
+    mediaSync->setVideoDevice(videoView);
     mediaSync->start(videoDecode,audioDecode);
+
 
     XThread::start();
     mutex.unlock();

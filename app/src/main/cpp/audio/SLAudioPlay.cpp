@@ -54,7 +54,7 @@ void SLAudioPlay::playCall(void *bufferQueue) {
         return;
     }
 
-    memcpy(buffer, data.data, data.size);
+    memcpy(buffer, data.resampleData, data.size);
 
     (*bf)->Enqueue(bf, buffer, data.size);
     data.drop();

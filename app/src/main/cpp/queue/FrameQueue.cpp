@@ -7,7 +7,7 @@ FrameQueue::FrameQueue(int max_size, int keep_last) {
     this->max_size = FFMIN(max_size, FRAME_QUEUE_SIZE);
     this->keep_last = (keep_last != 0);
     for (int i = 0; i < this->max_size; ++i) {
-        queue[i].data = (unsigned char *) av_frame_alloc();
+        queue[i].frame = av_frame_alloc();
     }
     abort_request = 1;
     rindex = 0;
@@ -20,7 +20,7 @@ FrameQueue::~FrameQueue() {
     for (int i = 0; i < max_size; ++i) {
         XData *vp = &queue[i];
         unrefFrame(vp);
-        av_frame_free((AVFrame **) (&vp->frameDatas));
+        av_frame_free((&vp->frame));
     }
 }
 
@@ -39,7 +39,9 @@ void FrameQueue::abort() {
 }
 
 XData *FrameQueue::currentFrame() {
-    return &queue[(rindex + show_index) % max_size];
+    std::unique_lock<std::mutex> lock(mMutex);
+    int index = (rindex + show_index) % max_size;
+    return &queue[index];
 }
 
 XData *FrameQueue::nextFrame() {
@@ -83,7 +85,8 @@ void FrameQueue::popFrame() {
         rindex = 0;
     }
     mMutex.lock();
-    size--;
+    if (size > 0)
+        size--;
     mNotFull.notify_all();
     mMutex.unlock();
 }
@@ -99,8 +102,12 @@ int FrameQueue::getFrameSize() {
 }
 
 void FrameQueue::unrefFrame(XData *vp) {
-    av_frame_unref((AVFrame *) (&vp->frameDatas));
-//    avsubtitle_free(&vp->sub); 字幕还不支持吧
+    av_frame_unref((vp->frame));
+    vp->size = 0;
+    vp->resampleData = 0;
+    vp->width = 0;
+    vp->height = 0;
+    vp->format = 0;
 }
 
 int FrameQueue::getShowIndex() const {
