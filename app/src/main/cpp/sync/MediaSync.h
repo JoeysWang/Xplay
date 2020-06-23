@@ -14,7 +14,7 @@
 /**
  * 视频同步器
  */
-class MediaSync : public XThread {
+class MediaSync : public IObserver {
 
 public:
     MediaSync(PlayerState *playerState);
@@ -57,6 +57,8 @@ public:
 
     void Main() override;
 
+    void update(XData data) override;
+
 private:
     void refreshVideo(double *remaining_time);
 
@@ -64,7 +66,7 @@ private:
 
     double calculateDelay(double delay);
 
-    double calculateDuration(Frame *vp, Frame *nextvp);
+    double calculateDuration(XData *vp, XData *nextvp);
 
     void renderVideo();
 

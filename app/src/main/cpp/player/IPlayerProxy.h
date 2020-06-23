@@ -7,7 +7,7 @@
 
 
 #include <mutex>
-#include "../player/IPlayer.h"
+#include "IPlayer.h"
 
 class IPlayerProxy : public IPlayer {
 

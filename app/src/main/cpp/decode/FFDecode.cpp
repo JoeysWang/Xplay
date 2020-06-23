@@ -14,7 +14,7 @@ extern "C" {
 }
 
 FFDecode::FFDecode() {
-    frameQueue = new FrameQueue(3, 1);
+    frameQueue = new FrameQueue(FRAME_QUEUE_SIZE, 1);
     videoQueue = new Queue<XData>(100);
     audioQueue = new Queue<XData>(100);
 }
@@ -100,6 +100,7 @@ XData FFDecode::receiveFrame() {
     if (!codecContext) {
         return XData();
     }
+    XData *vp;
     int ret = AVERROR(EAGAIN);
     for (;;) {
         if (!avFrame) {
@@ -182,7 +183,8 @@ XData FFDecode::receiveFrame() {
                 }
                 d.format = avFrame->format;
                 d.pts = avFrame->best_effort_timestamp;
-                memcpy(d.datas, avFrame->data, sizeof(avFrame->data));
+                memcpy(d.frameDatas, avFrame->data, sizeof(avFrame->data));
+                av_frame_unref(avFrame);
                 return d;
             }
         } while (ret != AVERROR(EAGAIN));

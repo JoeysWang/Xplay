@@ -58,8 +58,8 @@ void PlayerState::reset() {
         url = NULL;
     }
     offset = 0;
-    abortRequest = 1;
-    pauseRequest = 1;
+//    abortRequest = 1;
+//    pauseRequest = 1;
     seekByBytes = 0;
     syncType = AV_SYNC_AUDIO;
     startTime = AV_NOPTS_VALUE;

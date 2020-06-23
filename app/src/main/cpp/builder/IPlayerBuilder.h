@@ -6,12 +6,12 @@
 #define XPLAY_IPLAYERBUILDER_H
 
 
-#include "demux/IDemux.h"
-#include "decode/IDecode.h"
-#include "resample/IResample.h"
-#include "video/IVideoView.h"
-#include "audio/IAudioPlay.h"
-#include "player/IPlayer.h"
+#include "../demux/IDemux.h"
+#include "../decode/IDecode.h"
+#include "../resample/IResample.h"
+#include "../video/IVideoView.h"
+#include "../audio/IAudioPlay.h"
+#include "../player/IPlayer.h"
 
 class IPlayerBuilder {
 public:

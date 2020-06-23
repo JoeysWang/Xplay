@@ -5,6 +5,7 @@
 
 #include <mutex>
 #include <condition_variable>
+#include "../data/XData.h"
 
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -12,16 +13,16 @@ extern "C" {
 
 #define FRAME_QUEUE_SIZE 10
 
-typedef struct Frame {
-    AVFrame *frame;
-    AVSubtitle sub;
-    double pts;           /* presentation timestamp for the frame */
-    double duration;      /* estimated duration of the frame */
-    int width;
-    int height;
-    int format;
-    int uploaded;
-} Frame;
+//typedef struct Frame {
+//    AVFrame *frame;
+//    AVSubtitle sub;
+//    double pts;           /* presentation timestamp for the frame */
+//    double duration;      /* estimated duration of the frame */
+//    int width;
+//    int height;
+//    int format;
+//    int uploaded;
+//} Frame;
 
 class FrameQueue {
 
@@ -34,13 +35,13 @@ public:
 
     void abort();
 
-    Frame *currentFrame();
+    XData *currentFrame();
 
-    Frame *nextFrame();
+    XData *nextFrame();
 
-    Frame *lastFrame();
+    XData *lastFrame();
 
-    Frame *peekWritable();
+    XData *peekWritable();
 
     void pushFrame();
 
@@ -53,13 +54,14 @@ public:
     int getShowIndex() const;
 
 private:
-    void unrefFrame(Frame *vp);
+    void unrefFrame(XData *vp);
 
-private:
+public:
     std::mutex mMutex;
-    std::condition_variable mCondition;
+    std::condition_variable mNotFull;
+    std::condition_variable mNotEmpty;
     int abort_request;
-    Frame queue[FRAME_QUEUE_SIZE];
+    XData queue[FRAME_QUEUE_SIZE];
     int rindex;
     int windex;
     int size;

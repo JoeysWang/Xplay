@@ -1,12 +1,13 @@
 
 #include "FrameQueue.h"
+#include "../XLog.h"
 
 FrameQueue::FrameQueue(int max_size, int keep_last) {
-    memset(queue, 0, sizeof(Frame) * FRAME_QUEUE_SIZE);
+    memset(queue, 0, sizeof(XData) * FRAME_QUEUE_SIZE);
     this->max_size = FFMIN(max_size, FRAME_QUEUE_SIZE);
     this->keep_last = (keep_last != 0);
     for (int i = 0; i < this->max_size; ++i) {
-        queue[i].frame = av_frame_alloc();
+        queue[i].data = (unsigned char *) av_frame_alloc();
     }
     abort_request = 1;
     rindex = 0;
@@ -17,47 +18,44 @@ FrameQueue::FrameQueue(int max_size, int keep_last) {
 
 FrameQueue::~FrameQueue() {
     for (int i = 0; i < max_size; ++i) {
-        Frame *vp = &queue[i];
+        XData *vp = &queue[i];
         unrefFrame(vp);
-        av_frame_free(&vp->frame);
+        av_frame_free((AVFrame **) (&vp->frameDatas));
     }
 }
 
 void FrameQueue::start() {
     mMutex.lock();
     abort_request = 0;
-    mCondition.notify_all();
+    mNotFull.notify_all();
     mMutex.unlock();
 }
 
 void FrameQueue::abort() {
     mMutex.lock();
     abort_request = 1;
-    mCondition.notify_all();
+    mNotFull.notify_all();
     mMutex.unlock();
 }
 
-Frame *FrameQueue::currentFrame() {
+XData *FrameQueue::currentFrame() {
     return &queue[(rindex + show_index) % max_size];
 }
 
-Frame *FrameQueue::nextFrame() {
+XData *FrameQueue::nextFrame() {
     return &queue[(rindex + show_index + 1) % max_size];
 }
 
-Frame *FrameQueue::lastFrame() {
+XData *FrameQueue::lastFrame() {
     return &queue[rindex];
 }
 
-Frame *FrameQueue::peekWritable() {
+XData *FrameQueue::peekWritable() {
     std::unique_lock<std::mutex> lock(mMutex);
-    lock.lock();
-
-    while (size >= max_size && !abort_request) {
-        mCondition.wait(lock);
+    if (size >= max_size && !abort_request) {
+        LOGE("frame queue 已满");
+        mNotFull.wait(lock);
     }
-    lock.unlock();
-
     if (abort_request) {
         return NULL;
     }
@@ -71,7 +69,7 @@ void FrameQueue::pushFrame() {
     }
     mMutex.lock();
     size++;
-    mCondition.notify_all();
+    mNotFull.notify_all();
     mMutex.unlock();
 }
 
@@ -86,7 +84,7 @@ void FrameQueue::popFrame() {
     }
     mMutex.lock();
     size--;
-    mCondition.notify_all();
+    mNotFull.notify_all();
     mMutex.unlock();
 }
 
@@ -100,9 +98,9 @@ int FrameQueue::getFrameSize() {
     return size - show_index;
 }
 
-void FrameQueue::unrefFrame(Frame *vp) {
-    av_frame_unref(vp->frame);
-    avsubtitle_free(&vp->sub);
+void FrameQueue::unrefFrame(XData *vp) {
+    av_frame_unref((AVFrame *) (&vp->frameDatas));
+//    avsubtitle_free(&vp->sub); 字幕还不支持吧
 }
 
 int FrameQueue::getShowIndex() const {

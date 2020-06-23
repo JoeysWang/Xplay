@@ -9,7 +9,6 @@ void IDecode::Main() {
     while (!isExit) {
         XData data;
         if (getPacketQueue()->pop(data)) {
-            LOGD("取得一个数据包ok！ ");
         }
         if (sendPacket(data)) {
             while (!isExit) {
@@ -19,8 +18,30 @@ void IDecode::Main() {
                     break;
                 //此时的data是avFrame
 
+                XData *vp;
+                if (!(vp = frameQueue->peekWritable())) {
+                    LOGE("取出frame queue失败");
+                    break;
+                }
+                vp->width = frame.width;
+                vp->height = frame.height;
+                vp->duration = frame.duration;
+
+                memcpy(vp->frameDatas, frame.frameDatas, sizeof(frame.frameDatas));
+                frameQueue->pushFrame();
+                const char *type =
+                        (audioOrVideo == MEDIA_TYPE_VIDEO) ? "video" : "audio";
+
+                LOGE("取出%s frame queue成功 ,当前队列有%d个 rindex=%d,windex=%d",
+                     type,
+                     frameQueue->getFrameSize(),
+                     frameQueue->rindex,
+                     frameQueue->windex
+                );
+
+
                 videoPts = frame.pts;
-                //在这里做音视频同步
+                //在这里做音视频同步 ,把同步好的frame 发给下游的GLVideo SLAudio
                 notify(frame);
             }
         }
@@ -35,7 +56,6 @@ void IDecode::update(XData data) {
     while (!isExit) {
         if (getPacketQueue()->length() < maxList) {
             //生产者，把数据压入list
-            LOGI("IDecode pushPacket");
             pushPacket(data);
             condition.notify_all();
             break;

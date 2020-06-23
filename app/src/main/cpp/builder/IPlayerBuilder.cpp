@@ -3,11 +3,11 @@
 //
 
 #include "IPlayerBuilder.h"
-#include "demux/FFDemux.h"
-#include "decode/FFDecode.h"
-#include "resample/FFResample.h"
-#include "audio/SLAudioPlay.h"
-#include "video/GLVideoView.h"
+#include "../demux/FFDemux.h"
+#include "../decode/FFDecode.h"
+#include "../resample/FFResample.h"
+#include "../audio/SLAudioPlay.h"
+#include "../video/GLVideoView.h"
 
 IPlayer *IPlayerBuilder::buildPlayer() {
 
@@ -24,11 +24,14 @@ IPlayer *IPlayerBuilder::buildPlayer() {
     IResample *resample = createResample();
     audioDecode->addObserver(resample);
     IAudioPlay *audioPlay = createAudioPlay();
-    resample->addObserver(audioPlay);
+    //mediaSync自己去取数据帧
+//    resample->addObserver(audioPlay);
 
     //视频链路
     IVideoView *videoView = new GLVideoView();
-    videoDecode->addObserver(videoView);
+    //mediaSync自己去取数据帧
+//    videoDecode->addObserver(videoView);
+
 
     iplayer->demux = demux;
     iplayer->audioPlay = audioPlay;
@@ -37,5 +40,4 @@ IPlayer *IPlayerBuilder::buildPlayer() {
     iplayer->resample = resample;
     iplayer->videoView = videoView;
     return iplayer;
-
 }

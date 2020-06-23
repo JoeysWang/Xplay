@@ -53,7 +53,7 @@ XData FFResample::resample(XData in) {
     }
     out.alloc(size);
     uint8_t *outArr[2] = {0};
-    outArr[0]=out.data;
+    outArr[0] = out.data;
     int len = swr_convert(swrContext,
                           outArr,
                           frame->nb_samples,
@@ -61,9 +61,9 @@ XData FFResample::resample(XData in) {
                           frame->nb_samples
     );
 
-    if (len<=0) {
+    if (len <= 0) {
         out.drop();
-        LOGE("音频重采样 swr_convert 失败  " );
+        LOGE("音频重采样 swr_convert 失败  ");
         return XData();
     }
 

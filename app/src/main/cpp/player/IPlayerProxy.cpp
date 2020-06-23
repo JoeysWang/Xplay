@@ -3,7 +3,7 @@
 //
 
 #include "IPlayerProxy.h"
-#include "../FFPlayerBuilder.h"
+#include "../builder/FFPlayerBuilder.h"
 
 void IPlayerProxy::init() {
     if (player == nullptr) {

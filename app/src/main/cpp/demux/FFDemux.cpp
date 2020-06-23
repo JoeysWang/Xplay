@@ -70,7 +70,7 @@ XData FFDemux::read() {
                                                 NULL);
     d.frame_rate = frame_rate;
     d.time_base = pStream->time_base;
-    LOGI("FFDemux::read success");
+//    LOGI("FFDemux::read success");
     return d;
 }
 

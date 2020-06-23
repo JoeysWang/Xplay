@@ -21,7 +21,7 @@ void GLVideoView::render(XData data) {
         texture = XTexture::create();
         texture->init(view, data.width, data.height);
     }
-    texture->draw(data.datas, data.linesize, data.height);
+    texture->draw(data.frameDatas, data.linesize, data.height);
     XEGL::get()->draw();
 }
 

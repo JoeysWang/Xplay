@@ -110,8 +110,8 @@ public:
     const char *audioCodecName;     // 指定音频解码器名称
     const char *videoCodecName;     // 指定视频解码器名称
 
-    int abortRequest;               // 退出标志
-    int pauseRequest;               // 暂停标志
+    int abortRequest=0;               // 退出标志
+    int pauseRequest=0;               // 暂停标志
     SyncType syncType;              // 同步类型
     int64_t startTime;              // 播放起始位置
     int64_t duration;               // 播放时长

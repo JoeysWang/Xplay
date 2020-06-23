@@ -19,8 +19,8 @@ enum XDataType {
 struct XData {
 
     unsigned char *data = 0;
-    //解码后的数据
-    unsigned char *datas[8] = {0};
+    //解码后的数据 avFrame
+    unsigned char *frameDatas[8] = {0};
 
     int size = 0;
 

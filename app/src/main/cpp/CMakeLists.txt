@@ -35,15 +35,15 @@ add_library(
 
         player/IPlayer.cpp
         player/PlayerState.cpp
-        IPlayerBuilder.cpp
-        FFPlayerBuilder.cpp
+        builder/IPlayerBuilder.cpp
+        builder/FFPlayerBuilder.cpp
 
         queue/Queue.cpp
         queue/PacketQueue.cpp
         queue/FrameQueue.cpp
         sync/MediaSync.cpp
         sync/MediaClock.cpp
-        proxy/IPlayerProxy.cpp
+        player/IPlayerProxy.cpp
 
 
         test/QueueTest.cpp

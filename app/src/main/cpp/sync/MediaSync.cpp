@@ -1,9 +1,7 @@
-//
-// Created by cain on 2018/12/30.
-//
-
 #include "MediaSync.h"
 #include "../decode/FFDecode.h"
+#include "../XLog.h"
+
 
 MediaSync::MediaSync(PlayerState *playerState) {
     this->playerState = playerState;
@@ -136,27 +134,31 @@ double MediaSync::getMasterClock() {
     return val;
 }
 
-void MediaSync::Main() {
+void MediaSync::update(XData data) {
 
+}
+
+void MediaSync::Main() {
+    LOGD("MediaSync::Main");
     double remaining_time = 0.0;
     while (true) {
 
         if (abortRequest || playerState->abortRequest) {
             if (videoDevice != nullptr) {
-//                videoDevice->terminate();
+                videoDevice->stop();
             }
             break;
         }
 
-        // 处于暂停状态，则睡眠一定的时间
+//         处于暂停状态，则睡眠一定的时间
         if (playerState->pauseRequest) {
             av_usleep((int64_t) (REFRESH_RATE * 1000000.0));
         }
 
         // 是否立马刷新
-        if (!playerState->pauseRequest || forceRefresh) {
-            refreshVideo(&remaining_time);
-        }
+//        if (!playerState->pauseRequest || forceRefresh) {
+//        refreshVideo(&remaining_time);
+//        }
         if (remaining_time <= 0) {
             remaining_time = REFRESH_RATE;
         }
@@ -168,42 +170,47 @@ void MediaSync::Main() {
 
 void MediaSync::refreshVideo(double *remaining_time) {
     double time;
+//    LOGD("refreshVideo");
 
     // 检查外部时钟
-    if (!playerState->pauseRequest && playerState->realTime &&
-        playerState->syncType == AV_SYNC_EXTERNAL) {
-        checkExternalClockSpeed();
-    }
+//    if (!playerState->pauseRequest && playerState->realTime &&
+//        playerState->syncType == AV_SYNC_EXTERNAL) {
+//        checkExternalClockSpeed();
+//    }
 
     for (;;) {
 
-        if (playerState->abortRequest || !videoDecoder) {
-            break;
-        }
+//        if (playerState->abortRequest || !videoDecoder) {
+//            break;
+//        }
 
         // 判断是否存在帧队列是否存在数据
         if (videoDecoder->getFrameSize() > 0) {
             double lastDuration, duration, delay;
-            Frame *currentFrame, *lastFrame;
+            XData *currentFrame, *lastFrame;
             // 上一帧
             lastFrame = videoDecoder->getFrameQueue()->lastFrame();
             // 当前帧
             currentFrame = videoDecoder->getFrameQueue()->currentFrame();
             // 判断是否需要强制更新帧的时间
             if (frameTimerRefresh) {
+                LOGI("判断是否需要强制更新帧的时间 true");
                 frameTimer = av_gettime_relative() / 1000000.0;
                 frameTimerRefresh = 0;
             }
 
             // 如果处于暂停状态，则直接显示
             if (playerState->abortRequest || playerState->pauseRequest) {
+                LOGI("如果处于暂停状态，则直接显示");
                 break;
             }
 
             // 计算上一次显示时长
             lastDuration = calculateDuration(lastFrame, currentFrame);
+            LOGI(" 计算上一次显示时长 %f", lastDuration);
             // 根据上一次显示的时长，计算延时
             delay = calculateDelay(lastDuration);
+            LOGI("  根据上一次显示的时长，计算延时 %f", delay);
             // 处理超过延时阈值的情况
             if (fabs(delay) > AV_SYNC_THRESHOLD_MAX) {
                 if (delay > 0) {
@@ -214,6 +221,7 @@ void MediaSync::refreshVideo(double *remaining_time) {
             }
             // 获取当前时间
             time = av_gettime_relative() / 1000000.0;
+            LOGI("  获取当前时间，计算延时 %f", time);
             if (isnan(frameTimer) || time < frameTimer) {
                 frameTimer = time;
             }
@@ -240,7 +248,7 @@ void MediaSync::refreshVideo(double *remaining_time) {
 
             // 如果队列中还剩余超过一帧的数据时，需要拿到下一帧，然后计算间隔，并判断是否需要进行舍帧操作
             if (videoDecoder->getFrameSize() > 1) {
-                Frame *nextFrame = videoDecoder->getFrameQueue()->nextFrame();
+                XData *nextFrame = videoDecoder->getFrameQueue()->nextFrame();
                 duration = calculateDuration(currentFrame, nextFrame);
                 // 如果不处于同步到视频状态，并且处于跳帧状态，则跳过当前帧
                 if ((time > frameTimer + duration)
@@ -296,8 +304,8 @@ void MediaSync::refreshVideo(double *remaining_time) {
 void MediaSync::checkExternalClockSpeed() {
 //    if (videoDecoder && videoDecoder->getPacketSize() <= EXTERNAL_CLOCK_MIN_FRAMES
 //        || audioDecoder && audioDecoder->getPacketSize() <= EXTERNAL_CLOCK_MIN_FRAMES) {
-        extClock->setSpeed(FFMAX(EXTERNAL_CLOCK_SPEED_MIN,
-                                 extClock->getSpeed() - EXTERNAL_CLOCK_SPEED_STEP));
+    extClock->setSpeed(FFMAX(EXTERNAL_CLOCK_SPEED_MIN,
+                             extClock->getSpeed() - EXTERNAL_CLOCK_SPEED_STEP));
 //    } else if ((!videoDecoder || videoDecoder->getPacketSize() > EXTERNAL_CLOCK_MAX_FRAMES)
 //               && (!audioDecoder || audioDecoder->getPacketSize() > EXTERNAL_CLOCK_MAX_FRAMES)) {
 //        extClock->setSpeed(FFMIN(EXTERNAL_CLOCK_SPEED_MAX,
@@ -312,8 +320,9 @@ void MediaSync::checkExternalClockSpeed() {
 
 
 void MediaSync::renderVideo() {
-
+    LOGI("renderVideo");
 }
+
 //void MediaSync::renderVideo() {
 //    mMutex.lock();
 //    if (!videoDecoder || !videoDevice) {
@@ -465,7 +474,7 @@ double MediaSync::calculateDelay(double delay) {
     return delay;
 }
 
-double MediaSync::calculateDuration(Frame *vp, Frame *nextvp) {
+double MediaSync::calculateDuration(XData *vp, XData *nextvp) {
     double duration = nextvp->pts - vp->pts;
     if (isnan(duration) || duration <= 0 || duration > maxFrameDuration) {
         return vp->duration;

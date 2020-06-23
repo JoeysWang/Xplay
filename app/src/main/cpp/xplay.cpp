@@ -3,9 +3,9 @@
 #include "XLog.h"
 #include "android/native_window_jni.h"
 #include "player/IPlayer.h"
-#include "IPlayerBuilder.h"
-#include "FFPlayerBuilder.h"
-#include "proxy/IPlayerProxy.h"
+#include "builder/IPlayerBuilder.h"
+#include "builder/FFPlayerBuilder.h"
+#include "player/IPlayerProxy.h"
 #include "test/QueueTest.h"
 #include <thread>
 #include <chrono>

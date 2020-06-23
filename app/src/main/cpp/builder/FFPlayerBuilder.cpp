@@ -3,11 +3,11 @@
 //
 
 #include "FFPlayerBuilder.h"
-#include "demux/FFDemux.h"
-#include "decode/FFDecode.h"
-#include "resample/FFResample.h"
-#include "video/GLVideoView.h"
-#include "audio/SLAudioPlay.h"
+#include "../demux/FFDemux.h"
+#include "../decode/FFDecode.h"
+#include "../resample/FFResample.h"
+#include "../video/GLVideoView.h"
+#include "../audio/SLAudioPlay.h"
 
 IDemux *FFPlayerBuilder::createDemux() {
     return new FFDemux();
