@@ -36,7 +36,7 @@ XData FFResample::resample(XData in) {
     //输出空间分配
     XData out;
 
-    auto *frame =  in.frame;
+    auto *frame = in.frame;
     //通道数 * 单通道样本数 * 样本字节大小
 
     if (!swrContext)
@@ -57,7 +57,7 @@ XData FFResample::resample(XData in) {
     int len = swr_convert(swrContext,
                           outArr,
                           frame->nb_samples,
-                          (const uint8_t **) frame->data,
+                          (const uint8_t **)  frame->data,
                           frame->nb_samples
     );
 

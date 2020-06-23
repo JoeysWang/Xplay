@@ -190,7 +190,7 @@ XData FFDecode::receiveFrame() {
                 }
                 d->format = avFrame->format;
                 d->pts = avFrame->pts;
-//                memcpy(d->frameDatas, avFrame->data, sizeof(avFrame->data));
+                memcpy(d->decodeDatas, avFrame->data, sizeof(avFrame->data));
                 frameQueue->pushFrame();
 //                const char *type =
 //                        (audioOrVideo == MEDIA_TYPE_VIDEO) ? "video" : "audio";

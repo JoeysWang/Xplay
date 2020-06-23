@@ -25,7 +25,7 @@ void GLVideoView::render(XData data) {
     if (!data.frame||data.size == 0) {
         return;
     }
-    texture->draw(data.frame->data, data.linesize, data.height);
+    texture->draw(data.decodeDatas, data.linesize, data.height);
 //    av_frame_unref(data.frame);
     XEGL::get()->draw();
 }
