@@ -49,7 +49,6 @@ public:
     double getMasterClock();
 
 
-
     MediaClock *getAudioClock();
 
     MediaClock *getVideoClock();
@@ -71,13 +70,15 @@ private:
 
     double calculateDuration(XData *vp, XData *nextvp);
 
-    void renderVideo( );
+    void renderVideo();
 
 private:
     PlayerState *playerState;               // 播放器状态
     bool abortRequest;                      // 停止
     bool mExit;
 
+    double lastPlay;
+    long playTimeST=0L;
     MediaClock *audioClock;                 // 音频时钟
     MediaClock *videoClock;                 // 视频时钟
     MediaClock *extClock;                   // 外部时钟
@@ -98,7 +99,7 @@ private:
 
     AVFrame *pFrameARGB;
     uint8_t *mBuffer;
-    SwsContext *swsContext;
+
 };
 
 

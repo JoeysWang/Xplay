@@ -76,15 +76,16 @@ XData FFDemux::read() {
     double ptsSeconds =
             avPacket->pts * av_q2d(pStream->time_base) *
             1000;
-    double dtsSeconds =
-            avPacket->dts * av_q2d(pStream->time_base) *
-            1000;
-    d.pts = (int) ptsSeconds;
+
+    d.pts = avPacket->pts;
     AVRational frame_rate = av_guess_frame_rate(formatContext,
                                                 pStream,
                                                 NULL);
     d.frame_rate = frame_rate;
     d.time_base = pStream->time_base;
+//    LOGI("duration =%f", pStream->duration * av_q2d(pStream->time_base));
+//    LOGI("pStream->time_base 1/30000  =%d/%d", pStream->time_base.num,
+//         pStream->time_base.den);
 //    LOGI("FFDemux::read success");
     mutex.unlock();
     return d;

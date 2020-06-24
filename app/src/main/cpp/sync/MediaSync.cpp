@@ -22,7 +22,7 @@ MediaSync::MediaSync(PlayerState *playerState) {
 
 
     videoDevice = nullptr;
-    swsContext = nullptr;
+
     mBuffer = nullptr;
     pFrameARGB = nullptr;
 }
@@ -47,10 +47,7 @@ void MediaSync::reset() {
         av_freep(&mBuffer);
         mBuffer = nullptr;
     }
-    if (swsContext) {
-        sws_freeContext(swsContext);
-        swsContext = nullptr;
-    }
+
 }
 
 void MediaSync::start(IDecode *videoDecoder, IDecode *audioDecoder) {
@@ -341,11 +338,40 @@ void MediaSync::renderVideo() {
     XData *vp = videoDecoder->getFrameQueue()->currentFrame();
     XData *ap = audioDecoder->getFrameQueue()->currentFrame();
     if (vp->size > 0) {
+        double frameTime = vp->pts * av_q2d(vp->time_base);
+        XData *lastVP = videoDecoder->getFrameQueue()->lastFrame();
+        double last_duration = calculateDuration(lastVP, vp);
 
+
+        double currentTime = av_gettime_relative() / 1000000.0;
+        LOGD("currentTime  =  %f", currentTime);
+
+        if (isnan(frameTime)) {
+            frameTime = 0;
+        }
+        if (playTimeST == 0) {
+            playTimeST = currentTime;
+        }
+        int timePassed = (currentTime - playTimeST) / 1000;
+        LOGD("video pts=%ld , timePassed=%d ,frameTime = %f last_duration=%f",
+             vp->pts,
+             timePassed,
+             frameTime,
+             last_duration);
+
+        if (timePassed < frameTime) {
+
+            int sleepTime = (frameTime - timePassed);
+            LOGD("video sleep = %d", sleepTime);
+            XSleep(sleepTime);
+        }
+
+        lastPlay = frameTime;
         videoDevice->update(*vp);
         videoDecoder->getFrameQueue()->popFrame();
     }
     if (ap->size > 0) {
+//        LOGD("audio pts = %f",ap->pts);
         audioDevice->update(*ap);
         audioDecoder->getFrameQueue()->popFrame();
     }
@@ -497,13 +523,13 @@ double MediaSync::calculateDelay(double delay) {
         }
     }
 
-    av_log(nullptr, AV_LOG_TRACE, "video: delay=%0.3f A-V=%f\n", delay, -diff);
+    LOGD("video: delay=%0.3f A-V=%f\n", delay, -diff);
 
     return delay;
 }
 
 double MediaSync::calculateDuration(XData *vp, XData *nextvp) {
-    double duration = nextvp->frame->pts - vp->frame->pts;
+    double duration = nextvp->pts - vp->pts;
     if (isnan(duration) || duration <= 0 || duration > maxFrameDuration) {
         return vp->duration;
     } else {

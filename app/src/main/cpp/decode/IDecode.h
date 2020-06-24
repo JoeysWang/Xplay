@@ -43,7 +43,7 @@ public:
 
     Queue<XData> *getPacketQueue() const;
 
-    int pushPacket(XData  data);
+    int pushPacket(XData data);
 
     int getFrameSize();
 
@@ -70,9 +70,8 @@ protected:
 
     long next_pts;
     AVRational next_pts_tb;
-    int packet_pending;
-    int pkt_serial;
-    int reorderVideoPts = -1;            // 视频帧重排pts
+
+    AVRational stream_time_base;
 
     FrameQueue *frameQueue;
 

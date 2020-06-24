@@ -94,7 +94,7 @@ bool FFDecode::sendPacket(XData pkt) {
         av_packet_unref(pkt.packet);
         return false;
     }
-
+    stream_time_base = pkt.time_base;
     return true;
 }
 
@@ -121,14 +121,14 @@ XData FFDecode::receiveFrame() {
                     //     frame输出顺序是按pts的顺序，如IBBPBBP
                     //     frame->pkt_pos变量是此frame对应的packet在视频文件中的偏移地址，值同pkt.pos
                     ret = avcodec_receive_frame(codecContext, avFrame);
-                    if (ret >= 0) {
-                        //是否重排pts
-                        if (reorderVideoPts == -1) {
-                            avFrame->pts = avFrame->best_effort_timestamp;
-                        } else if (!reorderVideoPts) {
-                            avFrame->pts = avFrame->pkt_dts;
-                        }
-                    }
+//                    if (ret >= 0) {
+//                        //是否重排pts
+//                        if (reorderVideoPts == -1) {
+//                            avFrame->pts = avFrame->best_effort_timestamp;
+//                        } else if (!reorderVideoPts) {
+//                            avFrame->pts = avFrame->pkt_dts;
+//                        }
+//                    }
                     break;
                 }
                 case MEDIA_TYPE_AUDIO: {
@@ -137,18 +137,18 @@ XData FFDecode::receiveFrame() {
                     // 表示解码器需要填入新的音频packet
                     ret = avcodec_receive_frame(codecContext, avFrame);
                     if (ret >= 0) {
-                        AVRational timeBase = AVRational{1, avFrame->sample_rate};
-                        if (avFrame->pts != AV_NOPTS_VALUE) {
-                            avFrame->pts = av_rescale_q(avFrame->pts,
-                                                        codecContext->pkt_timebase, timeBase);
-                        } else if (next_pts != AV_NOPTS_VALUE) {
-                            avFrame->pts = av_rescale_q(next_pts,
-                                                        next_pts_tb, timeBase);
-                        }
-                        if (avFrame->pts != AV_NOPTS_VALUE) {
-                            next_pts = avFrame->pts + avFrame->nb_samples;
-                            next_pts_tb = timeBase;
-                        }
+//                        AVRational timeBase = AVRational{1, avFrame->sample_rate};
+//                        if (avFrame->pts != AV_NOPTS_VALUE) {
+//                            avFrame->pts = av_rescale_q(avFrame->pts,
+//                                                        codecContext->pkt_timebase, timeBase);
+//                        } else if (next_pts != AV_NOPTS_VALUE) {
+//                            avFrame->pts = av_rescale_q(next_pts,
+//                                                        next_pts_tb, timeBase);
+//                        }
+//                        if (avFrame->pts != AV_NOPTS_VALUE) {
+//                            next_pts = avFrame->pts + avFrame->nb_samples;
+//                            next_pts_tb = timeBase;
+//                        }
                     }
                     break;
                 }
@@ -160,10 +160,6 @@ XData FFDecode::receiveFrame() {
                 avcodec_flush_buffers(codecContext);
                 return XData();
             }
-//            if (ret == AVERROR(EAGAIN)) {
-//                LOGI("AVERROR，EAGAIN");
-//                continue;
-//            }
             if (ret == 0) {
                 // 成功解码得到一个视频帧或一个音频帧，则返回
                 XData *d;
@@ -188,8 +184,13 @@ XData FFDecode::receiveFrame() {
                               * avFrame->nb_samples
                               * 2;
                 }
+
+//                LOGI("codecContext 1/60 帧率的倒数 base=%d/%d", codecContext->time_base.num,
+//                     codecContext->time_base.den);
+
                 d->format = avFrame->format;
                 d->pts = avFrame->pts;
+                d->time_base =  codecContext->time_base;
                 memcpy(d->decodeDatas, avFrame->data, sizeof(avFrame->data));
                 frameQueue->pushFrame();
 //                const char *type =
