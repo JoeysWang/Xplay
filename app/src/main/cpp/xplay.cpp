@@ -40,35 +40,10 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_com_joeys_xplay_Xplay_text(JNIEnv *env, jobject thiz) {
 
-//    auto *queue = new PacketQueue();
-//    auto test1 = new QueueTest(queue, "thread 1");
-//    auto test2 = new QueueTest(queue, "thread 2");
-//    auto test3 = new QueueTest(queue, "thread 3");
-//    auto test4 = new QueueTest(queue, "thread 4");
-//    test1->start();
-//    test2->start();
-//    test3->start();
-//    test4->start();
-//    std::this_thread::sleep_for(std::chrono::seconds(2));
 
-
-    unsigned char v = 0x80;
-
-     char c = v;
-    unsigned char uc = v;
-    unsigned int a = c, b = uc;
-    int i = c, j = uc;
-     LOGD("----------------\n");
-     LOGD("%%c: %c, %c\n", c, uc);
-     LOGD("%%X: %X, %X\n", c, uc);
-     LOGD("%%u: %u, %u\n", a, b);
-    LOGD("%%d: %d, %d\n", i, j);
-
-
-
-
+    auto test1 = new QueueTest();
+    test1->start();
 }
-
 
 
 extern "C"

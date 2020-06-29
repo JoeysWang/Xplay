@@ -4,6 +4,9 @@
 
 #include "QueueTest.h"
 #include "../XLog.h"
+#include "../data/XData.h"
+
+QueueTest::QueueTest() {}
 
 
 QueueTest::QueueTest(PacketQueue *queue, const std::string &name) : queue(queue), name(name) {
@@ -11,18 +14,20 @@ QueueTest::QueueTest(PacketQueue *queue, const std::string &name) : queue(queue)
 
 }
 
+XData &maxx(XData &data1, XData &data2) {
+    LOGI("data1 address=%p , data1 address=%p ", &data1, &data2);
+    return data2;
+}
+
+
 void QueueTest::Main() {
+    XData *d1 = new XData();
+    XData *d2 = new XData();
+    LOGI("d1 address=%p , d2 address=%p ", d1, d2);
 
-    std::__thread_id id = std::this_thread::get_id();
+    XData &d = maxx(*d1, *d2);
+    LOGI("d  address=%p   ", &d);
 
-    LOGI("this thread is %s", name.c_str());
-
-    for (int i = 0; i < 100; ++i) {
-        queue->pushPacket(new AVPacket());
-        LOGI("queue->pushPacket success      %s size= %d",
-             name.c_str(),
-             queue->getPacketSize());
-    }
-    LOGI("  thread   %s  执行完毕", name.c_str());
 
 }
+

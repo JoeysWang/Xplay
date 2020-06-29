@@ -1,8 +1,10 @@
 package com.joeys.xplay
 
+import android.app.Dialog
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
+import android.os.Looper
 import android.view.ViewManager
 import com.blankj.utilcode.util.ScreenUtils
 import com.yanzhenjie.permission.AndPermission
@@ -30,6 +32,11 @@ class MainActivity : AppCompatActivity() {
         }
         test.setOnClickListener {
             xplay.text()
+        }
+        Looper.prepare()
+        Looper.getMainLooper().setMessageLogging { }
+        Looper.myQueue().addIdleHandler {
+            return@addIdleHandler true
         }
         xplay.layoutParams.height = 1080 * ScreenUtils.getScreenWidth() / 1920
     }

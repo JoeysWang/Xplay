@@ -75,14 +75,15 @@ XData FFDemux::read() {
     AVStream *pStream = formatContext->streams[avPacket->stream_index];
     double ptsSeconds =
             avPacket->pts * av_q2d(pStream->time_base) *
-            1000;
+            1000;//demux出来的帧的pts：是相对于源AVStream的timebase
 
-    d.pts = avPacket->pts;
+    d.pts = avPacket->pts;//demux出来的帧的pts：是相对于源AVStream的timebase
     AVRational frame_rate = av_guess_frame_rate(formatContext,
                                                 pStream,
                                                 NULL);
     d.frame_rate = frame_rate;
     d.time_base = pStream->time_base;
+
 //    LOGI("duration =%f", pStream->duration * av_q2d(pStream->time_base));
 //    LOGI("pStream->time_base 1/30000  =%d/%d", pStream->time_base.num,
 //         pStream->time_base.den);
