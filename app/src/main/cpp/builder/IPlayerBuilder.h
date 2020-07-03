@@ -20,7 +20,8 @@ public:
 protected:
     virtual IDemux *createDemux() = 0;
 
-    virtual IDecode *createDecode() = 0;
+    virtual IDecode *createAudioDecode() = 0;
+    virtual IDecode *createVideoDecode() = 0;
 
     virtual IResample *createResample() = 0;
 

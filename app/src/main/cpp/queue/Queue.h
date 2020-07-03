@@ -115,6 +115,7 @@ public:
     }
 
     int length() {
+        std::unique_lock<std::mutex> lock(_mutex);
         return static_cast<int>(_queue.size());
     }
 };

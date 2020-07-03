@@ -25,8 +25,6 @@ void IPlayer::Main() {
             XSleep(2);
             continue;
         }
-        int audioPts = audioPlay->pts;
-        videoDecode->syncAudioPts = audioPts;
         mutex.unlock();
         XSleep(2);
     }
@@ -38,11 +36,17 @@ bool IPlayer::open(const char *path) {
         LOGE("IPlayer::open demux error ");
         return false;
     }
-    if (!videoDecode || !videoDecode->open(demux->getVideoParameter())) {
+    if (!videoDecode ||
+        !videoDecode->openDecode(demux->getVideoParameter(),
+                                 demux->getVideoStream(),
+                                 demux->formatContext)) {
         LOGE("IPlayer videoDecode->open error ");
     }
 
-    if (!audioDecode || !audioDecode->open(demux->getAudioParameter())) {
+    if (!audioDecode ||
+        !audioDecode->openDecode(demux->getAudioParameter(),
+                                 demux->getAudioStream(),
+                                 demux->formatContext)) {
         LOGE("IPlayer audioDecode->open error ");
     }
     audioOutParam = (demux->getAudioParameter());
@@ -71,16 +75,16 @@ void IPlayer::start() {
     }
     audioPlay->startPlay(audioOutParam);
 
-    playerState=new PlayerState();
-    mediaSync =new MediaSync(playerState);
+    playerState = new PlayerState();
+    mediaSync = new MediaSync2(playerState, audioDecode, videoDecode);
     videoDecode->start();
     resample->start();
     demux->start();
 
-    mediaSync->setVideoDevice(videoView);
-    mediaSync->setAudioDevice(audioPlay);
-    mediaSync->start(videoDecode,audioDecode);
-
+    mediaSync->setVideoView(videoView);
+    mediaSync->setResample(resample);
+    mediaSync->start();
+    resample->addObserver(audioPlay);
 
     XThread::start();
     mutex.unlock();

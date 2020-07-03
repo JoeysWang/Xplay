@@ -9,6 +9,7 @@
 #include "../XThread.h"
 #include "../data/XParameter.h"
 #include "../sync/MediaSync.h"
+#include "../sync/MediaSync2.h"
 
 class IDemux;
 
@@ -31,7 +32,7 @@ public:
 
 
     PlayerState *playerState;
-    MediaSync *mediaSync;
+    MediaSync2 *mediaSync;
     IDemux *demux = 0;
     IDecode *audioDecode = 0;
     IDecode *videoDecode = 0;

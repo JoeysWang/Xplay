@@ -28,10 +28,13 @@ public:
 
     XParameter getAudioParameter() override;
 
+    AVStream *getAudioStream() override;
+
+    AVStream *getVideoStream() override;
+
+
 private:
-    AVFormatContext *formatContext = 0;
-    int audioStreamIndex = 0;
-    int videoStreamIndex = 0;
+
 
     std::mutex mutex;
 

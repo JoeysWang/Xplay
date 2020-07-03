@@ -7,10 +7,11 @@
 
 
 #include "../video/IVideoView.h"
-#include "../decode/FFDecode.h"
+#include "../decode/VideoDecode.h"
 #include "MediaClock.h"
 #include "../player/PlayerState.h"
 #include "../audio/IAudioPlay.h"
+#include "../resample/IResample.h"
 
 /**
  * 视频同步器
@@ -61,6 +62,8 @@ public:
 
     void setAudioDevice(IAudioPlay *audioDevice);
 
+    void setResample(IResample *resample);
+
 private:
     void refreshVideo(double *remaining_time);
 
@@ -78,7 +81,7 @@ private:
     bool mExit;
 
     double lastPlay;
-    long playTimeST=0L;
+    long playTimeST = 0L;
     MediaClock *audioClock;                 // 音频时钟
     MediaClock *videoClock;                 // 视频时钟
     MediaClock *extClock;                   // 外部时钟
@@ -96,6 +99,7 @@ private:
 
     IVideoView *videoDevice;               // 视频输出设备
     IAudioPlay *audioDevice;               // 音频输出设备
+    IResample *resample;
 
     AVFrame *pFrameARGB;
     uint8_t *mBuffer;

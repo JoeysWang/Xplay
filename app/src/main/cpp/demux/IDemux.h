@@ -23,11 +23,17 @@ public:
 
     virtual XParameter getVideoParameter()=0;
     virtual XParameter getAudioParameter()=0;
-
+    virtual AVStream* getAudioStream()=0;
+    virtual AVStream* getVideoStream()=0;
     //总时长
     int totalMs = 0;
+public:
+    AVFormatContext *formatContext = 0;
+    int audioStreamIndex = 0;
+    int videoStreamIndex = 0;
 protected:
     virtual void Main();
+
 };
 
 

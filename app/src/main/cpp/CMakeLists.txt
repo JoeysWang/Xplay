@@ -20,7 +20,8 @@ add_library(
         XThread.cpp
         IObserver.cpp
         decode/IDecode.cpp
-        decode/FFDecode.cpp
+        decode/VideoDecode.cpp
+        decode/AudioDecode.cpp
         audio/IAudioPlay.cpp
         audio/SLAudioPlay.cpp
         video/IVideoView.cpp
@@ -42,11 +43,13 @@ add_library(
         queue/PacketQueue.cpp
         queue/FrameQueue.cpp
         sync/MediaSync.cpp
+        sync/MediaSync2.cpp
         sync/MediaClock.cpp
         player/IPlayerProxy.cpp
 
 
         test/QueueTest.cpp
+        test/Ts.cpp
 )
 
 #find_library(

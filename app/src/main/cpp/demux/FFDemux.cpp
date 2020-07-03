@@ -53,7 +53,7 @@ XData FFDemux::read() {
         LOGE("av_read_frame error %s", av_err2str(re));
         av_packet_free(&avPacket);
         if (re == AVERROR_EOF) {
-            LOGE("ffdemux  read 到结尾了 结束");
+            LOGE("ffdemux  read 到结尾了 结束 %s", av_err2str(re));
             stop();
         }
         mutex.unlock();
@@ -67,6 +67,7 @@ XData FFDemux::read() {
     else if (avPacket->stream_index == videoStreamIndex)
         d.audioOrVideo = 1;
     else {
+        LOGE("FFDemux::read failed avPacket->stream_index 未知");
         av_packet_free(&avPacket);
         mutex.unlock();
         return XData();
@@ -85,9 +86,9 @@ XData FFDemux::read() {
     d.time_base = pStream->time_base;
 
 //    LOGI("duration =%f", pStream->duration * av_q2d(pStream->time_base));
-//    LOGI("pStream->time_base 1/30000  =%d/%d", pStream->time_base.num,
+//    LOGI("pStream->time_base  =%d/%d", pStream->time_base.num,
 //         pStream->time_base.den);
-//    LOGI("FFDemux::read success");
+//    LOGI("FFDemux::read success ");
     mutex.unlock();
     return d;
 }
@@ -109,8 +110,8 @@ XParameter FFDemux::getVideoParameter() {
     this->videoStreamIndex = videoIndex;
 
     XParameter para;
-    para.parameters = formatContext->streams[videoIndex]->codecpar;
-//    LOGI("getVideoParameter success codec_id= %d", para.parameters->codec_id);
+    AVStream *pStream = formatContext->streams[videoIndex];
+    para.parameters = pStream->codecpar;
     mutex.unlock();
     return para;
 }
@@ -130,7 +131,6 @@ XParameter FFDemux::getAudioParameter() {
         return XParameter();
     }
     this->audioStreamIndex = audioIndex;
-//    LOGI("getAudioParameter success");
 
     XParameter para;
     para.parameters = formatContext->streams[audioIndex]->codecpar;
@@ -139,6 +139,15 @@ XParameter FFDemux::getAudioParameter() {
     mutex.unlock();
 
     return para;
+}
+
+AVStream *FFDemux::getAudioStream() {
+    return formatContext->streams[audioStreamIndex];
+}
+
+AVStream *FFDemux::getVideoStream() {
+    return formatContext->streams[videoStreamIndex];
+
 }
 
 FFDemux::FFDemux() {

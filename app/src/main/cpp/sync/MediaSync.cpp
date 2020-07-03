@@ -1,5 +1,5 @@
 #include "MediaSync.h"
-#include "../decode/FFDecode.h"
+#include "../decode/VideoDecode.h"
 #include "../XLog.h"
 
 
@@ -19,7 +19,6 @@ MediaSync::MediaSync(PlayerState *playerState) {
     maxFrameDuration = 10.0;
     frameTimerRefresh = 1;
     frameTimer = 0;
-
 
     videoDevice = nullptr;
 
@@ -95,6 +94,10 @@ void MediaSync::setAudioDevice(IAudioPlay *audioDevice) {
 
 void MediaSync::setMaxDuration(double maxDuration) {
     this->maxFrameDuration = maxDuration;
+}
+
+void MediaSync::setResample(IResample *resample) {
+    MediaSync::resample = resample;
 }
 
 void MediaSync::refreshVideoTimer() {
@@ -344,7 +347,7 @@ void MediaSync::renderVideo() {
 
 
         double currentTime = av_gettime_relative() / 1000000.0;
-        LOGD("currentTime  =  %f", currentTime);
+//        LOGD("currentTime  =  %f", currentTime);
 
         if (isnan(frameTime)) {
             frameTime = 0;
@@ -353,17 +356,17 @@ void MediaSync::renderVideo() {
             playTimeST = currentTime;
         }
         int timePassed = (currentTime - playTimeST) / 1000;
-        LOGD("video pts=%ld , timePassed=%d ,frameTime = %f last_duration=%f",
-             vp->pts,
-             timePassed,
-             frameTime,
-             last_duration);
+//        LOGD("video pts=%ld , timePassed=%d ,frameTime = %f last_duration=%f",
+//             vp->pts,
+//             timePassed,
+//             frameTime,
+//             last_duration);
 
         if (timePassed < frameTime) {
 
             int sleepTime = (frameTime - timePassed);
-            LOGD("video sleep = %d", sleepTime);
-            XSleep(sleepTime);
+//            LOGD("video sleep = %d", sleepTime);
+//            XSleep(sleepTime);
         }
 
         lastPlay = frameTime;
@@ -372,7 +375,7 @@ void MediaSync::renderVideo() {
     }
     if (ap->size > 0) {
 //        LOGD("audio pts = %f",ap->pts);
-        audioDevice->update(*ap);
+        resample->update(*ap);
         audioDecoder->getFrameQueue()->popFrame();
     }
 }
@@ -523,7 +526,7 @@ double MediaSync::calculateDelay(double delay) {
         }
     }
 
-    LOGD("video: delay=%0.3f A-V=%f\n", delay, -diff);
+//    LOGD("video: delay=%0.3f A-V=%f\n", delay, -diff);
 
     return delay;
 }

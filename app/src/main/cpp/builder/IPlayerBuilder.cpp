@@ -4,7 +4,7 @@
 
 #include "IPlayerBuilder.h"
 #include "../demux/FFDemux.h"
-#include "../decode/FFDecode.h"
+#include "../decode/VideoDecode.h"
 #include "../resample/FFResample.h"
 #include "../audio/SLAudioPlay.h"
 #include "../video/GLVideoView.h"
@@ -15,8 +15,8 @@ IPlayer *IPlayerBuilder::buildPlayer() {
 
     auto *demux = createDemux();
 
-    IDecode *videoDecode = createDecode();
-    IDecode *audioDecode = createDecode();
+    IDecode *videoDecode = createVideoDecode();
+    IDecode *audioDecode = createAudioDecode();
     demux->addObserver(videoDecode);
     demux->addObserver(audioDecode);
 

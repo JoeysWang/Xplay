@@ -14,6 +14,7 @@ void XData::drop() {
         av_packet_free((AVPacket **) &resampleData);
     } else
         delete resampleData;
+
     resampleData = 0;
     size = 0;
 }

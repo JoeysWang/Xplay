@@ -33,11 +33,7 @@ class MainActivity : AppCompatActivity() {
         test.setOnClickListener {
             xplay.text()
         }
-        Looper.prepare()
-        Looper.getMainLooper().setMessageLogging { }
-        Looper.myQueue().addIdleHandler {
-            return@addIdleHandler true
-        }
+
         xplay.layoutParams.height = 1080 * ScreenUtils.getScreenWidth() / 1920
     }
 

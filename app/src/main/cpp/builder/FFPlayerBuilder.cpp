@@ -4,17 +4,23 @@
 
 #include "FFPlayerBuilder.h"
 #include "../demux/FFDemux.h"
-#include "../decode/FFDecode.h"
+#include "../decode/VideoDecode.h"
 #include "../resample/FFResample.h"
 #include "../video/GLVideoView.h"
 #include "../audio/SLAudioPlay.h"
+#include "../decode/AudioDecode.h"
 
 IDemux *FFPlayerBuilder::createDemux() {
     return new FFDemux();
 }
 
-IDecode *FFPlayerBuilder::createDecode() {
-    return new FFDecode();
+IDecode *FFPlayerBuilder::createAudioDecode() {
+    return new AudioDecode();
+}
+
+IDecode *FFPlayerBuilder::createVideoDecode() {
+    return new VideoDecode();
+
 }
 
 IResample *FFPlayerBuilder::createResample() {

@@ -25,7 +25,13 @@ public:
 protected:
     unsigned char *buffer = 0;
 
-
+    SLuint32 getCurSampleRate(int sample_rate);
+    SLObjectItf engineSL = NULL;
+    SLEngineItf engineItf = NULL;
+    SLObjectItf mix = NULL;
+    SLObjectItf player = NULL;
+    SLPlayItf iplayer = NULL;
+    SLAndroidSimpleBufferQueueItf pcmQueue = NULL;
 };
 
 

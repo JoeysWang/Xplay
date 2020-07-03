@@ -20,7 +20,7 @@ protected:
 
     IDemux *createDemux() override;
 
-    IDecode *createDecode() override;
+    IDecode *createAudioDecode() override;
 
     IResample *createResample() override;
 
@@ -29,6 +29,8 @@ protected:
     IAudioPlay *createAudioPlay() override;
 
     IPlayer *createPlayer(unsigned char index = 0) override;
+
+    IDecode *createVideoDecode() override;
 
 };
 

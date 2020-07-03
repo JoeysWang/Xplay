@@ -38,13 +38,13 @@ struct XData {
 
     AVRational time_base;
     AVRational frame_rate;
-    long pts = 0;
+    double pts = 0;
     double duration = 0;
 
     int width = 0;
     int height = 0;
     int format = 0;
-
+    int nb_samples;
     int linesize[3];    // 宽对齐
 
 
