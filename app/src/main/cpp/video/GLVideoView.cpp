@@ -9,7 +9,10 @@
 
 void GLVideoView::setRender(void *view) {
     this->view = view;
+//    texture = XTexture::create();
+//    texture->init( this->view, 1080, 608);
 }
+
 
 void GLVideoView::render(XData data) {
 
