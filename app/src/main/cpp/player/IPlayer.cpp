@@ -77,12 +77,15 @@ void IPlayer::start() {
 
     playerState = new PlayerState();
     mediaSync = new MediaSync2(playerState, audioDecode, videoDecode);
+    mediaSync->setAudioPlay(audioPlay);
+    mediaSync->setResample(resample);
+
     videoDecode->start();
     resample->start();
     demux->start();
 
     mediaSync->setVideoView(videoView);
-    mediaSync->setResample(resample);
+
     mediaSync->start();
     resample->addObserver(audioPlay);
 

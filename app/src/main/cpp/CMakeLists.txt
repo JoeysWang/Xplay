@@ -47,7 +47,6 @@ add_library(
         sync/MediaClock.cpp
         player/IPlayerProxy.cpp
 
-
         test/QueueTest.cpp
         test/Ts.cpp
 )
@@ -65,3 +64,5 @@ target_link_libraries(
         OpenSLES
         EGL
 )
+# Metadata库
+add_subdirectory(${CMAKE_SOURCE_DIR}/metadata)

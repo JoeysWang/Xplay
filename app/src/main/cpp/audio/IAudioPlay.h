@@ -10,7 +10,7 @@
 #include "../IObserver.h"
 #include "../data/XParameter.h"
 
-typedef void (*AudioPCMCallback) (void *userdata, uint8_t *stream, int len);
+typedef void (*AudioPCMCallback)(double pts, uint8_t *stream, int len, void *context);
 
 class IAudioPlay : public IObserver {
 public:
@@ -32,6 +32,10 @@ protected:
     std::condition_variable notEmpty;
     std::condition_variable notFull;
     AudioPCMCallback callback;  // 音频回调
+    void *callbackContext = nullptr;
+
+public:
+    void setCallback(AudioPCMCallback pcmCallback, void *context);
 
 };
 

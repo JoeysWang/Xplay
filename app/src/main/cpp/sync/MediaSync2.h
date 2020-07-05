@@ -7,8 +7,9 @@
 
 
 #include "../decode/IDecode.h"
-#include "../resample/IResample.h"
 #include "../video/IVideoView.h"
+#include "../resample/IResample.h"
+#include "../audio/IAudioPlay.h"
 
 class MediaSync2 {
 public:
@@ -17,6 +18,8 @@ public:
     double calculateDelay(double delay);
 
     double getMasterClock();
+
+    static void audioCallBack(double pts, uint8_t *stream, int len, void *context);
 
 public:
     bool isExist = false;
@@ -30,6 +33,7 @@ private:
 
     IResample *resample;
     IVideoView *videoView;
+    IAudioPlay *iAudioPlay;
 
     double lastFramePts = 0.0;
 
@@ -39,6 +43,8 @@ public:
     void setVideoView(IVideoView *videoView);
 
     void setResample(IResample *resample);
+
+    void setAudioPlay(IAudioPlay *audioPlay);
 
 private:
     void audioPlay();

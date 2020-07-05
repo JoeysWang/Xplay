@@ -6,13 +6,13 @@
 #include <thread>
 
 MediaSync2::MediaSync2(PlayerState *playerState, IDecode *audioDecode, IDecode *videoDecode)
-        : playerState(playerState), audioDecode(audioDecode), videoDecode(videoDecode) {
+        : playerState(playerState), audioDecode(audioDecode),
+          videoDecode(videoDecode) {
     audioClock = new MediaClock;
     videoClock = new MediaClock;
     maxFrameDuration = 10.0;
-
-
 }
+
 
 void MediaSync2::start() {
     isExist = false;
@@ -32,9 +32,9 @@ void MediaSync2::audioPlay() {
             std::this_thread::sleep_for(duration);
             continue;
         }
-        LOGI("audio play");
+//        LOGI("audio play");
         resample->update(*frameWrapper);
-        audioClock->setClock(frameWrapper->pts);
+//        audioClock->setClock(frameWrapper->pts);
         audioDecode->getFrameQueue()->popFrame();
     }
 
@@ -58,7 +58,7 @@ void MediaSync2::videoPlay() {
             std::chrono::milliseconds duration((int) (delay * 1000));
             std::this_thread::sleep_for(duration);
         }
-        LOGI("video play");
+//        LOGI("video play");
 
 //// 处理超过延时阈值的情况
 //        if (fabs(delay) > AV_SYNC_THRESHOLD_MAX) {
@@ -113,10 +113,26 @@ double MediaSync2::getMasterClock() {
     return audioClock->getClock();
 }
 
-void MediaSync2::setResample(IResample *resample) {
-    MediaSync2::resample = resample;
+void MediaSync2::setResample(IResample *pResample) {
+    MediaSync2::resample = pResample;
+
+
 }
 
 void MediaSync2::setVideoView(IVideoView *videoView) {
     MediaSync2::videoView = videoView;
+}
+
+void MediaSync2::setAudioPlay(IAudioPlay *pAudioPlay) {
+    MediaSync2::iAudioPlay = pAudioPlay;
+
+    iAudioPlay->setCallback(MediaSync2::audioCallBack, (void *) this);
+
+
+}
+
+void MediaSync2::audioCallBack(double pts, uint8_t *stream, int len, void *context) {
+    LOGI("MediaSync2::audioCallBack pts=%f", pts);
+    auto mediaSync2 = (MediaSync2 *) context;
+    mediaSync2->audioClock->setClock(pts);
 }

@@ -9,6 +9,7 @@
 #include "../IObserver.h"
 #include "../data/XParameter.h"
 
+
 class IResample : public IObserver {
 public:
     virtual bool open(XParameter in, XParameter out = XParameter()) = 0;
@@ -18,8 +19,11 @@ public:
     void update(XData data) override;
 
     //音频输出
+public:
     int outChannels = 2;
     int outFormat = 1;//AV_SAMPLE_FMT_S16
+
+
 };
 
 

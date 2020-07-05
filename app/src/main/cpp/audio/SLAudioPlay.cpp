@@ -8,7 +8,6 @@
 #include <SLES/OpenSLES.h>
 
 
-
 SLAudioPlay::SLAudioPlay() {
     buffer = new unsigned char[1024 * 1024];
 }
@@ -113,6 +112,7 @@ bool SLAudioPlay::startPlay(XParameter out) {
     return true;
 
 }
+
 void SLAudioPlay::playCall(void *bufferQueue) {
     auto bf = (SLAndroidSimpleBufferQueueItf) bufferQueue;
     XData data = getData();
@@ -124,8 +124,12 @@ void SLAudioPlay::playCall(void *bufferQueue) {
     memcpy(buffer, data.resampleData, data.size);
 
     (*bf)->Enqueue(bf, buffer, data.size);
+    if (callback ) {
+        callback(data.pts, buffer, data.size,callbackContext);
+    }
     data.drop();
 }
+
 SLuint32 SLAudioPlay::getCurSampleRate(int sample_rate) {
     SLuint32 rate = 0;
     switch (sample_rate) {

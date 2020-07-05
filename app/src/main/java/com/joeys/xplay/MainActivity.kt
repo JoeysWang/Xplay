@@ -1,24 +1,23 @@
 package com.joeys.xplay
 
 import android.app.Activity
-import android.app.Dialog
 import android.content.Intent
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
-import android.os.Looper
 import android.util.Log
-import android.view.ViewManager
-import com.blankj.utilcode.util.FileUtils
 import com.blankj.utilcode.util.ScreenUtils
 import com.blankj.utilcode.util.UriUtils
+import com.joeys.xplay.metadata.MediaMetadataRetriever
+import com.joeys.xplay.metadata.XMetadata
 import com.yanzhenjie.permission.AndPermission
 import com.yanzhenjie.permission.runtime.Permission
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
-import java.util.concurrent.locks.ReentrantLock
 
 class MainActivity : AppCompatActivity() {
+    lateinit var retriever: MediaMetadataRetriever
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,7 +32,11 @@ class MainActivity : AppCompatActivity() {
             }
             .start()
         btn.setOnClickListener {
-            open()
+            val file = File(
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                "失落沙洲.mp4"
+            )
+            open(file.absolutePath)
         }
         test.setOnClickListener {
             xplay.text()
@@ -45,8 +48,8 @@ class MainActivity : AppCompatActivity() {
             intent.type = "video/*"
             startActivityForResult(intent, 111)
         }
-
         xplay.layoutParams.height = 1080 * ScreenUtils.getScreenWidth() / 1920
+        retriever = MediaMetadataRetriever()
     }
 
     val TAG = "xplay"
@@ -59,18 +62,29 @@ class MainActivity : AppCompatActivity() {
                 if (uri != null) {
                     val uri2File = UriUtils.uri2File(uri)
                     Log.d(TAG, "uri2File: ${uri2File.absolutePath}")
-                    xplay.open(uri2File.absolutePath)
+                    open(uri2File.absolutePath)
                 }
             }
         }
     }
 
-    private fun open() {
-        val file = File(
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-            "失落沙洲.mp4"
-        )
-        xplay.open(file.absolutePath)
+
+    private fun open(path: String) {
+        retriever.setDataSource(path)
+        val metadata = retriever.getMetadata()
+        Log.i(TAG, "metadata:\n ${metadata?.toString()}")
+
+        metadata?.let {
+            val width = it.getInt("video_width")
+            val height = it.getInt("video_height")
+            val layoutParams = xplay.layoutParams
+            layoutParams.width = ScreenUtils.getScreenWidth()
+            layoutParams.height = ScreenUtils.getScreenWidth() * height / width
+            xplay.layoutParams = layoutParams
+
+        }
+        xplay.open(path)
+
     }
 
 

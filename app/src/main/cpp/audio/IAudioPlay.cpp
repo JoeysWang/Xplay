@@ -34,3 +34,8 @@ void IAudioPlay::update(XData data) {
     notEmpty.notify_all();
 
 }
+
+void IAudioPlay::setCallback(AudioPCMCallback  pcmCallback, void *context) {
+    IAudioPlay::callback = pcmCallback;
+    IAudioPlay::callbackContext = context;
+}
