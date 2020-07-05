@@ -10,7 +10,6 @@ extern "C" {
 #include <libavformat/avformat.h>
 }
 
-
 //打开文件、流媒体 http rtsp
 bool FFDemux::open(const char *url) {
     close();

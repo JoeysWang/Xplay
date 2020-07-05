@@ -132,7 +132,6 @@ void MediaSync2::setAudioPlay(IAudioPlay *pAudioPlay) {
 }
 
 void MediaSync2::audioCallBack(double pts, uint8_t *stream, int len, void *context) {
-    LOGI("MediaSync2::audioCallBack pts=%f", pts);
     auto mediaSync2 = (MediaSync2 *) context;
     mediaSync2->audioClock->setClock(pts);
 }

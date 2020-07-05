@@ -18,7 +18,6 @@ void IPlayerProxy::init() {
 bool IPlayerProxy::open(const char *path) {
     mutex.lock();
     if (player != nullptr) {
-
         player->open(path);
     }
     mutex.unlock();
