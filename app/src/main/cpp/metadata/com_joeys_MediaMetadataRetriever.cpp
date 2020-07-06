@@ -119,4 +119,8 @@ Java_com_joeys_xplay_metadata_MediaMetadataRetriever__1getAllMetadata(JNIEnv *en
 
         return hashMap;
     }
+}extern "C"
+JNIEXPORT void JNICALL
+Java_com_joeys_xplay_metadata_MediaMetadataRetriever_release(JNIEnv *env, jobject thiz) {
+    if (retriever)delete retriever;
 }

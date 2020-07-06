@@ -10,24 +10,18 @@
 #include "../video/IVideoView.h"
 #include "../XLog.h"
 
+IPlayer::IPlayer() {
+    playerState = new PlayerState();
+    LOGI("IPlayer constructor playerState=%p",playerState);
+}
+static IPlayer players[1];
+
 IPlayer *IPlayer::get(unsigned char index) {
-    static IPlayer players[256];
     return &players[index];
 }
 
-void IPlayer::Main() {
-    while (!isExit) {
-        mutex.lock();
-        //音频视频同步
-        //获取音频pts，告诉视频
-        if (!audioPlay || !videoDecode) {
-            mutex.unlock();
-            XSleep(2);
-            continue;
-        }
-        mutex.unlock();
-        XSleep(2);
-    }
+void IPlayer::run() {
+
 }
 
 bool IPlayer::open(const char *path) {
@@ -74,20 +68,17 @@ void IPlayer::start() {
         audioOutParam = demux->getAudioParameter();
     }
     audioPlay->startPlay(audioOutParam);
+    resample->addObserver(audioPlay);
 
-    playerState = new PlayerState();
     mediaSync = new MediaSync2(playerState, audioDecode, videoDecode);
     mediaSync->setAudioPlay(audioPlay);
     mediaSync->setResample(resample);
+    mediaSync->setVideoView(videoView);
 
     videoDecode->start();
     resample->start();
     demux->start();
-
-    mediaSync->setVideoView(videoView);
-
     mediaSync->start();
-    resample->addObserver(audioPlay);
 
     XThread::start();
     mutex.unlock();
@@ -95,14 +86,47 @@ void IPlayer::start() {
 
 
 bool IPlayer::initView(void *window) {
+    mutex.lock();
     this->window = window;
     if (videoView) {
         videoView->setRender(window);
     }
+    mutex.unlock();
     return true;
 }
 
-IPlayer::IPlayer() {
-
+void IPlayer::pause() {
+    mutex.lock();
+    playerState->pauseRequest = 1;
+    LOGD("IPlayer::pause %p = %d",playerState,playerState->pauseRequest);
+    mutex.unlock();
 }
 
+void IPlayer::resume() {
+    mutex.lock();
+    LOGD("IPlayer::resume");
+    playerState->pauseRequest = 0;
+    mutex.unlock();
+}
+
+void IPlayer::release() {
+    mutex.lock();
+    LOGD("IPlayer::release");
+    delete demux;
+    delete audioDecode;
+    delete videoDecode;
+    delete resample;
+    delete videoView;
+    delete audioPlay;
+    mutex.unlock();
+}
+
+void IPlayer::stop() {
+    mutex.lock();
+    XThread::stop();
+    playerState->abortRequest = 1;
+    if (audioDecode) { audioDecode->stop(); }
+    if (videoDecode) { videoDecode->stop(); }
+    if (resample) { resample->stop(); }
+    mutex.unlock();
+}

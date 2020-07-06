@@ -8,28 +8,26 @@
 #include "../texture/XEGL.h"
 
 void GLVideoView::setRender(void *view) {
+    std::unique_lock<std::mutex> lock(mutex);
     this->view = view;
-//    texture = XTexture::create();
-//    texture->init( this->view, 1080, 608);
+    noWindowCondition.notify_all();
 }
 
-
-void GLVideoView::render(XData data) {
-
+void GLVideoView::render(XData *data) {
+    std::unique_lock<std::mutex> lock(mutex);
     if (!view) {
         LOGE("GLVideoView::render view = null");
-        return;
+        noWindowCondition.wait(lock);
     }
     if (!texture) {
         texture = XTexture::create();
-        texture->init(view, data.width, data.height);
+        texture->init(view, data->width, data->height);
     }
 
-    if (!data.frame||data.size == 0) {
+    if (!data->decodeDatas[0] || data->size == 0) {
         return;
     }
-    texture->draw(data.decodeDatas, data.linesize, data.height);
-//    av_frame_unref(data.frame);
+    texture->draw(data->decodeDatas, data->linesize, data->height);
     XEGL::get()->draw();
 }
 

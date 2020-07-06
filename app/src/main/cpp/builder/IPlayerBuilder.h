@@ -15,21 +15,23 @@
 
 class IPlayerBuilder {
 public:
-    virtual  IPlayer *buildPlayer();
+    virtual IPlayer *buildPlayer();
 
 protected:
-    virtual IDemux *createDemux() = 0;
 
-    virtual IDecode *createAudioDecode() = 0;
-    virtual IDecode *createVideoDecode() = 0;
+    virtual IDemux *createDemux(PlayerState *playerState) = 0;
 
-    virtual IResample *createResample() = 0;
+    virtual IDecode *createAudioDecode(PlayerState *playerState) = 0;
+
+    virtual IDecode *createVideoDecode(PlayerState *playerState) = 0;
+
+    virtual IResample *createResample(PlayerState *playerState) = 0;
 
     virtual IVideoView *createVideoView() = 0;
 
     virtual IAudioPlay *createAudioPlay() = 0;
 
-    virtual IPlayer *createPlayer(unsigned char  index=0) = 0;
+    virtual IPlayer *createPlayer(unsigned char index = 0) = 0;
 
 
 };

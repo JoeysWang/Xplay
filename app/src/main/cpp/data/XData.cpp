@@ -9,13 +9,15 @@ extern "C" {
 #include "XData.h"
 
 void XData::drop() {
-    if (!resampleData)return;
     if (allocType == AVPACKET_TYPE) {
         av_packet_free((AVPacket **) &resampleData);
     } else
         delete resampleData;
-
     resampleData = 0;
+    if (frame)
+        av_frame_unref(frame);
+    if (packet)
+        av_packet_unref(packet);
     size = 0;
 }
 

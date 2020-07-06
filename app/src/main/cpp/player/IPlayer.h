@@ -8,18 +8,12 @@
 #include <mutex>
 #include "../XThread.h"
 #include "../data/XParameter.h"
-#include "../sync/MediaSync.h"
 #include "../sync/MediaSync2.h"
-
-class IDemux;
-
-class IDecode;
-
-class IResample;
-
-class IVideoView;
-
-class IAudioPlay;
+#include "../demux/IDemux.h"
+#include "../decode/IDecode.h"
+#include "../video/IVideoView.h"
+#include "../audio/IAudioPlay.h"
+#include "../resample/IResample.h"
 
 class IPlayer : public XThread {
 
@@ -30,6 +24,13 @@ public:
 
     virtual bool initView(void *window);
 
+    virtual void pause();
+
+    virtual void resume();
+
+    virtual void stop();
+
+    virtual void release();
 
     PlayerState *playerState;
     MediaSync2 *mediaSync;
@@ -47,7 +48,8 @@ public:
 
     void start() override;
 
-    void Main() override;
+    void run() override;
+
 
 public:
     void *window;

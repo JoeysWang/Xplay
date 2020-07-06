@@ -110,6 +110,7 @@ void FrameQueue::unrefFrame(XData *vp) {
     vp->width = 0;
     vp->height = 0;
     vp->format = 0;
+    vp->drop();
 }
 
 int FrameQueue::getShowIndex() const {

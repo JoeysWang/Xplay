@@ -9,6 +9,7 @@ import android.os.Environment
 import android.util.Log
 import com.blankj.utilcode.util.ScreenUtils
 import com.blankj.utilcode.util.UriUtils
+import com.joeys.xplay.activity.PlayerActivity
 import com.joeys.xplay.metadata.MediaMetadataRetriever
 import com.joeys.xplay.metadata.XMetadata
 import com.yanzhenjie.permission.AndPermission
@@ -17,7 +18,6 @@ import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
 
 class MainActivity : AppCompatActivity() {
-    lateinit var retriever: MediaMetadataRetriever
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,7 +39,7 @@ class MainActivity : AppCompatActivity() {
             open(file.absolutePath)
         }
         test.setOnClickListener {
-            xplay.text()
+//            xplay.text()
         }
         btn_scan.setOnClickListener {
 
@@ -48,8 +48,6 @@ class MainActivity : AppCompatActivity() {
             intent.type = "video/*"
             startActivityForResult(intent, 111)
         }
-        xplay.layoutParams.height = 1080 * ScreenUtils.getScreenWidth() / 1920
-        retriever = MediaMetadataRetriever()
     }
 
     val TAG = "xplay"
@@ -62,7 +60,8 @@ class MainActivity : AppCompatActivity() {
                 if (uri != null) {
                     val uri2File = UriUtils.uri2File(uri)
                     Log.d(TAG, "uri2File: ${uri2File.absolutePath}")
-                    open(uri2File.absolutePath)
+//                    open(uri2File.absolutePath)
+                    PlayerActivity.start(uri2File.absolutePath, this)
                 }
             }
         }
@@ -70,20 +69,16 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun open(path: String) {
-        retriever.setDataSource(path)
-        val metadata = retriever.getMetadata()
-        Log.i(TAG, "metadata:\n ${metadata?.toString()}")
-
-        metadata?.let {
-            val width = it.getInt("video_width")
-            val height = it.getInt("video_height")
-            val layoutParams = xplay.layoutParams
-            layoutParams.width = ScreenUtils.getScreenWidth()
-            layoutParams.height = ScreenUtils.getScreenWidth() * height / width
-            xplay.layoutParams = layoutParams
-
-        }
-        xplay.open(path)
+//        metadata?.let {
+//            val width = it.getInt("video_width")
+//            val height = it.getInt("video_height")
+//            val layoutParams = xplay.layoutParams
+//            layoutParams.width = ScreenUtils.getScreenWidth()
+//            layoutParams.height = ScreenUtils.getScreenWidth() * height / width
+//            xplay.layoutParams = layoutParams
+//
+//        }
+//        xplay.open(path)
 
     }
 

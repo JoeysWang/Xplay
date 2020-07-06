@@ -10,21 +10,22 @@
 #include "../audio/SLAudioPlay.h"
 #include "../decode/AudioDecode.h"
 
-IDemux *FFPlayerBuilder::createDemux() {
-    return new FFDemux();
+
+IDemux *FFPlayerBuilder::createDemux(PlayerState *playerState) {
+    return new FFDemux(playerState);
 }
 
-IDecode *FFPlayerBuilder::createAudioDecode() {
-    return new AudioDecode();
+IDecode *FFPlayerBuilder::createAudioDecode(PlayerState *playerState) {
+    return new AudioDecode(playerState);
 }
 
-IDecode *FFPlayerBuilder::createVideoDecode() {
-    return new VideoDecode();
+IDecode *FFPlayerBuilder::createVideoDecode(PlayerState *playerState) {
+    return new VideoDecode(playerState);
 
 }
 
-IResample *FFPlayerBuilder::createResample() {
-    return new FFResample();
+IResample *FFPlayerBuilder::createResample(PlayerState *playerState) {
+    return new FFResample(playerState);
 }
 
 IVideoView *FFPlayerBuilder::createVideoView() {

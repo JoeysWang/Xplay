@@ -18,11 +18,9 @@ public:
 protected:
     FFPlayerBuilder() {};
 
-    IDemux *createDemux() override;
+    IDecode *createAudioDecode(PlayerState *playerState) override;
 
-    IDecode *createAudioDecode() override;
-
-    IResample *createResample() override;
+    IResample *createResample(PlayerState *playerState) override;
 
     IVideoView *createVideoView() override;
 
@@ -30,7 +28,9 @@ protected:
 
     IPlayer *createPlayer(unsigned char index = 0) override;
 
-    IDecode *createVideoDecode() override;
+    IDecode *createVideoDecode(PlayerState *playerState) override;
+
+    IDemux *createDemux(PlayerState *playerState) override;
 
 };
 

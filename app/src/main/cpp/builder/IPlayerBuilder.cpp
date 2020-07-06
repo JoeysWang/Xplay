@@ -13,22 +13,21 @@ IPlayer *IPlayerBuilder::buildPlayer() {
 
     IPlayer *iplayer = createPlayer(0);
 
-    auto *demux = createDemux();
+    auto *demux = createDemux(iplayer->playerState);
 
-    IDecode *videoDecode = createVideoDecode();
-    IDecode *audioDecode = createAudioDecode();
+    IDecode *videoDecode = createVideoDecode(iplayer->playerState);
+    IDecode *audioDecode = createAudioDecode(iplayer->playerState);
     demux->addObserver(videoDecode);
     demux->addObserver(audioDecode);
 
     //音频链路
-    IResample *resample = createResample();
-    audioDecode->addObserver(resample);
+    IResample *resample = createResample(iplayer->playerState);
     IAudioPlay *audioPlay = createAudioPlay();
     //mediaSync自己去取数据帧
 //    resample->addObserver(audioPlay);
 
     //视频链路
-    IVideoView *videoView = new GLVideoView();
+    IVideoView *videoView = createVideoView();
     //mediaSync自己去取数据帧
 //    videoDecode->addObserver(videoView);
 

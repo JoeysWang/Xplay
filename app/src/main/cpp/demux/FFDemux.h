@@ -16,11 +16,11 @@ class FFDemux : public IDemux {
 public:
     bool open(const char *url) override;
 
-      void close();
+    void close();
 
     XData read() override;
 
-    FFDemux();
+    FFDemux(PlayerState *playerState);
 
     ~FFDemux();
 
@@ -32,10 +32,7 @@ public:
 
     AVStream *getVideoStream() override;
 
-
 private:
-
-
     std::mutex mutex;
 
 };

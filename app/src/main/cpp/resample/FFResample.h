@@ -14,9 +14,13 @@ extern "C" {
 
 class FFResample : public IResample {
 public:
+    FFResample(PlayerState *playerState);
+
     virtual bool open(XParameter in, XParameter out) override ;
 
     XData resample(XData in) override;
+
+    virtual ~FFResample();
 
 public:
     SwrContext *swrContext;

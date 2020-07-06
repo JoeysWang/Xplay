@@ -19,7 +19,7 @@ public:
 
     QueueTest(PacketQueue *queue, const std::string &name);
 
-    void Main() override;
+    void run() override;
 };
 
 

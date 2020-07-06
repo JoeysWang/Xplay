@@ -17,7 +17,7 @@ void XSleep(int mis) {
 
 void XThread::start() {
     isExit = false;
-    thread th(&XThread::ThreadMain, this);
+    thread th(&XThread::threadMain, this);
     th.detach();
 }
 
@@ -35,9 +35,9 @@ void XThread::stop() {
     LOGE("stop 线程 超时");
 }
 
-void XThread::ThreadMain() {
+void XThread::threadMain() {
     isRunning = true;
-    Main();
+    run();
     isRunning = false;
     LOGD("线程函数退出");
 }

@@ -8,10 +8,15 @@
 
 #include "../IObserver.h"
 #include "../data/XParameter.h"
+#include "../player/PlayerState.h"
 
 
 class IResample : public IObserver {
 public:
+    IResample(PlayerState *playerState);
+
+    virtual ~IResample();
+
     virtual bool open(XParameter in, XParameter out = XParameter()) = 0;
 
     virtual XData resample(XData in) = 0;
@@ -23,6 +28,7 @@ public:
     int outChannels = 2;
     int outFormat = 1;//AV_SAMPLE_FMT_S16
 
+    PlayerState *playerState;
 
 };
 

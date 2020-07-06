@@ -2,24 +2,40 @@
 // Created by 王越 on 2020/4/29.
 //
 
+#include <thread>
 #include "IDecode.h"
 #include "../XLog.h"
 
-void IDecode::Main() {
+IDecode::IDecode(PlayerState *playerState) : playerState(playerState) {
+    LOGI("IDecode constructor playerState=%p", this->playerState);
+}
+
+IDecode::~IDecode() {
+    LOGD("~IDecode");
+    mutex.lock();
+    if (packetQueue) {
+        packetQueue->quit();
+        delete packetQueue;
+        packetQueue = nullptr;
+    }
+    if (frameQueue) {
+        frameQueue->flush();
+        delete frameQueue;
+        frameQueue = nullptr;
+    }
+    avcodec_free_context(&codecContext);
+
+    mutex.unlock();
+}
+
+void IDecode::run() {
     while (!isExit) {
-//        XData data;
-//        if (getPacketQueue()->pop(data)) {
-//        }
-//        if (sendPacket(data)) {
-//            while (!isExit) {
-//            //从解码器接收解码后的frame，此frame作为函数的输出参数供上级函数处理
-//            XData frame = receiveFrame();
-//            if (!frame.resampleData)
-//                break;
-//
-//            notify(frame);
-//            }
-//        }
+        if (playerState->pauseRequest) {
+            LOGI("IDecode sleep for pause");
+            std::chrono::milliseconds duration(500);
+            std::this_thread::sleep_for(duration);
+            continue;
+        }
         decodePacket();
     }
 }
@@ -62,10 +78,12 @@ bool IDecode::openDecode(XParameter parameter, AVStream *stream, AVFormatContext
 }
 
 void IDecode::update(XData data) {
-    if (data.audioOrVideo != audioOrVideo && data.audioOrVideo != -1) {
+    if ((data.audioOrVideo != audioOrVideo && data.audioOrVideo != -1)
+        || isExit || playerState->abortRequest) {
         return;
     }
     //生产者，把数据压入list
+
     pushPacket(data);
 
 }
@@ -75,6 +93,7 @@ FrameQueue *IDecode::getFrameQueue() const {
 }
 
 int IDecode::pushPacket(XData data) {
+    if (!packetQueue)return -1;
     return packetQueue->push(data);
 
 }
@@ -88,5 +107,6 @@ int IDecode::getFrameSize() {
     std::unique_lock<std::mutex> lock(mutex);
     return frameQueue ? frameQueue->getFrameSize() : 0;
 }
+
 
 

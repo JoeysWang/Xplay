@@ -179,7 +179,14 @@ SLuint32 SLAudioPlay::getCurSampleRate(int sample_rate) {
 }
 
 SLAudioPlay::~SLAudioPlay() {
+    mutex.lock();
+    LOGI("~SLAudioPlay");
     delete buffer;
+    engineSL = NULL;
+    engineItf = NULL;
+    mix = NULL;
+    player = NULL;
+    mutex.unlock();
 }
 
 

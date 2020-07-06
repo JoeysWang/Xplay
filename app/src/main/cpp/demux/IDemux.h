@@ -8,6 +8,7 @@
 #include "../data/XData.h"
 #include "../XThread.h"
 #include "../IObserver.h"
+#include "../player/PlayerState.h"
 
 struct XParameter;
 
@@ -15,25 +16,34 @@ struct XParameter;
 class IDemux : public IObserver {
 
 public:
-    //打开文件、流媒体 http rtsp
+    IDemux(PlayerState *playerState);
+
+    virtual ~IDemux();
+
+//打开文件、流媒体 http rtsp
     virtual bool open(const char *url) = 0;
 
     //读取一帧数据，数据由调用者清理
     virtual XData read() = 0;
 
-    virtual XParameter getVideoParameter()=0;
-    virtual XParameter getAudioParameter()=0;
-    virtual AVStream* getAudioStream()=0;
-    virtual AVStream* getVideoStream()=0;
+    virtual XParameter getVideoParameter() = 0;
+
+    virtual XParameter getAudioParameter() = 0;
+
+    virtual AVStream *getAudioStream() = 0;
+
+    virtual AVStream *getVideoStream() = 0;
+
     //总时长
     int totalMs = 0;
 public:
     AVFormatContext *formatContext = 0;
     int audioStreamIndex = 0;
     int videoStreamIndex = 0;
-protected:
-    virtual void Main();
+    PlayerState *playerState;
 
+protected:
+    virtual void run();
 };
 
 

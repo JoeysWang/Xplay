@@ -15,9 +15,7 @@ struct AVFrame;
 class VideoDecode : public IDecode {
 public:
 
-
-    VideoDecode();
-
+    VideoDecode(PlayerState *playerState);
 
     virtual ~VideoDecode();
 
@@ -29,8 +27,6 @@ public:
 
 protected:
     std::mutex mutex;
-
-
 };
 
 

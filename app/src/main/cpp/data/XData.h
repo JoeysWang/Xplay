@@ -20,8 +20,6 @@ struct XData {
 
     unsigned char *resampleData = 0;
     unsigned char *decodeDatas[8] = {0};
-    //解码后的数据 avFrame
-//    unsigned char *frameDatas[8] = {0};
 
     AVFrame *frame = 0;
     AVPacket *packet = 0;

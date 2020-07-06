@@ -14,6 +14,8 @@ typedef void (*AudioPCMCallback)(double pts, uint8_t *stream, int len, void *con
 
 class IAudioPlay : public IObserver {
 public:
+    virtual ~IAudioPlay();
+
     //缓冲满后会阻塞
     void update(XData data) override;
 

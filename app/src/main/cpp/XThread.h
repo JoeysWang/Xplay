@@ -16,14 +16,14 @@ public:
     virtual void stop();
 
     //入口主函数
-    virtual void Main() {}
+    virtual void run() {}
 
 protected:
     bool isExit = false;
     bool isRunning = false;
 
 private:
-    void ThreadMain();
+    void threadMain();
 };
 void XSleep(int mis);
 

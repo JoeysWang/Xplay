@@ -5,6 +5,20 @@
 #include "FFResample.h"
 #include "../XLog.h"
 
+FFResample::FFResample(PlayerState *playerState) : IResample(playerState) {
+
+}
+
+FFResample::~FFResample() {
+    mutex.lock();
+    IResample::~IResample();
+    if (swrContext) {
+        swr_free(&swrContext);
+        swrContext = nullptr;
+    }
+    mutex.unlock();
+}
+
 bool FFResample::open(XParameter in, XParameter out) {
     //音频重采样初始化
     swrContext = swr_alloc();

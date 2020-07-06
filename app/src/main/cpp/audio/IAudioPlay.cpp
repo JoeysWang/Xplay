@@ -35,7 +35,15 @@ void IAudioPlay::update(XData data) {
 
 }
 
-void IAudioPlay::setCallback(AudioPCMCallback  pcmCallback, void *context) {
+void IAudioPlay::setCallback(AudioPCMCallback pcmCallback, void *context) {
     IAudioPlay::callback = pcmCallback;
     IAudioPlay::callbackContext = context;
+}
+
+IAudioPlay::~IAudioPlay() {
+    mutex.lock();
+    frames.clear();
+    callback = NULL;
+    callbackContext = nullptr;
+    mutex.unlock();
 }

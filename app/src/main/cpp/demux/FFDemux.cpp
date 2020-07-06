@@ -10,6 +10,21 @@ extern "C" {
 #include <libavformat/avformat.h>
 }
 
+FFDemux::FFDemux(PlayerState *playerState) : IDemux(playerState) {
+    static bool isFirst = true;
+    if (isFirst) {
+
+        isFirst = false;
+        //注册所有解封装器
+        av_register_all();
+
+        avcodec_register_all();
+
+        avformat_network_init();
+        LOGI("regsist ffmpeg");
+    }
+}
+
 //打开文件、流媒体 http rtsp
 bool FFDemux::open(const char *url) {
     close();
@@ -87,7 +102,7 @@ XData FFDemux::read() {
 //    LOGI("duration =%f", pStream->duration * av_q2d(pStream->time_base));
 //    LOGI("pStream->time_base  =%d/%d", pStream->time_base.num,
 //         pStream->time_base.den);
-//    LOGI("FFDemux::read success ");
+//    LOGI("FFDemux::read success pauseRequest=%d",playerState->pauseRequest);
     mutex.unlock();
     return d;
 }
@@ -149,27 +164,13 @@ AVStream *FFDemux::getVideoStream() {
 
 }
 
-FFDemux::FFDemux() {
-    static bool isFirst = true;
-    if (isFirst) {
 
-        isFirst = false;
-        //注册所有解封装器
-        av_register_all();
-
-        avcodec_register_all();
-
-        avformat_network_init();
-        LOGI("regsist ffmpeg");
-    }
-}
 
 void FFDemux::close() {
     mutex.lock();
     if (formatContext)
         avformat_close_input(&formatContext);
     mutex.unlock();
-
 }
 
 FFDemux::~FFDemux() {

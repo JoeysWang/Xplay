@@ -1,5 +1,6 @@
 package com.joeys.xplay
 
+import android.app.Activity
 import android.content.Context
 import android.graphics.SurfaceTexture
 import android.net.Uri
@@ -11,6 +12,7 @@ import android.util.Log
 import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.TextureView
+import androidx.appcompat.app.AppCompatActivity
 import com.joeys.xplay.IMediaPlayer.MEDIA_INFO_VIDEO_TRACK_LAGGING
 import java.io.FileDescriptor
 import java.lang.ref.WeakReference
@@ -28,7 +30,8 @@ class Xplay : TextureView, TextureView.SurfaceTextureListener, IMediaPlayer {
     private var mOnInfoListener: IMediaPlayer.OnInfoListener? = null
     private var mOnVideoSizeChangedListener: IMediaPlayer.OnVideoSizeChangedListener? = null
 
-    private var mNativeContext: Long = 0
+    var mNativeContext: Long = 0
+
 
     constructor(context: Context) : super(context)
     constructor(context: Context, attributeSet: AttributeSet) : super(context, attributeSet)
@@ -36,7 +39,7 @@ class Xplay : TextureView, TextureView.SurfaceTextureListener, IMediaPlayer {
     init {
         System.loadLibrary("xplay")
 
-        var looper = Looper.myLooper()
+        val looper = Looper.myLooper()
 
         when {
             looper != null -> {
@@ -46,9 +49,11 @@ class Xplay : TextureView, TextureView.SurfaceTextureListener, IMediaPlayer {
                 mEventHandler = EventHandler(this, Looper.getMainLooper())
             }
         }
+        iplayerIinit()
         surfaceTextureListener = this
     }
 
+    private external fun iplayerIinit()
     external fun open(url: String): Boolean
     external fun text()
     private external fun initView(holder: Surface?)
@@ -303,8 +308,10 @@ class Xplay : TextureView, TextureView.SurfaceTextureListener, IMediaPlayer {
     }
 
     override fun resume() {
-        Log.d(TAG, "Not yet implemented")
+        _resume()
     }
+
+    private external fun _resume()
 
     override fun reset() {
         Log.d(TAG, "Not yet implemented")
@@ -328,8 +335,10 @@ class Xplay : TextureView, TextureView.SurfaceTextureListener, IMediaPlayer {
     }
 
     override fun pause() {
-        Log.d(TAG, "Not yet implemented")
+        _pause()
     }
+
+    private external fun _pause()
 
     override fun setOnErrorListener(listener: IMediaPlayer.OnErrorListener?) {
         Log.d(TAG, "Not yet implemented")
@@ -365,8 +374,10 @@ class Xplay : TextureView, TextureView.SurfaceTextureListener, IMediaPlayer {
     }
 
     override fun stop() {
+        _stop()
     }
 
+    private external fun _stop()
     override fun setOnBufferingUpdateListener(listener: IMediaPlayer.OnBufferingUpdateListener?) {
     }
 
@@ -375,7 +386,10 @@ class Xplay : TextureView, TextureView.SurfaceTextureListener, IMediaPlayer {
     }
 
     override fun release() {
+        _release()
     }
+
+    private external fun _release()
 
     override fun setRate(rate: Float) {
     }

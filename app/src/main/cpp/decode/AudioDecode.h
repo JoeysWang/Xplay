@@ -10,7 +10,7 @@
 
 class AudioDecode : public IDecode {
 public:
-    AudioDecode();
+    AudioDecode(PlayerState *playerState);
 
     ~AudioDecode();
 

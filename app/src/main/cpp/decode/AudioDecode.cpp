@@ -2,9 +2,10 @@
 // Created by 王越 on 2020/7/3.
 //
 
+#include <thread>
 #include "AudioDecode.h"
 
-AudioDecode::AudioDecode() {
+AudioDecode::AudioDecode(PlayerState *playerState):IDecode(playerState) {
     mutex.lock();
     frameQueue = new FrameQueue(FRAME_QUEUE_SIZE, 1);
     packetQueue = new Queue<XData>(100);
@@ -13,16 +14,8 @@ AudioDecode::AudioDecode() {
 
 AudioDecode::~AudioDecode() {
     mutex.lock();
-    if (packetQueue) {
-        packetQueue->quit();
-        delete packetQueue;
-        packetQueue = NULL;
-    }
-    if (frameQueue) {
-        frameQueue->flush();
-        delete frameQueue;
-        frameQueue = NULL;
-    }
+    LOGI("~AudioDecode");
+
     mutex.unlock();
 }
 
@@ -42,13 +35,18 @@ int AudioDecode::decodePacket() {
             ret = -1;
             break;
         }
-        XData packetDataWrapper;
-
-        if (!packetQueue->pop(packetDataWrapper)) {
+        XData input;
+        while (playerState->pauseRequest) {
+            LOGI("AudioDecode sleep for pause");
+            std::chrono::milliseconds duration(500);
+            std::this_thread::sleep_for(duration);
+        }
+        if (!packetQueue->pop(input)) {
             ret = -1;
             break;
         }
-        AVPacket *pkt = packetDataWrapper.packet;
+
+        AVPacket *pkt = input.packet;
 
         // 将数据包解码
         ret = avcodec_send_packet(codecContext, pkt);
@@ -57,10 +55,12 @@ int AudioDecode::decodePacket() {
             if (ret == AVERROR(EAGAIN)) {
                 continue;
             } else {
+                input.drop();
                 av_packet_unref(pkt);
             }
             continue;
         }
+        input.drop();
         frame = av_frame_alloc();
         // 获取解码得到的音频帧AVFrame
         ret = avcodec_receive_frame(codecContext, frame);
@@ -75,19 +75,7 @@ int AudioDecode::decodePacket() {
             got_frame = 1;
             // 这里要重新计算frame的pts 否则会导致网络视频出现pts 对不上的情况
             AVRational tb = (AVRational) {1, frame->sample_rate};
-//            LOGI("pts before =%ld",frame->pts);
-//            if (frame->pts != AV_NOPTS_VALUE) {
-//                frame->pts = av_rescale_q(frame->pts, av_codec_get_pkt_timebase(codecContext), tb);
-//            } else if (next_pts != AV_NOPTS_VALUE) {
-//                frame->pts = av_rescale_q(next_pts, next_pts_tb, tb);
-//            }
-//            LOGI("pts after =%ld",frame->pts);
 
-
-            if (frame->pts != AV_NOPTS_VALUE) {
-                next_pts = frame->pts + frame->nb_samples;
-                next_pts_tb = tb;
-            }
             XData *output;
             if (!(output = frameQueue->peekWritable())) {
                 ret = -1;

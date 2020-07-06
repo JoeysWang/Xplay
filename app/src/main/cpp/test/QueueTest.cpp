@@ -20,7 +20,7 @@ XData &maxx(XData &data1, XData &data2) {
 }
 
 
-void QueueTest::Main() {
+void QueueTest::run() {
     XData *d1 = new XData();
     XData *d2 = new XData();
     LOGI("d1 address=%p , d2 address=%p ", d1, d2);

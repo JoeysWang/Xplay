@@ -2,6 +2,7 @@
 // Created by 王越 on 2020/4/29.
 //
 
+#include <thread>
 #include "VideoDecode.h"
 #include "../XLog.h"
 #include "../data/XParameter.h"
@@ -10,10 +11,9 @@
 extern "C" {
 #include "libavcodec/avcodec.h"
 #include "libavformat/avformat.h"
-
 }
 
-VideoDecode::VideoDecode() {
+VideoDecode::VideoDecode(PlayerState *playerState) : IDecode(playerState) {
     frameQueue = new FrameQueue(FRAME_QUEUE_SIZE, 1);
     packetQueue = new Queue<XData>(100);
 }
@@ -27,16 +27,8 @@ void VideoDecode::start() {
 
 VideoDecode::~VideoDecode() {
     mutex.lock();
-    if (packetQueue) {
-        packetQueue->quit();
-        delete packetQueue;
-        packetQueue = NULL;
-    }
-    if (frameQueue) {
-        frameQueue->flush();
-        delete frameQueue;
-        frameQueue = NULL;
-    }
+    LOGI("~VideoDecode");
+
     mutex.unlock();
 }
 
@@ -55,23 +47,34 @@ int VideoDecode::decodePacket() {
             ret = -1;
             break;
         }
-        XData packetDataWrapper;
+        if (playerState->abortRequest) {
+            return -1;
+        }
+        if (playerState->pauseRequest) {
+            LOGI("VideoDecode sleep for pause");
+            std::chrono::milliseconds duration(500);
+            std::this_thread::sleep_for(duration);
+            continue;
+        }
 
-        if (!packetQueue->pop(packetDataWrapper)) {
+        XData input;
+
+        if (!packetQueue->pop(input)) {
             ret = -1;
 
             break;
         }
-        packet = packetDataWrapper.packet;
+        packet = input.packet;
 
         // 送去解码
         ret = avcodec_send_packet(codecContext, packet);
         if (ret < 0 && ret != AVERROR(EAGAIN) && ret != AVERROR_EOF) {
             av_packet_unref(packet);
+            input.drop();
             LOGE("videodecode avcodec_send_packet %s", av_err2str(ret));
             continue;
         }
-
+        input.drop();
         // 得到解码帧
         frame = av_frame_alloc();
         ret = avcodec_receive_frame(codecContext, frame);
@@ -133,9 +136,7 @@ int VideoDecode::decodePacket() {
                             frame->linesize[1] +
                             frame->linesize[2]) * frame->height;
             memcpy(output->decodeDatas, frame->data, sizeof(frame->data));
-
-
-            av_frame_move_ref(output->frame, frame);
+//            av_frame_move_ref(output->frame, frame);
             // 入队帧
             frameQueue->pushFrame();
         }
