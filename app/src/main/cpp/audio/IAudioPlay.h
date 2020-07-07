@@ -9,11 +9,14 @@
 #include <list>
 #include "../IObserver.h"
 #include "../data/XParameter.h"
+#include "../player/PlayerState.h"
 
 typedef void (*AudioPCMCallback)(double pts, uint8_t *stream, int len, void *context);
 
 class IAudioPlay : public IObserver {
 public:
+    IAudioPlay(PlayerState *playerState);
+
     virtual ~IAudioPlay();
 
     //缓冲满后会阻塞
@@ -35,6 +38,7 @@ protected:
     std::condition_variable notFull;
     AudioPCMCallback callback;  // 音频回调
     void *callbackContext = nullptr;
+    PlayerState *playerState;
 
 public:
     void setCallback(AudioPCMCallback pcmCallback, void *context);

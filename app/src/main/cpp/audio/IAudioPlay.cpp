@@ -4,19 +4,23 @@
 
 #include "IAudioPlay.h"
 #include "../XLog.h"
+IAudioPlay::IAudioPlay(PlayerState *playerState) : playerState(playerState) {
+
+}
 
 XData IAudioPlay::getData() {
     XData d;
     std::unique_lock<std::mutex> lock(framesMutex);
     if (frames.empty()) {
-//        LOGE("IAudioPlay empty wait");
         notEmpty.wait(lock);
+    }
+    if (isExit){
+        return d;
     }
     d = frames.front();
     pts = d.pts;
     frames.pop_front();
     notFull.notify_all();
-
     return d;
 }
 
@@ -27,12 +31,10 @@ void IAudioPlay::update(XData data) {
         return;
 
     if (frames.size() > maxFrameBuffer) {
-//        LOGE("IAudioPlay full wait");
         notFull.wait(lock);
     }
     frames.push_back(data);
     notEmpty.notify_all();
-
 }
 
 void IAudioPlay::setCallback(AudioPCMCallback pcmCallback, void *context) {
@@ -47,3 +49,4 @@ IAudioPlay::~IAudioPlay() {
     callbackContext = nullptr;
     mutex.unlock();
 }
+

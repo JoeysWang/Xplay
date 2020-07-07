@@ -31,10 +31,7 @@ void GLVideoView::render(XData *data) {
     XEGL::get()->draw();
 }
 
-void GLVideoView::setMatrix(float *m, int size) {
-    LOGD("GLVideoView::setMatrix");
-    for (int i = 0; i < size; ++i) {
-        matrix[i] = *(m + i);
-        LOGD("setMatrix  matrix[%d]= %f", i, matrix[i]);
-    }
+GLVideoView::~GLVideoView() {
+    view = nullptr;
+    delete texture;
 }

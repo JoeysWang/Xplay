@@ -17,8 +17,6 @@ public:
 
     VideoDecode(PlayerState *playerState);
 
-    virtual ~VideoDecode();
-
     void start() override;
 
     void close();

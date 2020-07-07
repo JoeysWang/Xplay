@@ -21,8 +21,6 @@ void XThread::start() {
     th.detach();
 }
 
-
-
 void XThread::stop() {
     isExit = true;
     for (int i = 0; i < 200; i++) {

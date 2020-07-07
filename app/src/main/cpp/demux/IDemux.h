@@ -37,6 +37,7 @@ public:
     //总时长
     int totalMs = 0;
 public:
+    AVStream *pStream=0;
     AVFormatContext *formatContext = 0;
     int audioStreamIndex = 0;
     int videoStreamIndex = 0;

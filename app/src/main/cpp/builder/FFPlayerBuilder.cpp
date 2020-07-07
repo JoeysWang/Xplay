@@ -32,8 +32,8 @@ IVideoView *FFPlayerBuilder::createVideoView() {
     return new GLVideoView();
 }
 
-IAudioPlay *FFPlayerBuilder::createAudioPlay() {
-    return new SLAudioPlay();
+IAudioPlay *FFPlayerBuilder::createAudioPlay(PlayerState *playerState) {
+    return new SLAudioPlay(playerState);
 }
 
 IPlayer *FFPlayerBuilder::createPlayer(unsigned char index) {

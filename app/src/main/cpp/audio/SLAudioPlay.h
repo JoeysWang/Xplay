@@ -12,7 +12,7 @@
 
 class SLAudioPlay : public IAudioPlay {
 public:
-    SLAudioPlay();
+    SLAudioPlay(PlayerState *playerState);
 
     virtual ~SLAudioPlay();
 

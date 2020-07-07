@@ -24,7 +24,7 @@ protected:
 
     IVideoView *createVideoView() override;
 
-    IAudioPlay *createAudioPlay() override;
+    IAudioPlay *createAudioPlay(PlayerState *playerState) override;
 
     IPlayer *createPlayer(unsigned char index = 0) override;
 

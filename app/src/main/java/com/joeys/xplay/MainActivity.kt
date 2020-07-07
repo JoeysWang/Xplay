@@ -39,7 +39,12 @@ class MainActivity : AppCompatActivity() {
             open(file.absolutePath)
         }
         test.setOnClickListener {
-//            xplay.text()
+            val intent= Intent(Intent.ACTION_VIEW)
+            intent.setData(Uri.parse("http://weixin.qq.com/r/o3W_sRvEMSVOhwrSnyCH"))
+            intent.setPackage("com.tencent.mm")
+            intent.putExtra(Intent.EXTRA_SUBJECT,"Share")
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            startActivity(intent)
         }
         btn_scan.setOnClickListener {
 
@@ -69,7 +74,9 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun open(path: String) {
-//        metadata?.let {
+//        val metadataRetriever = MediaMetadataRetriever()
+//        metadataRetriever.setDataSource(path)
+//        metadataRetriever.getMetadata()?.let {
 //            val width = it.getInt("video_width")
 //            val height = it.getInt("video_height")
 //            val layoutParams = xplay.layoutParams

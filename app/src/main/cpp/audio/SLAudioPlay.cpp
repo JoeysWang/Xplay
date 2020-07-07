@@ -7,8 +7,7 @@
 #include <SLES/OpenSLES_Android.h>
 #include <SLES/OpenSLES.h>
 
-
-SLAudioPlay::SLAudioPlay() {
+SLAudioPlay::SLAudioPlay(PlayerState *playerState) : IAudioPlay(playerState) {
     buffer = new unsigned char[1024 * 1024];
 }
 
@@ -37,9 +36,7 @@ static void pcmCallback(SLAndroidSimpleBufferQueueItf bf, void *context) {
         return;
     }
     slAudioPlayer->playCall((void *) bf);
-
 }
-
 
 bool SLAudioPlay::startPlay(XParameter out) {
     engineItf = createSL();
@@ -94,8 +91,6 @@ bool SLAudioPlay::startPlay(XParameter out) {
         LOGE("(*engineItf)->CreateAudioPlayer ERROR");
         return false;
     }
-//    else
-//        LOGD("(*engineItf)->CreateAudioPlayer success");
 
     (*player)->Realize(player, SL_BOOLEAN_FALSE);
 
@@ -110,10 +105,11 @@ bool SLAudioPlay::startPlay(XParameter out) {
     (*pcmQueue)->Enqueue(pcmQueue, "", 1);
 
     return true;
-
 }
 
 void SLAudioPlay::playCall(void *bufferQueue) {
+    if (isExit || playerState->abortRequest || playerState->pauseRequest)
+        return;
     auto bf = (SLAndroidSimpleBufferQueueItf) bufferQueue;
     XData data = getData();
     if (data.size <= 0) {
@@ -179,14 +175,13 @@ SLuint32 SLAudioPlay::getCurSampleRate(int sample_rate) {
 }
 
 SLAudioPlay::~SLAudioPlay() {
-    mutex.lock();
     LOGI("~SLAudioPlay");
     delete buffer;
     engineSL = NULL;
     engineItf = NULL;
     mix = NULL;
     player = NULL;
-    mutex.unlock();
 }
+
 
 

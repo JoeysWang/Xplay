@@ -22,7 +22,7 @@ IPlayer *IPlayerBuilder::buildPlayer() {
 
     //音频链路
     IResample *resample = createResample(iplayer->playerState);
-    IAudioPlay *audioPlay = createAudioPlay();
+    IAudioPlay *audioPlay = createAudioPlay(iplayer->playerState);
     //mediaSync自己去取数据帧
 //    resample->addObserver(audioPlay);
 

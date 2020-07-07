@@ -15,6 +15,10 @@ class MediaSync2 {
 public:
     MediaSync2(PlayerState *playerState, IDecode *audioDecode, IDecode *videoDecode);
 
+    virtual ~MediaSync2();
+
+    void stop();
+
     double calculateDelay(double delay);
 
     double getMasterClock();

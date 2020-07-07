@@ -15,12 +15,17 @@
 #include "../audio/IAudioPlay.h"
 #include "../resample/IResample.h"
 
-class IPlayer : public XThread {
+class IPlayer    {
 
 public:
-    static IPlayer *get(unsigned char index = 0);
+    IPlayer();
 
-    virtual bool open(const char *path);
+    void openSource();
+
+    void start()  ;
+
+
+    static IPlayer *get(unsigned char index = 0);
 
     virtual bool initView(void *window);
 
@@ -32,6 +37,9 @@ public:
 
     virtual void release();
 
+    void setDataSource(std::string &url);
+
+public:
     PlayerState *playerState;
     MediaSync2 *mediaSync;
     IDemux *demux = 0;
@@ -40,16 +48,8 @@ public:
     IResample *resample = 0;
     IVideoView *videoView = 0;
     IAudioPlay *audioPlay = 0;
-
     //音频输出配置
     XParameter audioOutParam;
-
-    IPlayer();
-
-    void start() override;
-
-    void run() override;
-
 
 public:
     void *window;

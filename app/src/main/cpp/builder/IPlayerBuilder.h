@@ -29,7 +29,7 @@ protected:
 
     virtual IVideoView *createVideoView() = 0;
 
-    virtual IAudioPlay *createAudioPlay() = 0;
+    virtual IAudioPlay *createAudioPlay(PlayerState *playerState) = 0;
 
     virtual IPlayer *createPlayer(unsigned char index = 0) = 0;
 

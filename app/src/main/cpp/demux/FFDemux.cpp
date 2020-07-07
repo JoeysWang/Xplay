@@ -11,19 +11,23 @@ extern "C" {
 }
 
 FFDemux::FFDemux(PlayerState *playerState) : IDemux(playerState) {
-    static bool isFirst = true;
-    if (isFirst) {
 
-        isFirst = false;
-        //注册所有解封装器
-        av_register_all();
-
-        avcodec_register_all();
-
-        avformat_network_init();
-        LOGI("regsist ffmpeg");
-    }
+    //注册所有解封装器
+    formatContext = nullptr;
+    av_register_all();
+    avcodec_register_all();
+    avformat_network_init();
+    LOGI("regsist ffmpeg");
 }
+
+FFDemux::~FFDemux() {
+    avformat_network_deinit();
+
+
+    delete formatContext;
+    LOGI("~FFDemux");
+}
+
 
 //打开文件、流媒体 http rtsp
 bool FFDemux::open(const char *url) {
@@ -87,7 +91,9 @@ XData FFDemux::read() {
         return XData();
     }
     //转换pts
-    AVStream *pStream = formatContext->streams[avPacket->stream_index];
+    if (!pStream)
+        pStream = formatContext->streams[avPacket->stream_index];
+
     double ptsSeconds =
             avPacket->pts * av_q2d(pStream->time_base) *
             1000;//demux出来的帧的pts：是相对于源AVStream的timebase
@@ -165,16 +171,10 @@ AVStream *FFDemux::getVideoStream() {
 }
 
 
-
 void FFDemux::close() {
     mutex.lock();
     if (formatContext)
         avformat_close_input(&formatContext);
     mutex.unlock();
-}
-
-FFDemux::~FFDemux() {
-    delete formatContext;
-    LOGI("~FFDemux");
 }
 

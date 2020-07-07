@@ -12,6 +12,7 @@
 class IVideoView   {
 
 public:
+    virtual ~IVideoView();
 
     virtual void setRender(void *view) = 0;
 

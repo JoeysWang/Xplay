@@ -12,23 +12,27 @@
 
 IPlayer::IPlayer() {
     playerState = new PlayerState();
-    LOGI("IPlayer constructor playerState=%p",playerState);
+    LOGI("IPlayer constructor playerState=%p", playerState);
 }
-static IPlayer players[1];
 
 IPlayer *IPlayer::get(unsigned char index) {
-    return &players[index];
+    return new IPlayer();
 }
 
-void IPlayer::run() {
-
+void IPlayer::setDataSource(std::string &url) {
+    playerState->url = url;
 }
 
-bool IPlayer::open(const char *path) {
+void IPlayer::openSource() {
     mutex.lock();
+    if (playerState->url.empty()) {
+        LOGE("IPlayer::open url is empty ");
+        return;
+    }
+    const char *path = playerState->url.c_str();
     if (!demux || !demux->open(path)) {
         LOGE("IPlayer::open demux error ");
-        return false;
+        return;
     }
     if (!videoDecode ||
         !videoDecode->openDecode(demux->getVideoParameter(),
@@ -53,7 +57,6 @@ bool IPlayer::open(const char *path) {
     }
     mutex.unlock();
     LOGI("IPlayer::open success!");
-    return true;
 }
 
 void IPlayer::start() {
@@ -80,7 +83,6 @@ void IPlayer::start() {
     demux->start();
     mediaSync->start();
 
-    XThread::start();
     mutex.unlock();
 }
 
@@ -98,7 +100,7 @@ bool IPlayer::initView(void *window) {
 void IPlayer::pause() {
     mutex.lock();
     playerState->pauseRequest = 1;
-    LOGD("IPlayer::pause %p = %d",playerState,playerState->pauseRequest);
+    LOGD("IPlayer::pause %p = %d", playerState, playerState->pauseRequest);
     mutex.unlock();
 }
 
@@ -112,21 +114,44 @@ void IPlayer::resume() {
 void IPlayer::release() {
     mutex.lock();
     LOGD("IPlayer::release");
+    delete mediaSync;
     delete demux;
     delete audioDecode;
     delete videoDecode;
     delete resample;
     delete videoView;
     delete audioPlay;
+    delete playerState;
     mutex.unlock();
 }
 
 void IPlayer::stop() {
     mutex.lock();
-    XThread::stop();
     playerState->abortRequest = 1;
-    if (audioDecode) { audioDecode->stop(); }
-    if (videoDecode) { videoDecode->stop(); }
-    if (resample) { resample->stop(); }
+    if (mediaSync) {
+        LOGI("mediaSync->stop() ");
+        mediaSync->stop();
+    }
+    if (audioPlay) {
+        LOGI("audioPlay->stop() ");
+        audioPlay->stop();
+    }
+    if (demux) {
+        LOGI("demux->stop() ");
+        demux->stop();
+    }
+    if (audioDecode) {
+        LOGI("audioDecode->stop() ");
+        audioDecode->stop();
+    }
+    if (videoDecode) {
+        LOGI("videoDecode->stop() ");
+        videoDecode->stop();
+    }
+    if (resample) {
+        LOGI("resample->stop() ");
+        resample->stop();
+    }
+
     mutex.unlock();
 }

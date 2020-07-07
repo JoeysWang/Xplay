@@ -103,15 +103,15 @@ public:
     int64_t videoDuration;          // 视频时长
 
     AVInputFormat *iformat;         // 指定文件封装格式，也就是解复用器
-    const char *url;                // 文件路径
+    std::string url;                // 文件路径
     int64_t offset;                 // 文件偏移量
     const char *headers;            // 文件头信息
 
     const char *audioCodecName;     // 指定音频解码器名称
     const char *videoCodecName;     // 指定视频解码器名称
 
-    int abortRequest=0;               // 退出标志
-    int pauseRequest=0;               // 暂停标志
+    int abortRequest = 0;               // 退出标志
+    int pauseRequest = 0;               // 暂停标志
     SyncType syncType;              // 同步类型
     int64_t startTime;              // 播放起始位置
     int64_t duration;               // 播放时长

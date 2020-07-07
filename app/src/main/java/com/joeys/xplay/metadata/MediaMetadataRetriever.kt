@@ -1,12 +1,29 @@
 package com.joeys.xplay.metadata
 
+import android.util.Log
+import androidx.annotation.IntegerRes
 import java.util.*
 
 class MediaMetadataRetriever {
-    init {
-        System.loadLibrary("metadata_retriever")
-        native_setup()
+    companion object {
+        init {
+            System.loadLibrary("metadata_retriever")
+            native_init()
+        }
+
+        external fun native_init()
     }
+
+    var mNativeContext: Long = 0
+
+    init {
+        native_setup()
+        Log.i(
+            "xplay",
+            "MediaMetadataRetriever init  ${java.lang.Long.toHexString(mNativeContext)}"
+        );
+    }
+
 
     external fun native_setup()
 

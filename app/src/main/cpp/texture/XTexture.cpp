@@ -14,7 +14,6 @@ class CXTexture : public XTexture {
 public:
     XShader shader;
 
-
     bool init(void *win,
               int width, int height, XTextureType textureType) override {
         if (!win)return false;

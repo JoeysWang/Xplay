@@ -44,7 +44,6 @@ add_library(
         queue/FrameQueue.cpp
         sync/MediaSync2.cpp
         sync/MediaClock.cpp
-        player/IPlayerProxy.cpp
 
         test/QueueTest.cpp
         test/Ts.cpp

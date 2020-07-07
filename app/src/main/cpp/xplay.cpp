@@ -5,7 +5,6 @@
 #include "player/IPlayer.h"
 #include "builder/IPlayerBuilder.h"
 #include "builder/FFPlayerBuilder.h"
-#include "player/IPlayerProxy.h"
 #include "test/QueueTest.h"
 #include <thread>
 #include <chrono>
@@ -13,44 +12,70 @@
 extern "C" {
 #include "libavcodec/avcodec.h"
 }
-
+struct fields_t {
+    jfieldID context;
+    jmethodID post_event;
+};
+static fields_t fields;
 ANativeWindow *window;
-jfieldID context;
+
+struct retriever_fields_t {
+    jfieldID context;
+};
 
 static IPlayer *getMediaPlayer(JNIEnv *env, jobject thiz) {
-    IPlayer *const mp = (IPlayer *) env->GetLongField(thiz, context);
+    IPlayer *const mp = (IPlayer *) env->GetLongField(thiz, fields.context);
     return mp;
 }
 
 static IPlayer *setMediaPlayer(JNIEnv *env, jobject thiz, long mediaPlayer) {
-    IPlayer *old = (IPlayer *) env->GetLongField(thiz, context);
-    env->SetLongField(thiz, context, mediaPlayer);
+    IPlayer *old = (IPlayer *) env->GetLongField(thiz, fields.context);
+    env->SetLongField(thiz, fields.context, mediaPlayer);
     return old;
 }
 
 extern "C"
 JNIEXPORT void JNICALL
+Java_com_joeys_xplay_Xplay_00024Companion_native_1init(JNIEnv *env, jobject thiz) {
+    jclass clazz = env->FindClass("com/joeys/xplay/Xplay");
+    if (clazz == NULL) {
+        return;
+    }
+    fields.context = env->GetFieldID(clazz, "mNativeContext", "J");
+    if (fields.context == NULL) {
+        return;
+    }
+    env->DeleteLocalRef(clazz);
+}
+
+
+extern "C"
+JNIEXPORT void JNICALL
 Java_com_joeys_xplay_Xplay_iplayerIinit(JNIEnv *env, jobject thiz) {
     LOGI("Xplay_iplayerIinit");
-    jclass clazz = env->FindClass("com/joeys/xplay/Xplay");
-    context = env->GetFieldID(clazz, "mNativeContext", "J");
     IPlayer *pPlayer = FFPlayerBuilder::get()->buildPlayer();
     setMediaPlayer(env, thiz, (long) pPlayer);
 }
 
 extern "C"
 JNIEXPORT jboolean JNICALL
-Java_com_joeys_xplay_Xplay_open(JNIEnv *env, jobject thiz, jstring _url) {
-    using namespace std;
+Java_com_joeys_xplay_Xplay__1setDataSource(JNIEnv *env, jobject thiz, jstring _url) {
+
     const char *url = env->GetStringUTFChars(_url, 0);
-    getMediaPlayer(env, thiz)->open(url);
+    auto s = new std::string(url);
+    getMediaPlayer(env, thiz)->setDataSource(*s);
     if (window) {
         getMediaPlayer(env, thiz)->initView(window);
     }
-    getMediaPlayer(env, thiz)->start();
     return 0;
 }
 
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_joeys_xplay_Xplay__1start(JNIEnv *env, jobject thiz) {
+    getMediaPlayer(env, thiz)->openSource();
+    getMediaPlayer(env, thiz)->start();
+}
 
 extern "C"
 JNIEXPORT void JNICALL

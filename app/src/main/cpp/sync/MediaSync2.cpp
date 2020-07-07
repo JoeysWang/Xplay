@@ -14,7 +14,6 @@ MediaSync2::MediaSync2(PlayerState *playerState, IDecode *audioDecode, IDecode *
     maxFrameDuration = 10.0;
 }
 
-
 void MediaSync2::start() {
     isExist = false;
     std::thread audioThread(&MediaSync2::audioPlay, this);
@@ -23,16 +22,14 @@ void MediaSync2::start() {
     videoThread.detach();
 }
 
-
 void MediaSync2::audioPlay() {
     for (;;) {
-        if (isExist || playerState->abortRequest) { break; }
+        if (isExist || playerState->abortRequest) { return; }
         if (playerState->pauseRequest) {
             LOGI("MediaSync2::audioPlay sleep for pause");
             std::chrono::milliseconds duration(500);
             std::this_thread::sleep_for(duration);
             continue;
-
         }
         XData *frameWrapper = audioDecode->getFrameQueue()->currentFrame();
         if (frameWrapper->size == 0 || lastFramePts == 0) {
@@ -40,17 +37,14 @@ void MediaSync2::audioPlay() {
             std::this_thread::sleep_for(duration);
             continue;
         }
-//        LOGI("audio play");
         resample->update(*frameWrapper);
-//        audioClock->setClock(frameWrapper->pts);
         audioDecode->getFrameQueue()->popFrame();
     }
-
 }
 
 void MediaSync2::videoPlay() {
     for (;;) {
-        if (isExist || playerState->abortRequest) { break; }
+        if (isExist || playerState->abortRequest) { return; }
         if (playerState->pauseRequest) {
             LOGI("MediaSync2::videoPlay sleep for pause");
             std::chrono::milliseconds duration(500);
@@ -102,8 +96,6 @@ double MediaSync2::getMasterClock() {
 
 void MediaSync2::setResample(IResample *pResample) {
     MediaSync2::resample = pResample;
-
-
 }
 
 void MediaSync2::setVideoView(IVideoView *videoView) {
@@ -112,13 +104,19 @@ void MediaSync2::setVideoView(IVideoView *videoView) {
 
 void MediaSync2::setAudioPlay(IAudioPlay *pAudioPlay) {
     MediaSync2::iAudioPlay = pAudioPlay;
-
     iAudioPlay->setCallback(MediaSync2::audioCallBack, (void *) this);
-
-
 }
 
 void MediaSync2::audioCallBack(double pts, uint8_t *stream, int len, void *context) {
     auto mediaSync2 = (MediaSync2 *) context;
     mediaSync2->audioClock->setClock(pts);
+}
+
+void MediaSync2::stop() {
+    isExist = true;
+}
+
+MediaSync2::~MediaSync2() {
+    delete audioClock;
+    delete videoClock;
 }

@@ -7,7 +7,7 @@
 #include "../XLog.h"
 
 IDemux::IDemux(PlayerState *playerState) : playerState(playerState) {
-
+    LOGI("IDemux constructor %p", playerState);
 }
 
 void IDemux::run() {
@@ -27,8 +27,11 @@ void IDemux::run() {
 IDemux::~IDemux() {
     if (formatContext) {
         LOGD("~IDemux");
+        avformat_close_input(&formatContext);
         avformat_free_context(formatContext);
         formatContext = nullptr;
     }
+
+
 }
 

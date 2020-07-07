@@ -8,7 +8,6 @@ import android.util.Log
 import com.blankj.utilcode.util.ScreenUtils
 import com.joeys.xplay.R
 import com.joeys.xplay.metadata.MediaMetadataRetriever
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_player.*
 
 class PlayerActivity : AppCompatActivity() {
@@ -18,16 +17,15 @@ class PlayerActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_player)
+        setDataSource()
         btn_start_pause.setOnClickListener {
-            open()
+            xplay.start()
         }
     }
 
+    private val retriever = MediaMetadataRetriever()
 
-    private val mediaMetadataRetriever by lazy {  MediaMetadataRetriever()}
-
-    fun open() {
-        val retriever = mediaMetadataRetriever
+    fun setDataSource() {
         retriever.setDataSource(url)
         retriever.getMetadata()?.let {
             Log.d("xplay", "Metadata: $it")
@@ -37,9 +35,10 @@ class PlayerActivity : AppCompatActivity() {
             layoutParams.width = ScreenUtils.getScreenWidth()
             layoutParams.height = ScreenUtils.getScreenWidth() * height / width
             xplay.layoutParams = layoutParams
+            info.text=it.toString()
         }
-        xplay.open(url)
-
+        retriever.release()
+        xplay.setDataSource(url)
     }
 
     override fun onResume() {
@@ -59,9 +58,7 @@ class PlayerActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        xplay.stop()
         xplay.release()
-        mediaMetadataRetriever.release()
     }
 
     companion object {

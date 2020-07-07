@@ -15,21 +15,21 @@ IDecode::~IDecode() {
     mutex.lock();
     if (packetQueue) {
         packetQueue->quit();
-        delete packetQueue;
         packetQueue = nullptr;
     }
     if (frameQueue) {
         frameQueue->flush();
-        delete frameQueue;
         frameQueue = nullptr;
     }
+    avcodec_close(codecContext);
     avcodec_free_context(&codecContext);
-
     mutex.unlock();
 }
 
 void IDecode::run() {
     while (!isExit) {
+        if (playerState->abortRequest)
+            return;
         if (playerState->pauseRequest) {
             LOGI("IDecode sleep for pause");
             std::chrono::milliseconds duration(500);
@@ -83,9 +83,7 @@ void IDecode::update(XData data) {
         return;
     }
     //生产者，把数据压入list
-
     pushPacket(data);
-
 }
 
 FrameQueue *IDecode::getFrameQueue() const {
@@ -95,12 +93,10 @@ FrameQueue *IDecode::getFrameQueue() const {
 int IDecode::pushPacket(XData data) {
     if (!packetQueue)return -1;
     return packetQueue->push(data);
-
 }
 
 Queue<XData> *IDecode::getPacketQueue() const {
     return packetQueue;
-
 }
 
 int IDecode::getFrameSize() {

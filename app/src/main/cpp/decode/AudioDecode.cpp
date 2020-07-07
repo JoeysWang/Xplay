@@ -5,17 +5,10 @@
 #include <thread>
 #include "AudioDecode.h"
 
-AudioDecode::AudioDecode(PlayerState *playerState):IDecode(playerState) {
+AudioDecode::AudioDecode(PlayerState *playerState) : IDecode(playerState) {
     mutex.lock();
     frameQueue = new FrameQueue(FRAME_QUEUE_SIZE, 1);
     packetQueue = new Queue<XData>(100);
-    mutex.unlock();
-}
-
-AudioDecode::~AudioDecode() {
-    mutex.lock();
-    LOGI("~AudioDecode");
-
     mutex.unlock();
 }
 
@@ -29,10 +22,10 @@ int AudioDecode::decodePacket() {
     int got_frame = 0;
     int ret = 0;
     AVFrame *frame;
-
     do {
-        if (isExit) {
+        if (isExit || playerState->abortRequest) {
             ret = -1;
+            LOGI("AudioDecode abortRequest break");
             break;
         }
         XData input;

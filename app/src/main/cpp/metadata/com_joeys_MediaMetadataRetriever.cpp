@@ -5,26 +5,40 @@
 #include <jni.h>
 #include "../XLog.h"
 #include "MediaMetadataRetriever.h"
-
-static const char *const RETRIEVER_CLASS_NAME = "com/joeys/xplay/metadata/MediaMetadataRetriever";
+//
+//static const char *const RETRIEVER_CLASS_NAME = "com/joeys/xplay/metadata/MediaMetadataRetriever";
 
 struct retriever_fields_t {
     jfieldID context;
 };
 static retriever_fields_t fields;
-static MediaMetadataRetriever *retriever;
 
 static void setRetriever(JNIEnv *env, jobject thiz, long retriever) {
-    MediaMetadataRetriever *old = (MediaMetadataRetriever *) env->GetLongField(thiz,
-                                                                               fields.context);
+    auto *old = (MediaMetadataRetriever *) env->GetLongField(thiz, fields.context);
     env->SetLongField(thiz, fields.context, retriever);
 }
 
 static MediaMetadataRetriever *getRetriever(JNIEnv *env, jobject thiz) {
-    MediaMetadataRetriever *retriever = (MediaMetadataRetriever *) env->GetLongField(thiz,
-                                                                                     fields.context);
+    auto *retriever = (MediaMetadataRetriever *) env->GetLongField(thiz,
+                                                                   fields.context);
     return retriever;
 }
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_joeys_xplay_metadata_MediaMetadataRetriever_00024Companion_native_1init(
+        JNIEnv *env,
+        jobject thiz) {
+    jclass clazz = env->FindClass("com/joeys/xplay/metadata/MediaMetadataRetriever");
+    if (clazz == NULL) {
+        LOGE("MediaMetadataRetriever jclazz is null");
+        return;
+    }
+    fields.context = env->GetFieldID(clazz, "mNativeContext", "J");
+    if (fields.context == nullptr) {
+        return;
+    }
+}
+
 
 void throwException(JNIEnv *env, const char *className, const char *msg) {
     jclass exception = env->FindClass(className);
@@ -68,20 +82,20 @@ static jstring newUTFString(JNIEnv *env, const char *data) {
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_joeys_xplay_metadata_MediaMetadataRetriever_native_1setup(JNIEnv *env, jobject thiz) {
-    LOGI("Java_com_joeys_xplay_MediaMetadataRetriever_native_1setup");
-
-    retriever = new MediaMetadataRetriever();
-//    setRetriever(env, thiz, (long) retriever);
+    auto retriever = new MediaMetadataRetriever();
+    LOGI("MediaMetadataRetriever_native_1setup  %p",retriever);
+    setRetriever(env, thiz, (long) retriever);
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_joeys_xplay_metadata_MediaMetadataRetriever_setDataSource(JNIEnv *env, jobject thiz,
-                                                                   jstring url_) {
+Java_com_joeys_xplay_metadata_MediaMetadataRetriever_setDataSource(
+        JNIEnv *env,
+        jobject thiz,
+        jstring url_) {
     const char *url = env->GetStringUTFChars(url_, 0);
     LOGI("Java_com_joeys_xplay_MediaMetadataRetriever_setDataSource -> %s", url);
-//    MediaMetadataRetriever *retriever = getRetriever(env, thiz);
-
+    auto retriever = getRetriever(env, thiz);
     if (retriever) {
         retriever->setDataSource(url);
     }
@@ -90,13 +104,11 @@ Java_com_joeys_xplay_metadata_MediaMetadataRetriever_setDataSource(JNIEnv *env, 
 extern "C"
 JNIEXPORT jobject JNICALL
 Java_com_joeys_xplay_metadata_MediaMetadataRetriever__1getAllMetadata(JNIEnv *env, jobject thiz) {
-
-//    MediaMetadataRetriever *retriever = getRetriever(env, thiz);
-    if (retriever == NULL) {
+    auto *retriever = getRetriever(env, thiz);
+    if (retriever == nullptr) {
         throwException(env, "java/lang/IllegalStateException", "No retriever available");
         return NULL;
     }
-
     AVDictionary *metadata = NULL;
     int ret = retriever->getMetadata(&metadata);
     if (ret == 0) {
@@ -122,5 +134,6 @@ Java_com_joeys_xplay_metadata_MediaMetadataRetriever__1getAllMetadata(JNIEnv *en
 }extern "C"
 JNIEXPORT void JNICALL
 Java_com_joeys_xplay_metadata_MediaMetadataRetriever_release(JNIEnv *env, jobject thiz) {
-    if (retriever)delete retriever;
+    auto *retriever = getRetriever(env, thiz);
+    delete retriever;
 }

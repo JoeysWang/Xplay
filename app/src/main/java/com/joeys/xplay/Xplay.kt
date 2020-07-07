@@ -13,6 +13,7 @@ import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.TextureView
 import androidx.appcompat.app.AppCompatActivity
+import com.blankj.utilcode.util.UriUtils
 import com.joeys.xplay.IMediaPlayer.MEDIA_INFO_VIDEO_TRACK_LAGGING
 import java.io.FileDescriptor
 import java.lang.ref.WeakReference
@@ -32,13 +33,33 @@ class Xplay : TextureView, TextureView.SurfaceTextureListener, IMediaPlayer {
 
     var mNativeContext: Long = 0
 
+    companion object {
+
+        private val TAG = "xplay" // interface test message
+        private val MEDIA_NOP = 0 // interface test message
+
+        private val MEDIA_PREPARED = 1
+        private val MEDIA_PLAYBACK_COMPLETE = 2
+        private val MEDIA_BUFFERING_UPDATE = 3
+        private val MEDIA_SEEK_COMPLETE = 4
+        private val MEDIA_SET_VIDEO_SIZE = 5
+        private val MEDIA_TIMED_TEXT = 99
+        private val MEDIA_ERROR = 100
+        private val MEDIA_INFO = 200
+        private val MEDIA_CURRENT = 300
+
+        init {
+            System.loadLibrary("xplay")
+            native_init()
+        }
+
+        external fun native_init()
+    }
 
     constructor(context: Context) : super(context)
     constructor(context: Context, attributeSet: AttributeSet) : super(context, attributeSet)
 
     init {
-        System.loadLibrary("xplay")
-
         val looper = Looper.myLooper()
 
         when {
@@ -54,7 +75,7 @@ class Xplay : TextureView, TextureView.SurfaceTextureListener, IMediaPlayer {
     }
 
     private external fun iplayerIinit()
-    external fun open(url: String): Boolean
+    private external fun _setDataSource(url: String): Boolean
     external fun text()
     private external fun initView(holder: Surface?)
 
@@ -103,21 +124,6 @@ class Xplay : TextureView, TextureView.SurfaceTextureListener, IMediaPlayer {
         }
     }
 
-    companion object {
-
-        private val TAG = "xplay" // interface test message
-        private val MEDIA_NOP = 0 // interface test message
-
-        private val MEDIA_PREPARED = 1
-        private val MEDIA_PLAYBACK_COMPLETE = 2
-        private val MEDIA_BUFFERING_UPDATE = 3
-        private val MEDIA_SEEK_COMPLETE = 4
-        private val MEDIA_SET_VIDEO_SIZE = 5
-        private val MEDIA_TIMED_TEXT = 99
-        private val MEDIA_ERROR = 100
-        private val MEDIA_INFO = 200
-        private val MEDIA_CURRENT = 300
-    }
 
     private inner class EventHandler(val mMediaPlayer: Xplay, looper: Looper?) : Handler(looper) {
 
@@ -276,15 +282,16 @@ class Xplay : TextureView, TextureView.SurfaceTextureListener, IMediaPlayer {
     }
 
     override fun start() {
-        Log.d(TAG, "Not yet implemented")
+        _start()
     }
+    private external fun _start()
 
     override fun setVolume(leftVolume: Float, rightVolume: Float) {
         Log.d(TAG, "Not yet implemented")
     }
 
     override fun setDataSource(context: Context, uri: Uri) {
-        Log.d(TAG, "Not yet implemented")
+        _setDataSource(UriUtils.uri2File(uri).absolutePath)
     }
 
     override fun setDataSource(context: Context, uri: Uri, headers: MutableMap<String, String>?) {
@@ -292,7 +299,7 @@ class Xplay : TextureView, TextureView.SurfaceTextureListener, IMediaPlayer {
     }
 
     override fun setDataSource(path: String) {
-        Log.d(TAG, "Not yet implemented")
+        _setDataSource(path)
     }
 
     override fun setDataSource(path: String, headers: MutableMap<String, String>?) {
@@ -378,6 +385,7 @@ class Xplay : TextureView, TextureView.SurfaceTextureListener, IMediaPlayer {
     }
 
     private external fun _stop()
+
     override fun setOnBufferingUpdateListener(listener: IMediaPlayer.OnBufferingUpdateListener?) {
     }
 

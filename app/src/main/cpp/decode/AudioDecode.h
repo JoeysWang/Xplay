@@ -12,8 +12,6 @@ class AudioDecode : public IDecode {
 public:
     AudioDecode(PlayerState *playerState);
 
-    ~AudioDecode();
-
     int decodePacket() override;
 
     void start() override;

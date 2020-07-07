@@ -30,7 +30,7 @@ void PlayerState::init() {
     memset(codec_opts, 0, sizeof(AVDictionary));
 
     iformat = NULL;
-    url = NULL;
+    url = "";
     headers = NULL;
 
     audioCodecName = NULL;
@@ -53,10 +53,7 @@ void PlayerState::reset() {
     if (codec_opts) {
         av_dict_free(&codec_opts);
     }
-    if (url) {
-        av_freep(&url);
-        url = NULL;
-    }
+    url = "";
     offset = 0;
 //    abortRequest = 1;
 //    pauseRequest = 1;
