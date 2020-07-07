@@ -17,6 +17,7 @@ public:
 
     virtual ~MediaSync2();
 
+    void pause();
     void stop();
 
     double calculateDelay(double delay);
@@ -38,6 +39,7 @@ private:
     IResample *resample;
     IVideoView *videoView;
     IAudioPlay *iAudioPlay;
+    double frameTimer;                      // 视频时钟
 
     double lastFramePts = 0.0;
 

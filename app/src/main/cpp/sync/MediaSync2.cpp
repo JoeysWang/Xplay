@@ -59,9 +59,11 @@ void MediaSync2::videoPlay() {
             continue;
         }
 
+
         double current_pts = frameWrapper->pts;
         double lastDuration = current_pts - lastFramePts;
         double delay = calculateDelay(lastDuration);
+
         if (delay > 0) {
             std::chrono::milliseconds duration((int) (delay * 1000));
             std::this_thread::sleep_for(duration);
@@ -77,7 +79,6 @@ double MediaSync2::calculateDelay(double delay) {
     double sync_threshold, diff = 0;
     diff = videoClock->getClock() - getMasterClock();
     sync_threshold = FFMAX(AV_SYNC_THRESHOLD_MIN, FFMIN(AV_SYNC_THRESHOLD_MAX, delay));
-//    LOGI("diff =%f sync_threshold=%f", diff, sync_threshold);
     if (!isnan(diff) && fabs(diff) < maxFrameDuration) {
         if (diff <= -sync_threshold) {
             delay = FFMAX(0, delay + diff);
@@ -89,6 +90,8 @@ double MediaSync2::calculateDelay(double delay) {
     }
     return delay;
 }
+
+
 
 double MediaSync2::getMasterClock() {
     return audioClock->getClock();

@@ -27,6 +27,7 @@ double MediaClock::getClock() {
     }
 }
 
+
 void MediaClock::setClock(double pts, double time) {
     this->pts = pts;
     this->last_updated = time;
