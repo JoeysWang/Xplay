@@ -32,6 +32,10 @@ public:
 
     AVStream *getVideoStream() override;
 
+    void getAllStream();
+
+    void readPacket() override;
+
 private:
     std::mutex mutex;
 

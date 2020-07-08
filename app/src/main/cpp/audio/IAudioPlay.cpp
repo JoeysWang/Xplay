@@ -4,6 +4,7 @@
 
 #include "IAudioPlay.h"
 #include "../XLog.h"
+
 IAudioPlay::IAudioPlay(PlayerState *playerState) : playerState(playerState) {
 
 }
@@ -14,7 +15,7 @@ XData IAudioPlay::getData() {
     if (frames.empty()) {
         notEmpty.wait(lock);
     }
-    if (isExit){
+    if (isExit) {
         return d;
     }
     d = frames.front();
@@ -22,6 +23,13 @@ XData IAudioPlay::getData() {
     frames.pop_front();
     notFull.notify_all();
     return d;
+}
+
+void IAudioPlay::stop() {
+    LOGD(" IAudioPlay::stop");
+    isExit = true;
+    notEmpty.notify_all();
+    notFull.notify_all();
 }
 
 void IAudioPlay::update(XData data) {

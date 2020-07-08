@@ -33,8 +33,11 @@ public:
 
         shader.draw();
     }
+
+    ~CXTexture() {}
 };
 
 XTexture *XTexture::create() {
     return new CXTexture();
 }
+

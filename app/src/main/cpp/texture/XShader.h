@@ -21,6 +21,8 @@ public:
 
     void draw();
 
+    virtual ~XShader();
+
     int inputTextureHandle[MAX_TEXTURES]; // 纹理句柄列表
 
 

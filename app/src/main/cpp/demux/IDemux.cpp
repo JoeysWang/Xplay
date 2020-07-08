@@ -11,27 +11,28 @@ IDemux::IDemux(PlayerState *playerState) : playerState(playerState) {
 }
 
 void IDemux::run() {
-    while (!isExit || !playerState->abortRequest) {
-        if (playerState->pauseRequest) {
-            LOGI("IDemux sleep for pause");
-            std::chrono::milliseconds duration(500);
-            std::this_thread::sleep_for(duration);
-            continue;
-        }
-        XData d = read();
-        if (d.size > 0)
-            notify(d);
-    }
+    readPacket();
+}
+
+void IDemux::setAudioDecode(IDecode *audioDecode) {
+    IDemux::audioDecode = audioDecode;
+}
+
+void IDemux::setVideoDecode(IDecode *videoDecode) {
+    IDemux::videoDecode = videoDecode;
 }
 
 IDemux::~IDemux() {
+    mutex.lock();
     if (formatContext) {
         LOGD("~IDemux");
         avformat_close_input(&formatContext);
         avformat_free_context(formatContext);
         formatContext = nullptr;
     }
-
+    audioDecode = nullptr;
+    videoDecode = nullptr;
+    mutex.unlock();
 
 }
 

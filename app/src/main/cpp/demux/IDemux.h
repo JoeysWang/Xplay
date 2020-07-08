@@ -9,6 +9,7 @@
 #include "../XThread.h"
 #include "../IObserver.h"
 #include "../player/PlayerState.h"
+#include "../decode/IDecode.h"
 
 struct XParameter;
 
@@ -23,8 +24,7 @@ public:
 //打开文件、流媒体 http rtsp
     virtual bool open(const char *url) = 0;
 
-    //读取一帧数据，数据由调用者清理
-    virtual XData read() = 0;
+    virtual void readPacket() = 0;
 
     virtual XParameter getVideoParameter() = 0;
 
@@ -34,14 +34,21 @@ public:
 
     virtual AVStream *getVideoStream() = 0;
 
+    void setAudioDecode(IDecode *audioDecode);
+
+    void setVideoDecode(IDecode *videoDecode);
+
     //总时长
     int totalMs = 0;
 public:
-    AVStream *pStream=0;
+    AVStream *pStream = 0;
     AVFormatContext *formatContext = 0;
     int audioStreamIndex = 0;
     int videoStreamIndex = 0;
     PlayerState *playerState;
+
+    IDecode *audioDecode = nullptr;
+    IDecode *videoDecode = nullptr;
 
 protected:
     virtual void run();

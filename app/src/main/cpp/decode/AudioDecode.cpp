@@ -49,7 +49,7 @@ int AudioDecode::decodePacket() {
                 continue;
             } else {
                 input.drop();
-                av_packet_unref(pkt);
+
             }
             continue;
         }

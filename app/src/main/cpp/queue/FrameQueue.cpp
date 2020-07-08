@@ -104,7 +104,6 @@ int FrameQueue::getFrameSize() {
 void FrameQueue::unrefFrame(XData *vp) {
     av_frame_unref((vp->frame));
     memset(vp->decodeDatas, 0, 0);
-//    vp->decodeDatas = 0;
     vp->size = 0;
     vp->resampleData = 0;
     vp->width = 0;

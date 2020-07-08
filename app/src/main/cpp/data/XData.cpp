@@ -10,20 +10,18 @@ extern "C" {
 
 void XData::drop() {
     if (allocType == AVPACKET_TYPE) {
-        av_packet_free((AVPacket **) &resampleData);
-    } else
-        delete resampleData;
-    resampleData = 0;
-    if (frame)
+        av_packet_free(&packet);
+    } else {
         av_frame_unref(frame);
-    if (packet)
-        av_packet_unref(packet);
+        delete[] resampleData;
+        resampleData = nullptr;
+    }
     size = 0;
 }
 
 bool XData::alloc(int size, const char *data) {
     drop();
-    allocType = UCHAR_TYPE;
+    allocType = AVFRAME_TYPE;
     if (size <= 0) { return false; }
 
     this->resampleData = new unsigned char[size];

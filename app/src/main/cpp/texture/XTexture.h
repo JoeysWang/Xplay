@@ -13,6 +13,8 @@ enum XTextureType {
 
 class XTexture {
 public:
+    virtual ~XTexture() {};
+
     static XTexture *create();
 
     virtual bool init(void *win,

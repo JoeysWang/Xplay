@@ -12,18 +12,16 @@ extern "C" {
 struct AVPacket;
 enum XDataType {
     AVPACKET_TYPE = 0,
-    UCHAR_TYPE = 1,
+    AVFRAME_TYPE = 1,
 
 };
 
 struct XData {
-
     unsigned char *resampleData = 0;
     unsigned char *decodeDatas[8] = {0};
 
     AVFrame *frame = 0;
     AVPacket *packet = 0;
-
 
     int size = 0;
 

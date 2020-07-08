@@ -7,7 +7,29 @@
 
 class CXEGL : public XEGL {
 public:
+    void terminate() override {
+        LOGD("CXEGL terminate");
+        mWindow = nullptr;
+        if (eglSurface != EGL_NO_SURFACE) {
+            eglDestroySurface(display, eglSurface);
+            eglSurface = EGL_NO_SURFACE;
+        }
+        if (eglContext != EGL_NO_CONTEXT) {
+            if (display != EGL_NO_DISPLAY) {
+                eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+            }
+            if (eglContext != EGL_NO_CONTEXT) {
+                eglDestroyContext(display, eglContext);
+            }
+            if (display != EGL_NO_DISPLAY) {
+                eglReleaseThread();
+                eglTerminate(display);
+            }
+            display = EGL_NO_DISPLAY;
+            eglContext = EGL_NO_CONTEXT;
+        }
 
+    }
 
     void draw() override {
         if (display == EGL_NO_DISPLAY || eglSurface == EGL_NO_SURFACE) {

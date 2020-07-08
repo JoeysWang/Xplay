@@ -8,15 +8,20 @@
 #include "android/native_window_jni.h"
 #include "android/native_window.h"
 #include "EGL/egl.h"
+
 class XEGL {
 public:
-    virtual bool init(void *win,int width, int height) = 0;
-    virtual void draw( ) = 0;
+    virtual bool init(void *win, int width, int height) = 0;
+
+    virtual void draw() = 0;
+
+    virtual void terminate() = 0;
 
     static XEGL *get();
 
 protected:
-    XEGL(){}
+    XEGL() {}
+
     ANativeWindow *mWindow;             // Surface窗口
     int mSurfaceWidth;                  // 窗口宽度
     int mSurfaceHeight;                 // 窗口高度
@@ -24,7 +29,6 @@ protected:
     EGLSurface eglSurface = EGL_NO_SURFACE;
     EGLContext eglContext = EGL_NO_CONTEXT;
 };
-
 
 
 #endif //XPLAY_XEGL_H

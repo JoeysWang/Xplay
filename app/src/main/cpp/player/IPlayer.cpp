@@ -11,6 +11,13 @@
 #include "../XLog.h"
 
 IPlayer::IPlayer() {
+    mediaSync = nullptr;
+    demux = nullptr;
+    audioDecode = nullptr;
+    videoDecode = nullptr;
+    resample = nullptr;
+    videoView = nullptr;
+    audioPlay = nullptr;
     playerState = new PlayerState();
     LOGI("IPlayer constructor playerState=%p", playerState);
 }
@@ -21,10 +28,32 @@ IPlayer *IPlayer::get(unsigned char index) {
 
 void IPlayer::setDataSource(std::string &url) {
     playerState->url = url;
+    const char *path = playerState->url.c_str();
+    std::unique_lock<std::mutex> lock(mutex);
+    LOGD("IPlayer::setDataSource %s", url.c_str());
+    if (!demux || !demux->open(path)) {
+        LOGE("IPlayer::open demux error ");
+        return;
+    }
+    LOGE("IPlayer::open demux success ");
+    if (!videoDecode ||
+        !videoDecode->openDecode(demux->getVideoParameter(),
+                                 demux->getVideoStream(),
+                                 demux->formatContext)) {
+        LOGE("IPlayer videoDecode->open error ");
+    }
+
+    if (!audioDecode ||
+        !audioDecode->openDecode(demux->getAudioParameter(),
+                                 demux->getAudioStream(),
+                                 demux->formatContext)) {
+        LOGE("IPlayer audioDecode->open error ");
+    }
+    LOGD("IPlayer::setDataSource success  ");
 }
 
 void IPlayer::openSource() {
-    mutex.lock();
+    std::unique_lock<std::mutex> lock(mutex);
     if (playerState->url.empty()) {
         LOGE("IPlayer::open url is empty ");
         return;
@@ -55,8 +84,7 @@ void IPlayer::openSource() {
     if (window) {
         videoView->setRender(window);
     }
-    mutex.unlock();
-    LOGI("IPlayer::open success!");
+    LOGI("IPlayer::openSource success!");
 }
 
 void IPlayer::start() {
@@ -112,21 +140,29 @@ void IPlayer::resume() {
 }
 
 void IPlayer::release() {
-    mutex.lock();
-    LOGD("IPlayer::release");
+    LOGE("IPlayer::release ========");
     delete mediaSync;
+    mediaSync = nullptr;
     delete demux;
+    demux = nullptr;
     delete audioDecode;
+    audioDecode = nullptr;
     delete videoDecode;
+    videoDecode = nullptr;
     delete resample;
+    resample = nullptr;
     delete videoView;
+    videoView = nullptr;
     delete audioPlay;
+    audioPlay = nullptr;
     delete playerState;
-    mutex.unlock();
+    playerState = nullptr;
+    LOGD("IPlayer::release success");
 }
 
 void IPlayer::stop() {
     mutex.lock();
+    LOGE("IPlayer::stop ========");
     playerState->abortRequest = 1;
     if (mediaSync) {
         LOGI("mediaSync->stop() ");
@@ -154,4 +190,20 @@ void IPlayer::stop() {
     }
 
     mutex.unlock();
+}
+
+int IPlayer::getVideoWidth() {
+    std::unique_lock<std::mutex> lock(mutex);
+    if (videoDecode) {
+        return videoDecode->codecContext->width;
+    }
+    return 0;
+}
+
+int IPlayer::getVideoHeight() {
+    std::unique_lock<std::mutex> lock(mutex);
+    if (videoDecode) {
+        return videoDecode->codecContext->height;
+    }
+    return 0;
 }

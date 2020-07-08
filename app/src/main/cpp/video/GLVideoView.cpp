@@ -9,6 +9,7 @@
 
 void GLVideoView::setRender(void *view) {
     std::unique_lock<std::mutex> lock(mutex);
+    LOGI("GLVideoView::setRender");
     this->view = view;
     noWindowCondition.notify_all();
 }
@@ -32,6 +33,14 @@ void GLVideoView::render(XData *data) {
 }
 
 GLVideoView::~GLVideoView() {
-    view = nullptr;
+    LOGD("~GLVideoView");
+    terminate();
+}
+
+void GLVideoView::terminate() {
+    LOGD("GLVideoView terminate");
+    XEGL::get()->terminate();
     delete texture;
+    texture = nullptr;
+    view = nullptr;
 }

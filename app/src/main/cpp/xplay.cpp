@@ -124,4 +124,17 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_com_joeys_xplay_Xplay__1release(JNIEnv *env, jobject thiz) {
     getMediaPlayer(env, thiz)->release();
+    ANativeWindow_release(window);
+    window = nullptr;
+}
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_joeys_xplay_Xplay__1getVideoWidth(JNIEnv *env, jobject thiz) {
+    return getMediaPlayer(env, thiz)->getVideoWidth();
+}
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_joeys_xplay_Xplay__1getVideoHeight(JNIEnv *env, jobject thiz) {
+    return getMediaPlayer(env, thiz)->getVideoHeight();
 }

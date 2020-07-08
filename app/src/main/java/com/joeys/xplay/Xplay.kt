@@ -284,6 +284,7 @@ class Xplay : TextureView, TextureView.SurfaceTextureListener, IMediaPlayer {
     override fun start() {
         _start()
     }
+
     private external fun _start()
 
     override fun setVolume(leftVolume: Float, rightVolume: Float) {
@@ -364,8 +365,11 @@ class Xplay : TextureView, TextureView.SurfaceTextureListener, IMediaPlayer {
     }
 
     override fun getVideoWidth(): Int {
-        return 0
+        return _getVideoWidth()
     }
+
+    private external fun _getVideoWidth(): Int
+
 
     override fun setLooping(looping: Boolean) {
     }
@@ -374,8 +378,10 @@ class Xplay : TextureView, TextureView.SurfaceTextureListener, IMediaPlayer {
     }
 
     override fun getVideoHeight(): Int {
-        return 0
+        return _getVideoHeight()
     }
+
+    private external fun _getVideoHeight(): Int
 
     override fun setSurface(surface: Surface?) {
     }

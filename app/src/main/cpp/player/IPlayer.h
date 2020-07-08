@@ -15,14 +15,14 @@
 #include "../audio/IAudioPlay.h"
 #include "../resample/IResample.h"
 
-class IPlayer    {
+class IPlayer {
 
 public:
     IPlayer();
 
     void openSource();
 
-    void start()  ;
+    void start();
 
 
     static IPlayer *get(unsigned char index = 0);
@@ -41,7 +41,7 @@ public:
 
 public:
     PlayerState *playerState;
-    MediaSync2 *mediaSync;
+    MediaSync2 *mediaSync = nullptr;
     IDemux *demux = 0;
     IDecode *audioDecode = 0;
     IDecode *videoDecode = 0;
@@ -54,6 +54,10 @@ public:
 public:
     void *window;
     std::mutex mutex;
+
+    int getVideoWidth();
+
+    int getVideoHeight();
 };
 
 

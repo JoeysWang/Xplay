@@ -47,7 +47,7 @@ public:
 
     Queue<XData> *getPacketQueue() const;
 
-    int pushPacket(XData data);
+    int pushPacket(XData *data);
 
     int getFrameSize();
 

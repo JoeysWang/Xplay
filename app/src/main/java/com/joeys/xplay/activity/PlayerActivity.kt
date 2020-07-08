@@ -23,22 +23,23 @@ class PlayerActivity : AppCompatActivity() {
         }
     }
 
-    private val retriever = MediaMetadataRetriever()
+//    private val retriever = MediaMetadataRetriever()
 
     fun setDataSource() {
-        retriever.setDataSource(url)
-        retriever.getMetadata()?.let {
-            Log.d("xplay", "Metadata: $it")
-            val width = it.getInt("video_width")
-            val height = it.getInt("video_height")
-            val layoutParams = xplay.layoutParams
-            layoutParams.width = ScreenUtils.getScreenWidth()
-            layoutParams.height = ScreenUtils.getScreenWidth() * height / width
-            xplay.layoutParams = layoutParams
-            info.text=it.toString()
-        }
-        retriever.release()
+//        retriever.setDataSource(url)
+//        retriever.getMetadata()?.let {
         xplay.setDataSource(url)
+//        Log.d("xplay", "Metadata: $it")
+        val width = xplay.videoWidth
+        val height = xplay.videoHeight
+        Log.d("xplay", "width: $width  height:$height")
+        val layoutParams = xplay.layoutParams
+        layoutParams.width = ScreenUtils.getScreenWidth()
+        layoutParams.height = ScreenUtils.getScreenWidth() * height / width
+        xplay.layoutParams = layoutParams
+//        info.text = it.toString()
+//        }
+//        retriever.release()
     }
 
     override fun onResume() {

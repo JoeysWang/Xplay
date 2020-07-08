@@ -52,6 +52,11 @@ char fragYUV420P[] =
         "\n"
         "}";
 
+XShader::~XShader() {
+    if (program) {
+        glDeleteProgram(program);
+    }
+}
 
 bool XShader::init(XShaderType shaderType) {
     program = OpenGLUtils::createProgram(vertexShader, fragYUV420P);

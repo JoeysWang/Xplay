@@ -47,7 +47,6 @@ bool IDecode::openDecode(XParameter parameter, AVStream *stream, AVFormatContext
     this->pStream = stream;
     //1.查找解码器
     AVCodec *avCodec = avcodec_find_decoder(parameters->codec_id);
-    LOGI("avcodec_find_decoder video codec_id=%d ", parameters->codec_id);
 
     if (!avCodec) {
         LOGE("avcodec_find_decoder error %d ", parameters->codec_id);
@@ -68,10 +67,11 @@ bool IDecode::openDecode(XParameter parameter, AVStream *stream, AVFormatContext
         mutex.unlock();
         return false;
     }
-    if (codecContext->codec_type == AVMEDIA_TYPE_VIDEO)
+    if (codecContext->codec_type == AVMEDIA_TYPE_VIDEO) {
         audioOrVideo = MEDIA_TYPE_VIDEO;
-    else if (codecContext->codec_type == AVMEDIA_TYPE_AUDIO)
+    } else if (codecContext->codec_type == AVMEDIA_TYPE_AUDIO) {
         audioOrVideo = MEDIA_TYPE_AUDIO;
+    }
     mutex.unlock();
 
     return true;
@@ -83,16 +83,16 @@ void IDecode::update(XData data) {
         return;
     }
     //生产者，把数据压入list
-    pushPacket(data);
+    pushPacket(&data);
 }
 
 FrameQueue *IDecode::getFrameQueue() const {
     return frameQueue;
 }
 
-int IDecode::pushPacket(XData data) {
-    if (!packetQueue)return -1;
-    return packetQueue->push(data);
+int IDecode::pushPacket(XData *data) {
+    if (!packetQueue || isExit || playerState->abortRequest)return -1;
+    return packetQueue->push(*data);
 }
 
 Queue<XData> *IDecode::getPacketQueue() const {

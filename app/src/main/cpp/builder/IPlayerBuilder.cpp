@@ -17,8 +17,8 @@ IPlayer *IPlayerBuilder::buildPlayer() {
 
     IDecode *videoDecode = createVideoDecode(iplayer->playerState);
     IDecode *audioDecode = createAudioDecode(iplayer->playerState);
-    demux->addObserver(videoDecode);
-    demux->addObserver(audioDecode);
+    demux->setVideoDecode(videoDecode);
+    demux->setAudioDecode(audioDecode);
 
     //音频链路
     IResample *resample = createResample(iplayer->playerState);

@@ -27,6 +27,7 @@ void VideoDecode::start() {
 int VideoDecode::decodePacket() {
     AVFrame *frame;
     XData *output;
+
     int got_picture;
     int ret = 0;
     AVPacket *packet;
@@ -98,16 +99,13 @@ int VideoDecode::decodePacket() {
                 ret = -1;
                 break;
             }
-            // 复制参数
-//            vp->uploaded = 0;
+            output->allocType=AVFRAME_TYPE;
             output->linesize[0] = frame->linesize[0];
             output->linesize[1] = frame->linesize[1];
             output->linesize[2] = frame->linesize[2];
-
             output->width = frame->width;
             output->height = frame->height;
             output->format = frame->format;
-//            LOGI("video frame width=%d height=%d\n=====", output->width, output->height);
             output->pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts * av_q2d(tb);
             output->duration = frame_rate.num && frame_rate.den
                                ? av_q2d((AVRational) {frame_rate.den, frame_rate.num}) : 0;

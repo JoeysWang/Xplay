@@ -58,7 +58,7 @@ private:
     void videoPlay();
 
     double maxFrameDuration;
-    double frameTimer;
+
 };
 
 

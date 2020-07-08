@@ -26,6 +26,8 @@ protected:
     float matrix[16];
 
     std::condition_variable noWindowCondition;
+
+    void terminate();
 };
 
 

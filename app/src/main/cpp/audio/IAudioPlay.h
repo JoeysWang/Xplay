@@ -43,6 +43,8 @@ protected:
 public:
     void setCallback(AudioPCMCallback pcmCallback, void *context);
 
+    void stop() override;
+
 };
 
 
