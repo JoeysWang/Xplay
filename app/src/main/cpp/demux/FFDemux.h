@@ -18,7 +18,6 @@ public:
 
     void close();
 
-    XData read() override;
 
     FFDemux(PlayerState *playerState);
 
