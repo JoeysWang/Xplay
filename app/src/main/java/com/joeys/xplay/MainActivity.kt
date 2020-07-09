@@ -3,21 +3,21 @@ package com.joeys.xplay
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
-import com.blankj.utilcode.util.ScreenUtils
+import androidx.appcompat.app.AppCompatActivity
 import com.blankj.utilcode.util.UriUtils
 import com.joeys.xplay.activity.PlayerActivity
-import com.joeys.xplay.metadata.MediaMetadataRetriever
-import com.joeys.xplay.metadata.XMetadata
+import com.sample.breakpad.BreakpadInit
 import com.yanzhenjie.permission.AndPermission
 import com.yanzhenjie.permission.runtime.Permission
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
 
 class MainActivity : AppCompatActivity() {
+    private var externalReportPath: File? = null
+    val TAG = "xplay"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,6 +26,8 @@ class MainActivity : AppCompatActivity() {
             .runtime()
             .permission(Permission.Group.STORAGE)
             .onGranted { permissions: List<String?>? ->
+                initExternalReportPath()
+                initBreakPad()
             }
             .onDenied { permissions: List<String?>? ->
 
@@ -36,13 +38,13 @@ class MainActivity : AppCompatActivity() {
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
                 "失落沙洲.mp4"
             )
-            open(file.absolutePath)
+            PlayerActivity.start(file.absolutePath, this)
         }
         test.setOnClickListener {
-            val intent= Intent(Intent.ACTION_VIEW)
+            val intent = Intent(Intent.ACTION_VIEW)
             intent.setData(Uri.parse("http://weixin.qq.com/r/o3W_sRvEMSVOhwrSnyCH"))
             intent.setPackage("com.tencent.mm")
-            intent.putExtra(Intent.EXTRA_SUBJECT,"Share")
+            intent.putExtra(Intent.EXTRA_SUBJECT, "Share")
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             startActivity(intent)
         }
@@ -55,7 +57,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    val TAG = "xplay"
+    private fun initExternalReportPath() {
+        externalReportPath =
+            File(Environment.getExternalStorageDirectory(), "crashDump")
+        if (externalReportPath?.exists() != true) {
+            externalReportPath?.mkdirs()
+        }
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK) {
@@ -65,28 +74,20 @@ class MainActivity : AppCompatActivity() {
                 if (uri != null) {
                     val uri2File = UriUtils.uri2File(uri)
                     Log.d(TAG, "uri2File: ${uri2File.absolutePath}")
-//                    open(uri2File.absolutePath)
                     PlayerActivity.start(uri2File.absolutePath, this)
                 }
             }
         }
     }
 
-
-    private fun open(path: String) {
-//        val metadataRetriever = MediaMetadataRetriever()
-//        metadataRetriever.setDataSource(path)
-//        metadataRetriever.getMetadata()?.let {
-//            val width = it.getInt("video_width")
-//            val height = it.getInt("video_height")
-//            val layoutParams = xplay.layoutParams
-//            layoutParams.width = ScreenUtils.getScreenWidth()
-//            layoutParams.height = ScreenUtils.getScreenWidth() * height / width
-//            xplay.layoutParams = layoutParams
-//
-//        }
-//        xplay.open(path)
-
+    private fun initBreakPad() {
+        if (externalReportPath == null) {
+            externalReportPath = File(filesDir, "crashDump")
+            if (!externalReportPath!!.exists()) {
+                externalReportPath!!.mkdirs()
+            }
+        }
+        BreakpadInit.initBreakpad(externalReportPath!!.absolutePath)
     }
 
 
