@@ -4,6 +4,8 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.os.Environment
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.blankj.utilcode.util.UriUtils
@@ -32,6 +34,7 @@ class MainActivity : AppCompatActivity() {
 
             }
             .start()
+
         btn.setOnClickListener {
             val file = File(
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
@@ -40,7 +43,7 @@ class MainActivity : AppCompatActivity() {
             PlayerActivity.start(file.absolutePath, this)
         }
         test.setOnClickListener {
-
+            CPPHelper().cpptest()
         }
         btn_scan.setOnClickListener {
 

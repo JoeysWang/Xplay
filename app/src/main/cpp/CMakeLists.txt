@@ -9,27 +9,17 @@ set(ffmpeg_libs_names
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -L${ffmpeg_libs}")
 
 add_library(
-        xlog
-        SHARED
-        XLog.cpp
-)
-add_library(
-        cpphepler
+        cpphelper
         SHARED
         CppHelper.cpp
-)
-
-
-target_link_libraries(
-        xlog
-        log
-        android
+        XLog.cpp
 )
 
 target_link_libraries(
-        cpphepler
+        cpphelper
         log
         android
+        xhandler
 )
 
 # Metadata库

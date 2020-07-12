@@ -12,4 +12,4 @@ target_link_libraries(
         ${ffmpeg_libs_names}
         android
         jnigraphics
-        xlog)
+        log)

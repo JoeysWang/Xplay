@@ -51,7 +51,7 @@ add_library(
 target_link_libraries(
         xplay
         ${ffmpeg_libs_names}
-        xlog
+        log
         android
         GLESv3
         OpenSLES

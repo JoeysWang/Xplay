@@ -23,14 +23,6 @@ void XThread::start() {
 
 void XThread::stop() {
     isExit = true;
-//    for (int i = 0; i < 200; i++) {
-//        if (!isRunning) {
-////            LOGI("stop 线程 成功");
-//            return;
-//        }
-//        XSleep(10);
-//    }
-//    LOGE("stop 线程 超时");
 }
 
 void XThread::threadMain() {

@@ -5,10 +5,34 @@
 #ifndef XPLAY_XHANDLER_H
 #define XPLAY_XHANDLER_H
 
+#include "XMessage.h"
+#include "XLooper.h"
+
+class HandleMessageI {
+public:
+    virtual void handleMessage(XMessage *) = 0;
+};
 
 class XHandler {
 public:
+    virtual ~XHandler();
+
+public:
+    HandleMessageI *callBack;
+
+    XLooper *looper;
+public:
     XHandler();
+
+    void setCallBack(HandleMessageI *callBack);
+
+    void sendMessage(XMessage *message);
+
+    void dispatchMessage(XMessage *message);
+
+private:
+    void enqueueMessage(XMessage *);
+
 };
 
 
