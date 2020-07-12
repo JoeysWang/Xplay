@@ -9,58 +9,30 @@ set(ffmpeg_libs_names
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -L${ffmpeg_libs}")
 
 add_library(
-        xplay
+        xlog
         SHARED
-        xplay.cpp
-        demux/IDemux.cpp
-        demux/FFDemux.cpp
-        data/XData.cpp
-        data/XParameter.cpp
         XLog.cpp
-        XThread.cpp
-        IObserver.cpp
-        decode/IDecode.cpp
-        decode/VideoDecode.cpp
-        decode/AudioDecode.cpp
-        audio/IAudioPlay.cpp
-        audio/SLAudioPlay.cpp
-        video/IVideoView.cpp
-        video/GLVideoView.cpp
-        resample/IResample.cpp
-        resample/FFResample.cpp
-        texture/XEGL.cpp
-        texture/XShader.cpp
-        texture/XTexture.cpp
-        utils/OpenGLUtils.cpp
-        utils/vecmath.cpp
-
-        player/IPlayer.cpp
-        player/PlayerState.cpp
-        builder/IPlayerBuilder.cpp
-        builder/FFPlayerBuilder.cpp
-
-        queue/Queue.cpp
-        queue/PacketQueue.cpp
-        queue/FrameQueue.cpp
-        sync/MediaSync2.cpp
-        sync/MediaClock.cpp
-
-        test/QueueTest.cpp
-        test/Ts.cpp
+)
+add_library(
+        cpphepler
+        SHARED
+        CppHelper.cpp
 )
 
-#find_library(
-##        log-lib
-##        log)
 
 target_link_libraries(
-        xplay
-        ${ffmpeg_libs_names}
+        xlog
         log
         android
-        GLESv3
-        OpenSLES
-        EGL
 )
+
+target_link_libraries(
+        cpphepler
+        log
+        android
+)
+
 # Metadata库
-add_subdirectory(${CMAKE_SOURCE_DIR}/metadata)
+add_subdirectory(xplayer)
+add_subdirectory(metadata)
+add_subdirectory(xhandler)

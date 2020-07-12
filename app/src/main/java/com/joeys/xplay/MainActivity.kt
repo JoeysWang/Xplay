@@ -2,7 +2,6 @@ package com.joeys.xplay
 
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
@@ -41,12 +40,7 @@ class MainActivity : AppCompatActivity() {
             PlayerActivity.start(file.absolutePath, this)
         }
         test.setOnClickListener {
-            val intent = Intent(Intent.ACTION_VIEW)
-            intent.setData(Uri.parse("http://weixin.qq.com/r/o3W_sRvEMSVOhwrSnyCH"))
-            intent.setPackage("com.tencent.mm")
-            intent.putExtra(Intent.EXTRA_SUBJECT, "Share")
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            startActivity(intent)
+
         }
         btn_scan.setOnClickListener {
 

@@ -3,8 +3,9 @@
 //
 
 #include <jni.h>
-#include "../XLog.h"
+#include "../../XLog.h"
 #include "MediaMetadataRetriever.h"
+#include "../xhandler/XHandler.h"
 //
 //static const char *const RETRIEVER_CLASS_NAME = "com/joeys/xplay/metadata/MediaMetadataRetriever";
 
