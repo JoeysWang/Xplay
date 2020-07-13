@@ -21,12 +21,16 @@ void XHandler::sendMessage(XMessage *message) {
 void XHandler::dispatchMessage(XMessage *message) {
     if (callBack) {
         callBack->handleMessage(message);
+    }else{
+        LOGE("dispatchMessage callBack is null");
     }
 }
 
 void XHandler::enqueueMessage(XMessage *message) {
     if (looper) {
         looper->sendMessage(message);
+    }else{
+        LOGE("enqueueMessage looper is null");
     }
 }
 

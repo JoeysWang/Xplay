@@ -8,6 +8,7 @@
 #include <mutex>
 #include <map>
 #include "XLooper.h"
+#include "../XLog.h"
 
 class LooperManager {
 
@@ -22,6 +23,7 @@ public:
     }
 
     XLooper *createLooper(long threadId) {
+        LOGI(" XLooper *createLooper %ld",threadId);
         std::unique_lock<std::mutex> lock(mutex);
         auto finder = looperMap.find(threadId);
         if (finder == looperMap.end()) {
@@ -33,6 +35,7 @@ public:
     }
 
     XLooper *getLooper(long threadId) {
+        LOGI(" XLooper *getLooper %ld",threadId);
         std::unique_lock<std::mutex> lock(mutex);
         auto finder = looperMap.find(threadId);
         if (finder == looperMap.end()) {

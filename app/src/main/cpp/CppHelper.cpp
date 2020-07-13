@@ -8,27 +8,37 @@
 #include "xhandler/XHandler.h"
 #include "XLog.h"
 #include "xhandler/LooperManager.h"
+#include "xhandler/HandlerThread.h"
 
+class TH : public HandlerThread {
+    void handleMessage(XMessage *message) override {
+        LOGI("handleMessage  what=%d", message->what);
+    }
+};
 
-void getLooper(long id) {
+TH *th;
+static int count=0;
+void thfun() {
+    auto *message = new XMessage();
+    message->what = count++;
+    th->getHandler()->sendMessage(message);
 
-    XLooper::prepare();
-    auto handler = new XHandler();
-    XLooper::loop();
-
-
+    std::chrono::milliseconds duration(15);
+    std::this_thread::sleep_for(duration);
+    auto *message2 = new XMessage();
+    message2->what = count++;
+    th->getHandler()->sendMessage(message2);
 }
 
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_joeys_xplay_CPPHelper_cpptest(JNIEnv *env, jobject thiz) {
-    std::thread t1(getLooper, 1);
-    t1.detach();
-    std::thread t2(getLooper, 2);
-    t2.detach();
-    std::thread t3(getLooper, 3);
-    t3.detach();
-
+    if (!th) {
+        th = new TH();
+        std::thread thread(&thfun);
+        thread.detach();
+    }else
+        thfun();
 
 }
 

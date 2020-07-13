@@ -27,6 +27,7 @@ XLooper *XLooper::prepare() {
 
 void XLooper::loop() {
     XLooper *looper = myLooper();
+    LOGI(" XLooper::loop %p",looper);
     if (looper) {
         looper->_loop();
     }

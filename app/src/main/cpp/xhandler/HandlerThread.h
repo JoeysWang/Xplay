@@ -11,10 +11,8 @@
 class HandlerThread : public HandleMessageI {
 public:
     HandlerThread() {
-        auto looper = XLooper::prepare();
-        handler = new XHandler();
-        handler->setCallBack(this);
         std::thread thread(&HandlerThread::run, this);
+        thread.detach();
     }
 
     virtual ~HandlerThread() {
@@ -27,6 +25,9 @@ public:
 
 private:
     virtual void run() {
+        auto looper = XLooper::prepare();
+        handler = new XHandler();
+        handler->setCallBack(this);
         XLooper::loop();
     };
 
