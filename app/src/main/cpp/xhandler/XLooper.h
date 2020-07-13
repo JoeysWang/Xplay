@@ -16,7 +16,7 @@ public:
 
     void sendMessage(XMessage *);
 
-    static XLooper * prepare();
+    static XLooper *prepare();
 
     static void loop();
 
@@ -25,7 +25,10 @@ public:
     void quit() {
         std::unique_lock<std::mutex> lock(mutex);
         isQuit = true;
+        queue->quit();
     }
+
+    virtual ~XLooper();
 
 private:
     void _loop();

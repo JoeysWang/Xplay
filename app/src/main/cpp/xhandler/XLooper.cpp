@@ -13,12 +13,14 @@ XLooper::XLooper() {
     queue = new XMessageQueue(10);
 }
 
+XLooper::~XLooper() {
+    delete (queue);
+}
+
 void XLooper::sendMessage(XMessage *message) {
     std::unique_lock<std::mutex> lock(mutex);
     if (isQuit) { return; }
-
     queue->push(*message);
-
 }
 
 XLooper *XLooper::prepare() {
