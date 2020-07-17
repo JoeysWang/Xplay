@@ -26,7 +26,7 @@ protected:
 
     IAudioPlay *createAudioPlay(PlayerState *playerState) override;
 
-    IPlayer *createPlayer(unsigned char index = 0) override;
+    MediaPlayer *createPlayer(unsigned char index = 0) override;
 
     IDecode *createVideoDecode(PlayerState *playerState) override;
 

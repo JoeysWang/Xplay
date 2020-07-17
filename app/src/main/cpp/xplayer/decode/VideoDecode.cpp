@@ -39,7 +39,7 @@ int VideoDecode::decodePacket() {
             break;
         }
         if (playerState->pauseRequest) {
-            LOGI("VideoDecode sleep for pause");
+//            LOGI("VideoDecode sleep for pause");
             std::chrono::milliseconds duration(500);
             std::this_thread::sleep_for(duration);
             continue;

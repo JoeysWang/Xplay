@@ -4,6 +4,7 @@
 
 #include <jni.h>
 #include <thread>
+#include "libyuv/scale_argb.h"
 #include "xhandler/XLooper.h"
 #include "xhandler/XHandler.h"
 #include "XLog.h"
@@ -17,7 +18,8 @@ class TH : public HandlerThread {
 };
 
 TH *th;
-static int count=0;
+static int count = 0;
+
 void thfun() {
     auto *message = new XMessage();
     message->what = count++;
@@ -33,12 +35,12 @@ void thfun() {
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_joeys_xplay_CPPHelper_cpptest(JNIEnv *env, jobject thiz) {
-    if (!th) {
-        th = new TH();
-        std::thread thread(&thfun);
-        thread.detach();
-    }else
-        thfun();
+//    if (!th) {
+//        th = new TH();
+//        std::thread thread(&thfun);
+//        thread.detach();
+//    }else
+//        thfun();
 
 }
 

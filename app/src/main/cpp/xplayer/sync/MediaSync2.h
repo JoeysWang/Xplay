@@ -18,6 +18,7 @@ public:
     virtual ~MediaSync2();
 
     void pause();
+
     void stop();
 
     double calculateDelay(double delay);
@@ -42,6 +43,9 @@ private:
     double frameTimer;                      // 视频时钟
 
     double lastFramePts = 0.0;
+    double lastAudioPts = 0.0;
+
+    bool resumeAfterPause = false;          // 暂停后恢复的
 
 public:
     void start();

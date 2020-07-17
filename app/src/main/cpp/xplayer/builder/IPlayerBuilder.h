@@ -11,11 +11,11 @@
 #include "../resample/IResample.h"
 #include "../video/IVideoView.h"
 #include "../audio/IAudioPlay.h"
-#include "../player/IPlayer.h"
+#include "../player/MediaPlayer.h"
 
 class IPlayerBuilder {
 public:
-    virtual IPlayer *buildPlayer();
+    virtual MediaPlayer *buildPlayer();
 
 protected:
 
@@ -31,7 +31,7 @@ protected:
 
     virtual IAudioPlay *createAudioPlay(PlayerState *playerState) = 0;
 
-    virtual IPlayer *createPlayer(unsigned char index = 0) = 0;
+    virtual MediaPlayer *createPlayer(unsigned char index = 0) = 0;
 
 
 };

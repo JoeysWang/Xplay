@@ -18,8 +18,14 @@ class PlayerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_player)
         setDataSource()
-        btn_start_pause.setOnClickListener {
+        btn_start.setOnClickListener {
             xplay.start()
+        }
+        btn_pause.setOnClickListener {
+            xplay.pause()
+        }
+        btn_resume.setOnClickListener {
+            xplay.resume()
         }
     }
 

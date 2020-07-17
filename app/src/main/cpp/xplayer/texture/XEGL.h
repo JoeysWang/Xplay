@@ -8,6 +8,7 @@
 #include "android/native_window_jni.h"
 #include "android/native_window.h"
 #include "EGL/egl.h"
+#include <mutex>
 
 class XEGL {
 public:
@@ -22,6 +23,7 @@ public:
 protected:
     XEGL() {}
 
+    std::mutex mutex;
     ANativeWindow *mWindow;             // Surface窗口
     int mSurfaceWidth;                  // 窗口宽度
     int mSurfaceHeight;                 // 窗口高度

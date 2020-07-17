@@ -29,10 +29,11 @@ int AudioDecode::decodePacket() {
             break;
         }
         XData input;
-        while (playerState->pauseRequest) {
+        if (playerState->pauseRequest) {
             LOGI("AudioDecode sleep for pause");
             std::chrono::milliseconds duration(500);
             std::this_thread::sleep_for(duration);
+            continue;
         }
         if (!packetQueue->pop(input)) {
             ret = -1;
@@ -80,7 +81,7 @@ int AudioDecode::decodePacket() {
                            * 2;
             output->format = frame->format;
             output->nb_samples = frame->nb_samples;
-//            LOGI("audio frame size=%d  \n=====", output->size);
+            LOGI("audio frame size=%d  \n=====", output->size);
             output->pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts * av_q2d(tb);
 
             memcpy(output->decodeDatas, frame->data, sizeof(frame->data));

@@ -2,7 +2,7 @@
 #include <string>
 #include "../../XLog.h"
 #include "android/native_window_jni.h"
-#include "player/IPlayer.h"
+#include "player/MediaPlayer.h"
 #include "builder/IPlayerBuilder.h"
 #include "builder/FFPlayerBuilder.h"
 #include "test/QueueTest.h"
@@ -25,13 +25,13 @@ struct retriever_fields_t {
     jfieldID context;
 };
 
-static IPlayer *getMediaPlayer(JNIEnv *env, jobject thiz) {
-    IPlayer *const mp = (IPlayer *) env->GetLongField(thiz, fields.context);
+static MediaPlayer *getMediaPlayer(JNIEnv *env, jobject thiz) {
+    MediaPlayer *const mp = (MediaPlayer *) env->GetLongField(thiz, fields.context);
     return mp;
 }
 
-static IPlayer *setMediaPlayer(JNIEnv *env, jobject thiz, long mediaPlayer) {
-    IPlayer *old = (IPlayer *) env->GetLongField(thiz, fields.context);
+static MediaPlayer *setMediaPlayer(JNIEnv *env, jobject thiz, long mediaPlayer) {
+    MediaPlayer *old = (MediaPlayer *) env->GetLongField(thiz, fields.context);
     env->SetLongField(thiz, fields.context, mediaPlayer);
     return old;
 }
@@ -55,7 +55,7 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_com_joeys_xplay_Xplay_iplayerIinit(JNIEnv *env, jobject thiz) {
     LOGI("Xplay_iplayerIinit");
-    IPlayer *pPlayer = FFPlayerBuilder::get()->buildPlayer();
+    MediaPlayer *pPlayer = FFPlayerBuilder::get()->buildPlayer();
     setMediaPlayer(env, thiz, (long) pPlayer);
 }
 
@@ -89,7 +89,7 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_com_joeys_xplay_Xplay_initView(JNIEnv *env, jobject thiz, jobject holder) {
     window = ANativeWindow_fromSurface(env, holder);
-    LOGD("ANativeWindow_fromSurface %d", window);
+    LOGD("ANativeWindow_fromSurface %p", window);
     if (window) {
         getMediaPlayer(env, thiz)->initView(window);
     }

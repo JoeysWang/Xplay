@@ -2,8 +2,8 @@
 // Created by ky611 on 2020/6/20.
 //
 
-#ifndef XPLAY_IPLAYER_H
-#define XPLAY_IPLAYER_H
+#ifndef XPLAY_MEDIAPLAYER_H
+#define XPLAY_MEDIAPLAYER_H
 
 #include <mutex>
 #include "../XThread.h"
@@ -15,17 +15,17 @@
 #include "../audio/IAudioPlay.h"
 #include "../resample/IResample.h"
 
-class IPlayer {
+class MediaPlayer {
 
 public:
-    IPlayer();
+    MediaPlayer();
 
     void openSource();
 
     void start();
 
 
-    static IPlayer *get(unsigned char index = 0);
+    static MediaPlayer *get(unsigned char index = 0);
 
     virtual bool initView(void *window);
 
@@ -61,4 +61,4 @@ public:
 };
 
 
-#endif //XPLAY_IPLAYER_H
+#endif //XPLAY_MEDIAPLAYER_H

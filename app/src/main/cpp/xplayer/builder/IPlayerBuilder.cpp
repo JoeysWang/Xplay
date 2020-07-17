@@ -9,9 +9,9 @@
 #include "../audio/SLAudioPlay.h"
 #include "../video/GLVideoView.h"
 
-IPlayer *IPlayerBuilder::buildPlayer() {
+MediaPlayer *IPlayerBuilder::buildPlayer() {
 
-    IPlayer *iplayer = createPlayer(0);
+    MediaPlayer *iplayer = createPlayer(0);
 
     auto *demux = createDemux(iplayer->playerState);
 

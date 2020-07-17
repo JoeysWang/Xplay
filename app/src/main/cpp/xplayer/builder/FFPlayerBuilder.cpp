@@ -36,7 +36,7 @@ IAudioPlay *FFPlayerBuilder::createAudioPlay(PlayerState *playerState) {
     return new SLAudioPlay(playerState);
 }
 
-IPlayer *FFPlayerBuilder::createPlayer(unsigned char index) {
-    return IPlayer::get(index);
+MediaPlayer *FFPlayerBuilder::createPlayer(unsigned char index) {
+    return MediaPlayer::get(index);
 }
 

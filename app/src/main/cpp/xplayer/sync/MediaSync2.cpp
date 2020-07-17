@@ -42,11 +42,18 @@ void MediaSync2::audioPlay() {
     }
 }
 
+void MediaSync2::audioCallBack(double pts, uint8_t *stream, int len, void *context) {
+    auto mediaSync2 = (MediaSync2 *) context;
+    mediaSync2->lastAudioPts = pts;
+    mediaSync2->audioClock->setClock(pts);
+}
+
 void MediaSync2::videoPlay() {
     for (;;) {
         if (isExist || playerState->abortRequest) { return; }
         if (playerState->pauseRequest) {
-            LOGI("MediaSync2::videoPlay sleep for pause");
+//            LOGI("MediaSync2::videoPlay sleep for pause");
+            resumeAfterPause = true;
             std::chrono::milliseconds duration(500);
             std::this_thread::sleep_for(duration);
             continue;
@@ -59,6 +66,11 @@ void MediaSync2::videoPlay() {
             continue;
         }
 
+        if (resumeAfterPause) {
+            resumeAfterPause = false;
+            videoClock->setClock(lastFramePts);
+            audioClock->setClock(lastAudioPts);
+        }
 
         double current_pts = frameWrapper->pts;
         double lastDuration = current_pts - lastFramePts;
@@ -78,6 +90,7 @@ void MediaSync2::videoPlay() {
 double MediaSync2::calculateDelay(double delay) {
     double sync_threshold, diff = 0;
     diff = videoClock->getClock() - getMasterClock();
+//    LOGI("diff =%f ", diff);
     sync_threshold = FFMAX(AV_SYNC_THRESHOLD_MIN, FFMIN(AV_SYNC_THRESHOLD_MAX, delay));
     if (!isnan(diff) && fabs(diff) < maxFrameDuration) {
         if (diff <= -sync_threshold) {
@@ -88,9 +101,10 @@ double MediaSync2::calculateDelay(double delay) {
             delay = 2 * delay;
         }
     }
+//    LOGI("delay =%f ", delay);
+
     return delay;
 }
-
 
 
 double MediaSync2::getMasterClock() {
@@ -108,11 +122,6 @@ void MediaSync2::setVideoView(IVideoView *videoView) {
 void MediaSync2::setAudioPlay(IAudioPlay *pAudioPlay) {
     MediaSync2::iAudioPlay = pAudioPlay;
     iAudioPlay->setCallback(MediaSync2::audioCallBack, (void *) this);
-}
-
-void MediaSync2::audioCallBack(double pts, uint8_t *stream, int len, void *context) {
-    auto mediaSync2 = (MediaSync2 *) context;
-    mediaSync2->audioClock->setClock(pts);
 }
 
 void MediaSync2::stop() {

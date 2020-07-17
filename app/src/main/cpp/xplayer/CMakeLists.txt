@@ -33,7 +33,7 @@ add_library(
         utils/OpenGLUtils.cpp
         utils/vecmath.cpp
 
-        player/IPlayer.cpp
+        player/MediaPlayer.cpp
         player/PlayerState.cpp
         builder/IPlayerBuilder.cpp
         builder/FFPlayerBuilder.cpp

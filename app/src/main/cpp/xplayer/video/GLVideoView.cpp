@@ -9,7 +9,7 @@
 
 void GLVideoView::setRender(void *view) {
     std::unique_lock<std::mutex> lock(mutex);
-    LOGI("GLVideoView::setRender");
+    LOGI("GLVideoView::setRender %p",view);
     this->view = view;
     noWindowCondition.notify_all();
 }

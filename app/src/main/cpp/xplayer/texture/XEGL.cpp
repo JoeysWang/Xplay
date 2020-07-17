@@ -9,6 +9,7 @@ class CXEGL : public XEGL {
 public:
     void terminate() override {
         LOGD("CXEGL terminate");
+        mutex.lock();
         mWindow = nullptr;
         if (eglSurface != EGL_NO_SURFACE) {
             eglDestroySurface(display, eglSurface);
@@ -28,6 +29,7 @@ public:
             display = EGL_NO_DISPLAY;
             eglContext = EGL_NO_CONTEXT;
         }
+        mutex.unlock();
 
     }
 
@@ -35,7 +37,9 @@ public:
         if (display == EGL_NO_DISPLAY || eglSurface == EGL_NO_SURFACE) {
             return;
         }
+        mutex.lock();
         eglSwapBuffers(display, eglSurface);
+        mutex.unlock();
     }
 
     bool init(void *win, int width, int height) override {

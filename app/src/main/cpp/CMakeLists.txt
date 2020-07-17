@@ -8,6 +8,11 @@ set(ffmpeg_libs_names
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -L${ffmpeg_libs}")
 
+add_library(yuv SHARED IMPORTED )
+set_target_properties( yuv
+        PROPERTIES IMPORTED_LOCATION
+        ${CMAKE_SOURCE_DIR}/../../../libs/${CMAKE_ANDROID_ARCH_ABI}/libyuv.so )
+
 add_library(
         cpphelper
         SHARED
@@ -20,6 +25,7 @@ target_link_libraries(
         log
         android
         xhandler
+        yuv
 )
 
 # Metadata库
