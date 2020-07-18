@@ -9,6 +9,8 @@ AudioDecode::AudioDecode(PlayerState *playerState) : IDecode(playerState) {
     mutex.lock();
     frameQueue = new FrameQueue(FRAME_QUEUE_SIZE, 1);
     packetQueue = new Queue<XData>(100);
+    packetQueue->tag = "audio";
+
     mutex.unlock();
 }
 
@@ -22,19 +24,18 @@ int AudioDecode::decodePacket() {
     int got_frame = 0;
     int ret = 0;
     AVFrame *frame;
-    do {
+    for (;;) {
         if (isExit || playerState->abortRequest) {
             ret = -1;
-            LOGI("AudioDecode abortRequest break");
             break;
         }
-        XData input;
         if (playerState->pauseRequest) {
-            LOGI("AudioDecode sleep for pause");
+            got_frame = 0;
             std::chrono::milliseconds duration(500);
             std::this_thread::sleep_for(duration);
             continue;
         }
+        XData input;
         if (!packetQueue->pop(input)) {
             ret = -1;
             break;
@@ -46,11 +47,11 @@ int AudioDecode::decodePacket() {
         ret = avcodec_send_packet(codecContext, pkt);
         if (ret < 0) {
             // 一次解码无法消耗完AVPacket中的所有数据，需要重新解码
+            LOGD("一次解码无法消耗完AVPacket中的所有数据，需要重新解码");
             if (ret == AVERROR(EAGAIN)) {
                 continue;
             } else {
                 input.drop();
-
             }
             continue;
         }
@@ -89,9 +90,10 @@ int AudioDecode::decodePacket() {
             frameQueue->pushFrame();
         }
 
-    } while (!got_frame);
+    }
 
     if (ret < 0) {
+        LOGE("audio ret =%d return", ret);
         return -1;
     }
 

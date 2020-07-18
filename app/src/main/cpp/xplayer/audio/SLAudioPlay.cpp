@@ -6,6 +6,7 @@
 #include "../../XLog.h"
 #include <SLES/OpenSLES_Android.h>
 #include <SLES/OpenSLES.h>
+#include <thread>
 
 SLAudioPlay::SLAudioPlay(PlayerState *playerState) : IAudioPlay(playerState) {
     buffer = new unsigned char[1024 * 1024];
@@ -108,8 +109,16 @@ bool SLAudioPlay::startPlay(XParameter out) {
 }
 
 void SLAudioPlay::playCall(void *bufferQueue) {
-    if (isExit || playerState->abortRequest || playerState->pauseRequest)
+    if (isExit || playerState->abortRequest) {
         return;
+    }
+    while (playerState->pauseRequest) {
+        if (isExit || playerState->abortRequest) {
+            return;
+        }
+        std::chrono::milliseconds duration(500);
+        std::this_thread::sleep_for(duration);
+    }
     auto bf = (SLAndroidSimpleBufferQueueItf) bufferQueue;
     XData data = getData();
     if (data.size <= 0) {

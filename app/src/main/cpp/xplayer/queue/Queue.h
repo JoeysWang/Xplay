@@ -17,7 +17,6 @@ protected:
     // Data
     std::queue<T> _queue;
     typename std::queue<T>::size_type _size_max;
-
     // Thread gubbins
     std::mutex _mutex;
     std::condition_variable _fullQue;
@@ -29,6 +28,8 @@ protected:
     std::atomic_bool _finished; // { false };
 public:
     int serial;
+    std::string tag="";
+
 public:
     Queue(const size_t size_max) : _size_max(size_max) {
         _quit = ATOMIC_VAR_INIT(false);
@@ -45,7 +46,7 @@ public:
                 return true;
             } else {
                 // wait的时候自动释放锁，如果wait到了会获取锁
-//                LOGE("packet queue is full wait");
+                LOGE("%s packet queue is full wait ", tag.c_str());
                 _fullQue.wait(lock);
             }
         }
@@ -65,7 +66,8 @@ public:
             }
         }
     }
-  T *last() {
+
+    T *last() {
         std::unique_lock<std::mutex> lock(_mutex);
         while (!_quit) {
             if (!_queue.empty()) {
@@ -91,7 +93,7 @@ public:
             } else if (_queue.empty() && _finished) {
                 return false;
             } else {
-//                LOGE("packet queue is empty wait");
+                LOGE("packet queue is empty wait");
                 _empty.wait(lock);
             }
         }

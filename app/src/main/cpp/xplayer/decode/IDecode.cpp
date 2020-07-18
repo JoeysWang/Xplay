@@ -28,6 +28,7 @@ IDecode::~IDecode() {
 
 void IDecode::run() {
     while (!isExit) {
+        LOGE(" IDecode::run pauseRequest= %d",playerState->pauseRequest);
         if (playerState->abortRequest)
             return;
         if (playerState->pauseRequest) {
@@ -38,6 +39,7 @@ void IDecode::run() {
         }
         decodePacket();
     }
+    LOGE(" IDecode::run return");
 }
 
 bool IDecode::openDecode(XParameter parameter, AVStream *stream, AVFormatContext *formatContext) {

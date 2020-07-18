@@ -14,8 +14,12 @@ extern "C" {
 }
 
 VideoDecode::VideoDecode(PlayerState *playerState) : IDecode(playerState) {
+    mutex.lock();
     frameQueue = new FrameQueue(FRAME_QUEUE_SIZE, 1);
     packetQueue = new Queue<XData>(100);
+    packetQueue->tag="audio";
+    mutex.unlock();
+
 }
 
 void VideoDecode::start() {
@@ -135,7 +139,5 @@ int VideoDecode::decodePacket() {
 }
 
 void VideoDecode::close() {
-    mutex.lock();
 
-    mutex.unlock();
 }
