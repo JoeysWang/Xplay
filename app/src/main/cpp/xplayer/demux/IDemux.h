@@ -10,6 +10,7 @@
 #include "../IObserver.h"
 #include "../player/PlayerState.h"
 #include "../decode/IDecode.h"
+#include "../../xhandler/HandlerThread.h"
 
 struct XParameter;
 
@@ -49,6 +50,8 @@ public:
 
     IDecode *audioDecode = nullptr;
     IDecode *videoDecode = nullptr;
+
+    XHandler *playerHandler = nullptr;
 
 protected:
     virtual void run();

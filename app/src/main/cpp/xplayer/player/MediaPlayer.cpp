@@ -35,6 +35,7 @@ void MediaPlayer::setDataSource(std::string &url) {
         LOGE("IPlayer::open demux error ");
         return;
     }
+    demux->playerHandler = getHandler();
     LOGE("IPlayer::open demux success ");
     if (!videoDecode ||
         !videoDecode->openDecode(demux->getVideoParameter(),
@@ -42,13 +43,14 @@ void MediaPlayer::setDataSource(std::string &url) {
                                  demux->formatContext)) {
         LOGE("IPlayer videoDecode->open error ");
     }
-
+    videoDecode->playerHandler = getHandler();
     if (!audioDecode ||
         !audioDecode->openDecode(demux->getAudioParameter(),
                                  demux->getAudioStream(),
                                  demux->formatContext)) {
         LOGE("IPlayer audioDecode->open error ");
     }
+    audioDecode->playerHandler = getHandler();
     LOGD("IPlayer::setDataSource success  ");
 }
 
@@ -158,6 +160,9 @@ void MediaPlayer::release() {
     delete playerState;
     playerState = nullptr;
     window = nullptr;
+    delete jniListener;
+    jniListener = nullptr;
+
     LOGD("IPlayer::release success");
 }
 
@@ -207,4 +212,16 @@ int MediaPlayer::getVideoHeight() {
         return videoDecode->codecContext->height;
     }
     return 0;
+}
+
+void MediaPlayer::setListener(MediaPlayerListener *listener) {
+    if (jniListener != nullptr) {
+        delete jniListener;
+        jniListener = nullptr;
+    }
+    MediaPlayer::jniListener = listener;
+}
+
+void MediaPlayer::handleMessage(XMessage *message) {
+    LOGI("MediaPlayer::handleMessage what=%d", message->what);
 }

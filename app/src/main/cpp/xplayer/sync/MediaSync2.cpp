@@ -8,7 +8,6 @@
 MediaSync2::MediaSync2(PlayerState *playerState, IDecode *audioDecode, IDecode *videoDecode)
         : playerState(playerState), audioDecode(audioDecode),
           videoDecode(videoDecode) {
-    LOGI("MediaSync2 constructor playerState=%p", playerState);
     audioClock = new MediaClock;
     videoClock = new MediaClock;
     maxFrameDuration = 10.0;
@@ -46,6 +45,7 @@ void MediaSync2::audioCallBack(double pts, uint8_t *stream, int len, void *conte
     auto mediaSync2 = (MediaSync2 *) context;
     mediaSync2->lastAudioPts = pts;
     mediaSync2->audioClock->setClock(pts);
+    playerHandler->sendMessage()
 }
 
 void MediaSync2::videoPlay() {
@@ -90,7 +90,6 @@ void MediaSync2::videoPlay() {
 double MediaSync2::calculateDelay(double delay) {
     double sync_threshold, diff = 0;
     diff = videoClock->getClock() - getMasterClock();
-//    LOGI("diff =%f ", diff);
     sync_threshold = FFMAX(AV_SYNC_THRESHOLD_MIN, FFMIN(AV_SYNC_THRESHOLD_MAX, delay));
     if (!isnan(diff) && fabs(diff) < maxFrameDuration) {
         if (diff <= -sync_threshold) {
@@ -101,8 +100,6 @@ double MediaSync2::calculateDelay(double delay) {
             delay = 2 * delay;
         }
     }
-//    LOGI("delay =%f ", delay);
-
     return delay;
 }
 
@@ -126,9 +123,11 @@ void MediaSync2::setAudioPlay(IAudioPlay *pAudioPlay) {
 
 void MediaSync2::stop() {
     isExist = true;
+    playerHandler = nullptr;
 }
 
 MediaSync2::~MediaSync2() {
     delete audioClock;
     delete videoClock;
 }
+

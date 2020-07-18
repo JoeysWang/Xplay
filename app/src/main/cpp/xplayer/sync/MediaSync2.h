@@ -10,8 +10,9 @@
 #include "../video/IVideoView.h"
 #include "../resample/IResample.h"
 #include "../audio/IAudioPlay.h"
+#include "../../xhandler/HandlerThread.h"
 
-class MediaSync2 {
+class MediaSync2  {
 public:
     MediaSync2(PlayerState *playerState, IDecode *audioDecode, IDecode *videoDecode);
 
@@ -41,6 +42,7 @@ private:
     IVideoView *videoView;
     IAudioPlay *iAudioPlay;
     double frameTimer;                      // 视频时钟
+    XHandler *playerHandler = nullptr;
 
     double lastFramePts = 0.0;
     double lastAudioPts = 0.0;

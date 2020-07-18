@@ -1,6 +1,5 @@
 package com.joeys.xplay
 
-import android.app.Activity
 import android.content.Context
 import android.graphics.SurfaceTexture
 import android.net.Uri
@@ -12,7 +11,6 @@ import android.util.Log
 import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.TextureView
-import androidx.appcompat.app.AppCompatActivity
 import com.blankj.utilcode.util.UriUtils
 import com.joeys.xplay.IMediaPlayer.MEDIA_INFO_VIDEO_TRACK_LAGGING
 import java.io.FileDescriptor
@@ -21,7 +19,7 @@ import kotlin.concurrent.thread
 
 
 class Xplay : TextureView, TextureView.SurfaceTextureListener, IMediaPlayer {
-    private var mEventHandler: EventHandler
+    private var mEventHandler: EventHandler?
 
     private var mOnPreparedListener: IMediaPlayer.OnPreparedListener? = null
     private var mOnBufferingUpdateListener: IMediaPlayer.OnBufferingUpdateListener? = null
@@ -54,6 +52,18 @@ class Xplay : TextureView, TextureView.SurfaceTextureListener, IMediaPlayer {
         }
 
         external fun native_init()
+
+        @JvmStatic
+        fun postEventFromNative(
+            mediaplayer_ref: Any,
+            what: Int, arg1: Int, arg2: Int, obj: Any
+        ) {
+            val mp: Xplay = (mediaplayer_ref as WeakReference<*>).get() as Xplay? ?: return
+            mp.mEventHandler?.let {
+                val m: Message = it.obtainMessage(what, arg1, arg2, obj)
+                it.sendMessage(m)
+            }
+        }
     }
 
     constructor(context: Context) : super(context)
@@ -70,11 +80,12 @@ class Xplay : TextureView, TextureView.SurfaceTextureListener, IMediaPlayer {
                 mEventHandler = EventHandler(this, Looper.getMainLooper())
             }
         }
-        iplayerIinit()
+        iplayerIinit(WeakReference(this))
         surfaceTextureListener = this
+
     }
 
-    private external fun iplayerIinit()
+    private external fun iplayerIinit(weakReference: WeakReference<Xplay>)
     private external fun _setDataSource(url: String): Boolean
     external fun text()
     private external fun initView(holder: Surface?)
@@ -82,7 +93,6 @@ class Xplay : TextureView, TextureView.SurfaceTextureListener, IMediaPlayer {
     external fun setMatrix(vPMatrix: FloatArray)
 
     override fun onSurfaceTextureSizeChanged(surface: SurfaceTexture?, width: Int, height: Int) {
-        Log.d("xplay", "surfaceCreated")
     }
 
     override fun onSurfaceTextureUpdated(surface: SurfaceTexture?) {
@@ -102,26 +112,6 @@ class Xplay : TextureView, TextureView.SurfaceTextureListener, IMediaPlayer {
 
     private fun stayAwake(awake: Boolean) {
 
-    }
-
-    /**
-     * Called from native code when an interesting event happens.  This method
-     * just uses the EventHandler system to post the event back to the main app thread.
-     * We use a weak reference to the original MediaPlayer object so that the native
-     * code is safe from the object disappearing from underneath it.  (This is
-     * the cookie passed to native_setup().)
-     */
-    private fun postEventFromNative(
-        mediaplayer_ref: Any,
-        what: Int, arg1: Int, arg2: Int, obj: Any
-    ) {
-        val mp: Xplay =
-            (mediaplayer_ref as WeakReference<*>).get() as Xplay?
-                ?: return
-        if (mp.mEventHandler != null) {
-            val m: Message = mp.mEventHandler.obtainMessage(what, arg1, arg2, obj)
-            mp.mEventHandler.sendMessage(m)
-        }
     }
 
 

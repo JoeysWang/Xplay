@@ -21,6 +21,7 @@ IDecode::~IDecode() {
         frameQueue->flush();
         frameQueue = nullptr;
     }
+    playerHandler = nullptr;
     avcodec_close(codecContext);
     avcodec_free_context(&codecContext);
     mutex.unlock();
@@ -28,7 +29,7 @@ IDecode::~IDecode() {
 
 void IDecode::run() {
     while (!isExit) {
-        LOGE(" IDecode::run pauseRequest= %d",playerState->pauseRequest);
+        LOGE(" IDecode::run pauseRequest= %d", playerState->pauseRequest);
         if (playerState->abortRequest)
             return;
         if (playerState->pauseRequest) {

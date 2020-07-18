@@ -17,6 +17,8 @@ void XHandler::sendMessage(XMessage *message) {
     message->target = this;
     enqueueMessage(message);
 }
+void XHandler::postMessage(int what, int arg1, int arg2) {
+}
 
 void XHandler::dispatchMessage(XMessage *message) {
     if (callBack) {
@@ -43,3 +45,4 @@ XHandler::~XHandler() {
 void XHandler::setCallBack(HandleMessageI *callBack) {
     XHandler::callBack = callBack;
 }
+

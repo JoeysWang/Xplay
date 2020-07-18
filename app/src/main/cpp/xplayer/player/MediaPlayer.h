@@ -15,7 +15,12 @@
 #include "../audio/IAudioPlay.h"
 #include "../resample/IResample.h"
 
-class MediaPlayer {
+class MediaPlayerListener {
+public:
+    virtual void notify(int msg, int ext1, int ext2, void *obj) {}
+};
+
+class MediaPlayer :HandlerThread{
 
 public:
     MediaPlayer();
@@ -39,6 +44,11 @@ public:
 
     void setDataSource(std::string &url);
 
+    void setListener(MediaPlayerListener *mListener);
+
+private:
+    void handleMessage(XMessage *message) override;
+
 public:
     PlayerState *playerState;
     MediaSync2 *mediaSync = nullptr;
@@ -50,7 +60,7 @@ public:
     IAudioPlay *audioPlay = 0;
     //音频输出配置
     XParameter audioOutParam;
-
+    MediaPlayerListener *jniListener = nullptr;;
 public:
     void *window;
     std::mutex mutex;

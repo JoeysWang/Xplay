@@ -28,6 +28,8 @@ public:
 
     void sendMessage(XMessage *message);
 
+    void postMessage(int what, int arg1, int arg2);
+
     void dispatchMessage(XMessage *message);
 
 private:

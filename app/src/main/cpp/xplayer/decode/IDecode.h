@@ -19,6 +19,7 @@ struct XData;
 #include "../queue/PacketQueue.h"
 #include "../player/PlayerState.h"
 #include "../sync/MediaClock.h"
+#include "../../xhandler/HandlerThread.h"
 
 enum DecodeMediaType {
     MEDIA_TYPE_NONE = -1,
@@ -61,6 +62,7 @@ public:
     AVCodecContext *codecContext = nullptr;
     AVFormatContext *formatCtx = nullptr;
 
+    XHandler *playerHandler = nullptr;
 
 protected:
     //消费数据，如果是空的，阻塞

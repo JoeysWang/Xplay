@@ -32,6 +32,7 @@ IDemux::~IDemux() {
     }
     audioDecode = nullptr;
     videoDecode = nullptr;
+    playerHandler = nullptr;
     mutex.unlock();
 
 }
