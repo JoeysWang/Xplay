@@ -12,7 +12,7 @@
 #include "../audio/IAudioPlay.h"
 #include "../../xhandler/HandlerThread.h"
 
-class MediaSync2  {
+class MediaSync2 {
 public:
     MediaSync2(PlayerState *playerState, IDecode *audioDecode, IDecode *videoDecode);
 
@@ -23,6 +23,8 @@ public:
     void stop();
 
     double calculateDelay(double delay);
+
+    long getCurrentPosition();
 
     double getMasterClock();
 

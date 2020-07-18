@@ -223,5 +223,5 @@ void MediaPlayer::setListener(MediaPlayerListener *listener) {
 }
 
 void MediaPlayer::handleMessage(XMessage *message) {
-    LOGI("MediaPlayer::handleMessage what=%d", message->what);
+    LOGI("MediaPlayer::handleMessage what=%d  arg1=%d", message->what,message->arg1);
 }

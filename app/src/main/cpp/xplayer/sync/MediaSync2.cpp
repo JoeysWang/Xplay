@@ -3,6 +3,7 @@
 //
 
 #include "MediaSync2.h"
+#include "../player/PlayerMessage.h"
 #include <thread>
 
 MediaSync2::MediaSync2(PlayerState *playerState, IDecode *audioDecode, IDecode *videoDecode)
@@ -45,7 +46,31 @@ void MediaSync2::audioCallBack(double pts, uint8_t *stream, int len, void *conte
     auto mediaSync2 = (MediaSync2 *) context;
     mediaSync2->lastAudioPts = pts;
     mediaSync2->audioClock->setClock(pts);
-    playerHandler->sendMessage()
+    mediaSync2->playerHandler->postMessage(MSG_CURRENT_POSITON,
+                                           mediaSync2->getCurrentPosition(),
+                                           0);
+}
+
+long MediaSync2::getCurrentPosition() {
+    // 起始延时
+    int64_t start_time = videoDecode->formatCtx->start_time;
+    int64_t start_diff = 0;
+    if (start_time > 0 && start_time != AV_NOPTS_VALUE) {
+        start_diff = av_rescale(start_time, 1000, AV_TIME_BASE);
+    }
+
+    // 计算主时钟的时间
+    int64_t pos = 0;
+    double clock = getMasterClock();
+    if (isnan(clock)) {
+        pos = playerState->seekPos;
+    } else {
+        pos = (int64_t) (clock * 1000);
+    }
+    if (pos < 0 || pos < start_diff) {
+        return 0;
+    }
+    return (long) (pos - start_diff);
 }
 
 void MediaSync2::videoPlay() {

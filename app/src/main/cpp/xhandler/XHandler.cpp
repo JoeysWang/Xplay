@@ -17,13 +17,19 @@ void XHandler::sendMessage(XMessage *message) {
     message->target = this;
     enqueueMessage(message);
 }
+
 void XHandler::postMessage(int what, int arg1, int arg2) {
+    auto xMessage = new XMessage;
+    xMessage->what = what;
+    xMessage->arg1 = arg1;
+    xMessage->arg2 = arg2;
+    sendMessage(xMessage);
 }
 
 void XHandler::dispatchMessage(XMessage *message) {
     if (callBack) {
         callBack->handleMessage(message);
-    }else{
+    } else {
         LOGE("dispatchMessage callBack is null");
     }
 }
@@ -31,7 +37,7 @@ void XHandler::dispatchMessage(XMessage *message) {
 void XHandler::enqueueMessage(XMessage *message) {
     if (looper) {
         looper->sendMessage(message);
-    }else{
+    } else {
         LOGE("enqueueMessage looper is null");
     }
 }
