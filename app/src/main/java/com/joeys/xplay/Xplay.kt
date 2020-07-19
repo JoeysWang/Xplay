@@ -36,15 +36,15 @@ class Xplay : TextureView, TextureView.SurfaceTextureListener, IMediaPlayer {
         private val TAG = "xplay" // interface test message
         private val MEDIA_NOP = 0 // interface test message
 
-        private val MEDIA_PREPARED = 1
-        private val MEDIA_PLAYBACK_COMPLETE = 2
-        private val MEDIA_BUFFERING_UPDATE = 3
-        private val MEDIA_SEEK_COMPLETE = 4
-        private val MEDIA_SET_VIDEO_SIZE = 5
-        private val MEDIA_TIMED_TEXT = 99
-        private val MEDIA_ERROR = 100
-        private val MEDIA_INFO = 200
-        private val MEDIA_CURRENT = 300
+        private val MEDIA_PREPARED = 0x1
+        private val MEDIA_PLAYBACK_COMPLETE = 0x2
+        private val MEDIA_BUFFERING_UPDATE = 0x3
+        private val MEDIA_SEEK_COMPLETE = 0x4
+        private val MEDIA_SET_VIDEO_SIZE = 0x5
+        private val MEDIA_TIMED_TEXT = 0x99
+        private val MEDIA_ERROR = 0x100
+        private val MEDIA_INFO = 0x200
+        private val MEDIA_CURRENT = 0x300
 
         init {
             System.loadLibrary("xplay")
@@ -56,7 +56,7 @@ class Xplay : TextureView, TextureView.SurfaceTextureListener, IMediaPlayer {
         @JvmStatic
         fun postEventFromNative(
             mediaplayer_ref: Any,
-            what: Int, arg1: Int, arg2: Int, obj: Any
+            what: Int, arg1: Int, arg2: Int, obj: Any?
         ) {
             val mp: Xplay = (mediaplayer_ref as WeakReference<*>).get() as Xplay? ?: return
             mp.mEventHandler?.let {
@@ -125,6 +125,10 @@ class Xplay : TextureView, TextureView.SurfaceTextureListener, IMediaPlayer {
                 )
                 return
             }
+            Log.w(
+                Xplay.TAG,
+                "EventHandler handleMessage what=${msg.what} arg1=${msg.arg1}"
+            )
             when (msg.what) {
                 MEDIA_PREPARED -> {
                     mOnPreparedListener?.onPrepared(mMediaPlayer)

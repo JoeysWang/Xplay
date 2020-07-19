@@ -29,7 +29,7 @@ XLooper *XLooper::prepare() {
 
 void XLooper::loop() {
     XLooper *looper = myLooper();
-    LOGI(" XLooper::loop %p",looper);
+    LOGI(" XLooper::loop %p", looper);
     if (looper) {
         looper->_loop();
     }
@@ -42,13 +42,12 @@ XLooper *XLooper::myLooper() {
 void XLooper::_loop() {
     for (;;) {
         if (isQuit) { return; }
-        auto message = queue->peek();
-        if (message) {
+        auto message = new XMessage;
+
+        if (queue->pop(*message)) {
             if (message->target) {
                 message->target->dispatchMessage(message);
             }
-            queue->pop(*message);
-            delete message;
         }
 
     }

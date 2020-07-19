@@ -29,7 +29,6 @@ public:
 
     void start();
 
-
     static MediaPlayer *get(unsigned char index = 0);
 
     virtual bool initView(void *window);
@@ -41,6 +40,8 @@ public:
     virtual void stop();
 
     virtual void release();
+
+    long getDuration();
 
     void setDataSource(std::string &url);
 

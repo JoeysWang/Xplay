@@ -18,11 +18,13 @@ public:
     virtual ~XHandler();
 
 public:
-    HandleMessageI *callBack;
+    HandleMessageI *callBack = nullptr;
 
-    XLooper *looper;
+    XLooper *looper = nullptr;
 public:
     XHandler();
+
+    XHandler(XLooper *looper);
 
     void setCallBack(HandleMessageI *callBack);
 

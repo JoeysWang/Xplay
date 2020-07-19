@@ -7,7 +7,7 @@
 #include "../../XLog.h"
 
 IDemux::IDemux(PlayerState *playerState) : playerState(playerState) {
-    LOGI("IDemux constructor %p", playerState);
+    LOGI("IDemux constructor  ");
 }
 
 void IDemux::run() {

@@ -11,6 +11,10 @@
 
 XHandler::XHandler() {
     looper = XLooper::myLooper();
+    LOGI("XHandler::XHandler() looper=%p",looper);
+}
+XHandler::XHandler(XLooper *looper) : looper(looper) {
+    LOGI("XHandler::XHandler(XLooper *looper) looper=%p",looper);
 }
 
 void XHandler::sendMessage(XMessage *message) {
@@ -35,10 +39,10 @@ void XHandler::dispatchMessage(XMessage *message) {
 }
 
 void XHandler::enqueueMessage(XMessage *message) {
-    if (looper) {
+    if (looper && message) {
         looper->sendMessage(message);
     } else {
-        LOGE("enqueueMessage looper is null");
+        LOGE("enqueueMessage  message || looper is null");
     }
 }
 
@@ -51,4 +55,5 @@ XHandler::~XHandler() {
 void XHandler::setCallBack(HandleMessageI *callBack) {
     XHandler::callBack = callBack;
 }
+
 

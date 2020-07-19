@@ -26,68 +26,6 @@ MediaPlayer *MediaPlayer::get(unsigned char index) {
     return new MediaPlayer();
 }
 
-void MediaPlayer::setDataSource(std::string &url) {
-    playerState->url = url;
-    const char *path = playerState->url.c_str();
-    std::unique_lock<std::mutex> lock(mutex);
-    LOGD("IPlayer::setDataSource %s", url.c_str());
-    if (!demux || !demux->open(path)) {
-        LOGE("IPlayer::open demux error ");
-        return;
-    }
-    demux->playerHandler = getHandler();
-    LOGE("IPlayer::open demux success ");
-    if (!videoDecode ||
-        !videoDecode->openDecode(demux->getVideoParameter(),
-                                 demux->getVideoStream(),
-                                 demux->formatContext)) {
-        LOGE("IPlayer videoDecode->open error ");
-    }
-    videoDecode->playerHandler = getHandler();
-    if (!audioDecode ||
-        !audioDecode->openDecode(demux->getAudioParameter(),
-                                 demux->getAudioStream(),
-                                 demux->formatContext)) {
-        LOGE("IPlayer audioDecode->open error ");
-    }
-    audioDecode->playerHandler = getHandler();
-    LOGD("IPlayer::setDataSource success  ");
-}
-
-void MediaPlayer::openSource() {
-    std::unique_lock<std::mutex> lock(mutex);
-    if (playerState->url.empty()) {
-        LOGE("IPlayer::open url is empty ");
-        return;
-    }
-    const char *path = playerState->url.c_str();
-    if (!demux || !demux->open(path)) {
-        LOGE("IPlayer::open demux error ");
-        return;
-    }
-    if (!videoDecode ||
-        !videoDecode->openDecode(demux->getVideoParameter(),
-                                 demux->getVideoStream(),
-                                 demux->formatContext)) {
-        LOGE("IPlayer videoDecode->open error ");
-    }
-
-    if (!audioDecode ||
-        !audioDecode->openDecode(demux->getAudioParameter(),
-                                 demux->getAudioStream(),
-                                 demux->formatContext)) {
-        LOGE("IPlayer audioDecode->open error ");
-    }
-    audioOutParam = (demux->getAudioParameter());
-
-    if (!resample || !resample->open(demux->getAudioParameter(), audioOutParam)) {
-        LOGE("IPlayer  resample->open error ");
-    }
-    if (window) {
-        videoView->setRender(window);
-    }
-    LOGI("IPlayer::openSource success!");
-}
 
 void MediaPlayer::start() {
     mutex.lock();
@@ -107,6 +45,7 @@ void MediaPlayer::start() {
     mediaSync->setAudioPlay(audioPlay);
     mediaSync->setResample(resample);
     mediaSync->setVideoView(videoView);
+    mediaSync->setPlayerHandler(getHandler());
 
     videoDecode->start();
     resample->start();
@@ -214,6 +153,17 @@ int MediaPlayer::getVideoHeight() {
     return 0;
 }
 
+long MediaPlayer::getDuration() {
+    std::unique_lock<std::mutex> lock(mutex);
+    if (videoDecode) {
+        long duration = videoDecode->formatCtx->duration;
+        duration = duration * av_q2d(videoDecode->codecContext->time_base);
+        
+        return videoDecode->codecContext->height;
+    }
+    return 0;
+}
+
 void MediaPlayer::setListener(MediaPlayerListener *listener) {
     if (jniListener != nullptr) {
         delete jniListener;
@@ -223,5 +173,69 @@ void MediaPlayer::setListener(MediaPlayerListener *listener) {
 }
 
 void MediaPlayer::handleMessage(XMessage *message) {
-    LOGI("MediaPlayer::handleMessage what=%d  arg1=%d", message->what,message->arg1);
+    jniListener->notify(message->what, message->arg1, message->arg2, nullptr);
+    delete message;
+}
+
+void MediaPlayer::setDataSource(std::string &url) {
+    playerState->url = url;
+    const char *path = playerState->url.c_str();
+    std::unique_lock<std::mutex> lock(mutex);
+    LOGD("IPlayer::setDataSource %s", url.c_str());
+    if (!demux || !demux->open(path)) {
+        LOGE("IPlayer::open demux error ");
+        return;
+    }
+    demux->playerHandler = getHandler();
+    LOGE("IPlayer::open demux success ");
+    if (!videoDecode ||
+        !videoDecode->openDecode(demux->getVideoParameter(),
+                                 demux->getVideoStream(),
+                                 demux->formatContext)) {
+        LOGE("IPlayer videoDecode->open error ");
+    }
+    videoDecode->playerHandler = getHandler();
+    if (!audioDecode ||
+        !audioDecode->openDecode(demux->getAudioParameter(),
+                                 demux->getAudioStream(),
+                                 demux->formatContext)) {
+        LOGE("IPlayer audioDecode->open error ");
+    }
+    audioDecode->playerHandler = getHandler();
+    LOGD("IPlayer::setDataSource success  ");
+}
+
+void MediaPlayer::openSource() {
+    std::unique_lock<std::mutex> lock(mutex);
+    if (playerState->url.empty()) {
+        LOGE("IPlayer::open url is empty ");
+        return;
+    }
+    const char *path = playerState->url.c_str();
+    if (!demux || !demux->open(path)) {
+        LOGE("IPlayer::open demux error ");
+        return;
+    }
+    if (!videoDecode ||
+        !videoDecode->openDecode(demux->getVideoParameter(),
+                                 demux->getVideoStream(),
+                                 demux->formatContext)) {
+        LOGE("IPlayer videoDecode->open error ");
+    }
+
+    if (!audioDecode ||
+        !audioDecode->openDecode(demux->getAudioParameter(),
+                                 demux->getAudioStream(),
+                                 demux->formatContext)) {
+        LOGE("IPlayer audioDecode->open error ");
+    }
+    audioOutParam = (demux->getAudioParameter());
+
+    if (!resample || !resample->open(demux->getAudioParameter(), audioOutParam)) {
+        LOGE("IPlayer  resample->open error ");
+    }
+    if (window) {
+        videoView->setRender(window);
+    }
+    LOGI("IPlayer::openSource success!");
 }

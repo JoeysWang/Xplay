@@ -19,6 +19,14 @@ public:
         delete handler;
     }
 
+    void postMessage(XMessage *message) {
+        handler->sendMessage(message);
+    }
+
+    void postMessage(int what, int arg1, int arg2) {
+        handler->postMessage(what, arg1, arg2);
+    }
+
     XHandler *getHandler() const {
         return handler;
     }
@@ -26,9 +34,9 @@ public:
 private:
     virtual void run() {
         auto looper = XLooper::prepare();
-        handler = new XHandler();
+        handler = new XHandler(looper);
         handler->setCallBack(this);
-        XLooper::loop();
+        looper->loop();
     };
 
     virtual void handleMessage(XMessage *message) override = 0;
@@ -36,6 +44,7 @@ private:
     virtual void stop() {
         isQuit = true;
     }
+
 
 private:
     bool isQuit = false;

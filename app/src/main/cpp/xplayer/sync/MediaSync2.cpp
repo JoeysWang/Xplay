@@ -46,10 +46,13 @@ void MediaSync2::audioCallBack(double pts, uint8_t *stream, int len, void *conte
     auto mediaSync2 = (MediaSync2 *) context;
     mediaSync2->lastAudioPts = pts;
     mediaSync2->audioClock->setClock(pts);
-    mediaSync2->playerHandler->postMessage(MSG_CURRENT_POSITON,
-                                           mediaSync2->getCurrentPosition(),
-                                           0);
+    if (mediaSync2->playerHandler) {
+        mediaSync2->playerHandler->postMessage(MSG_CURRENT_POSITON,
+                                               mediaSync2->getCurrentPosition(),
+                                               0);
+    }
 }
+
 
 long MediaSync2::getCurrentPosition() {
     // 起始延时
@@ -154,5 +157,9 @@ void MediaSync2::stop() {
 MediaSync2::~MediaSync2() {
     delete audioClock;
     delete videoClock;
+}
+
+void MediaSync2::setPlayerHandler(XHandler *playerHandler) {
+    MediaSync2::playerHandler = playerHandler;
 }
 

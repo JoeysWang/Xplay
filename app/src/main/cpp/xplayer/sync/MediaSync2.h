@@ -60,6 +60,8 @@ public:
 
     void setAudioPlay(IAudioPlay *audioPlay);
 
+    void setPlayerHandler(XHandler *playerHandler);
+
 private:
     void audioPlay();
 

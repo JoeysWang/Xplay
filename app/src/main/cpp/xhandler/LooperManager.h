@@ -23,7 +23,7 @@ public:
     }
 
     XLooper *createLooper(long threadId) {
-        LOGI(" XLooper *createLooper %ld",threadId);
+        LOGI(" XLooper *createLooper threadId=%ld",threadId);
         std::unique_lock<std::mutex> lock(mutex);
         auto finder = looperMap.find(threadId);
         if (finder == looperMap.end()) {
@@ -35,7 +35,7 @@ public:
     }
 
     XLooper *getLooper(long threadId) {
-        LOGI(" XLooper *getLooper %ld",threadId);
+        LOGI(" XLooper *getLooper threadId=%ld",threadId);
         std::unique_lock<std::mutex> lock(mutex);
         auto finder = looperMap.find(threadId);
         if (finder == looperMap.end()) {

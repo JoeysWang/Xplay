@@ -78,6 +78,7 @@ Java_com_joeys_xplay_Xplay_00024Companion_native_1init(JNIEnv *env, jobject thiz
     fields.post_event = env->GetStaticMethodID(clazz, "postEventFromNative",
                                                "(Ljava/lang/Object;IIILjava/lang/Object;)V");
     if (fields.post_event == NULL) {
+        LOGE("postEventFromNative Java方法不存在");
         return;
     }
 
@@ -93,7 +94,7 @@ Java_com_joeys_xplay_Xplay_iplayerIinit(
         jobject weakReference) {
     LOGI("Xplay_iplayerIinit");
     MediaPlayer *pPlayer = FFPlayerBuilder::get()->buildPlayer();
-    JNIMediaPlayerListener *listener = new JNIMediaPlayerListener(env, thiz, weakReference);
+    auto *listener = new JNIMediaPlayerListener(env, thiz, weakReference);
     pPlayer->setListener(listener);
 
     setMediaPlayer(env, thiz, (long) pPlayer);
@@ -122,10 +123,10 @@ void JNIMediaPlayerListener::notify(int msg, int ext1, int ext2, void *obj) {
     env->CallStaticVoidMethod(mClass, fields.post_event, mObject,
                               msg, ext1, ext2, obj);
 
-    if (env->ExceptionCheck()) {
-        LOGE("An exception occurred while notifying an event.");
-        env->ExceptionClear();
-    }
+//    if (env->ExceptionCheck()) {
+//        LOGE("An exception occurred while notifying an event.");
+//        env->ExceptionClear();
+//    }
 
     if (status) {
         javaVM->DetachCurrentThread();

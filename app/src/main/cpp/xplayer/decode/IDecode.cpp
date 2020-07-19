@@ -7,7 +7,7 @@
 #include "../../XLog.h"
 
 IDecode::IDecode(PlayerState *playerState) : playerState(playerState) {
-    LOGI("IDecode constructor playerState=%p", this->playerState);
+    LOGI("IDecode  " );
 }
 
 IDecode::~IDecode() {
@@ -29,18 +29,15 @@ IDecode::~IDecode() {
 
 void IDecode::run() {
     while (!isExit) {
-        LOGE(" IDecode::run pauseRequest= %d", playerState->pauseRequest);
         if (playerState->abortRequest)
             return;
         if (playerState->pauseRequest) {
-            LOGI("IDecode sleep for pause");
             std::chrono::milliseconds duration(500);
             std::this_thread::sleep_for(duration);
             continue;
         }
         decodePacket();
     }
-    LOGE(" IDecode::run return");
 }
 
 bool IDecode::openDecode(XParameter parameter, AVStream *stream, AVFormatContext *formatContext) {
