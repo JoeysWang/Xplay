@@ -125,10 +125,10 @@ class Xplay : TextureView, TextureView.SurfaceTextureListener, IMediaPlayer {
                 )
                 return
             }
-            Log.w(
-                Xplay.TAG,
-                "EventHandler handleMessage what=${msg.what} arg1=${msg.arg1}"
-            )
+//            Log.w(
+//                Xplay.TAG,
+//                "EventHandler handleMessage what=${msg.what} arg1=${msg.arg1}"
+//            )
             when (msg.what) {
                 MEDIA_PREPARED -> {
                     mOnPreparedListener?.onPrepared(mMediaPlayer)
@@ -203,7 +203,7 @@ class Xplay : TextureView, TextureView.SurfaceTextureListener, IMediaPlayer {
                 MEDIA_NOP -> {
                 }
                 MEDIA_CURRENT -> {
-                    Log.d(TAG, "handleMessage: MEDIA_CURRENT")
+//                    Log.d(TAG, "handleMessage: MEDIA_CURRENT")
 //                    if (mOnCurrentPositionListener != null) {
 //                        mOnCurrentPositionListener.onCurrentPosition(
 //                            msg.arg1.toLong(),

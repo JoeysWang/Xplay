@@ -81,8 +81,8 @@ int VideoDecode::decodePacket() {
 //                    dpts = av_q2d(pStream->time_base) * frame->pts;
 //                }
 //                // 计算视频帧的长宽比
-//                frame->sample_aspect_ratio = av_guess_sample_aspect_ratio(formatCtx, pStream,
-//                                                                          frame);
+                frame->sample_aspect_ratio = av_guess_sample_aspect_ratio(formatCtx, pStream,
+                                                                          frame);
 //                // 是否需要做舍帧操作
 //                if (playerState->frameDrop > 0 ||
 //                    (playerState->frameDrop > 0 && playerState->syncType != AV_SYNC_VIDEO)) {
@@ -109,6 +109,7 @@ int VideoDecode::decodePacket() {
             output->linesize[2] = frame->linesize[2];
             output->width = frame->width;
             output->height = frame->height;
+            LOGI("frame->format %d",frame->format);
             output->format = frame->format;
             output->pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts * av_q2d(tb);
             output->duration = frame_rate.num && frame_rate.den

@@ -7,7 +7,7 @@
 #include "../../XLog.h"
 
 IDecode::IDecode(PlayerState *playerState) : playerState(playerState) {
-    LOGI("IDecode  " );
+    LOGI("IDecode  ");
 }
 
 IDecode::~IDecode() {
@@ -69,6 +69,14 @@ bool IDecode::openDecode(XParameter parameter, AVStream *stream, AVFormatContext
     }
     if (codecContext->codec_type == AVMEDIA_TYPE_VIDEO) {
         audioOrVideo = MEDIA_TYPE_VIDEO;
+        AVDictionaryEntry *entry = av_dict_get(stream->metadata, "rotate", NULL,
+                                               AV_DICT_MATCH_CASE);
+        if (entry && entry->value) {
+              mRotate = atoi(entry->value);
+        } else {
+              mRotate = 0;
+        }
+        LOGI("video rotate = %d",mRotate);
     } else if (codecContext->codec_type == AVMEDIA_TYPE_AUDIO) {
         audioOrVideo = MEDIA_TYPE_AUDIO;
     }

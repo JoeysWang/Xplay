@@ -71,6 +71,7 @@ protected:
     FrameQueue *frameQueue;
 
     Queue<XData> *packetQueue;       // 数据包队列
+    int mRotate;
 };
 
 

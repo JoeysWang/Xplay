@@ -15,7 +15,7 @@ public:
     void setRender(void *view) override;
 
     void render(XData *data) override;
-
+    const char *formatString(int formate);
 
     virtual ~GLVideoView();
 
