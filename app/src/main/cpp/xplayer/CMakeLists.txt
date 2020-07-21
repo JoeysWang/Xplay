@@ -32,6 +32,7 @@ add_library(
         texture/XTexture.cpp
         utils/OpenGLUtils.cpp
         utils/vecmath.cpp
+        utils/CoordinateUtils.cpp
 
         player/MediaPlayer.cpp
         player/PlayerState.cpp

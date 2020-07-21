@@ -8,6 +8,7 @@
 #include "XShader.h"
 #include "../../XLog.h"
 #include "../utils/vecmath.h"
+#include "../utils/CoordinateUtils.h"
 
 class CXTexture : public XTexture {
 
@@ -30,7 +31,18 @@ public:
             ///对帧宽度和纹理宽度不一致的进行裁剪
             GLsizei padding = width[0] - frameWidth;
             GLfloat normalized = ((GLfloat) padding + 0.5f) / (GLfloat) width[0];
-            LOGI("帧宽度和linesize宽度不一致 padding=%d , normalized=%f", padding, normalized);
+            if (lastNormalized != normalized) {
+                auto coor = const_cast<GLfloat *>(CoordinateUtils::getInputTextureCoordinates());
+                for (int i = 0; i < 20; ++i) {
+                    if (i == 3 || i == 18) {
+                        shader.vertices[i] = coor[i] - normalized;
+                        LOGI(" shader.vertices[%d] = %f", i, shader.vertices[i]);
+                    } else
+                        shader.vertices[i] = coor[i];
+                }
+                lastNormalized = normalized;
+                shader.init();
+            }
         }
 
         shader.getTexture(0, width[0], height, data[0]); //y

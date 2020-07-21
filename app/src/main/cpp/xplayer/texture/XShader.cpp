@@ -9,6 +9,7 @@
 
 #include "../utils/OpenGLUtils.h"
 #include "../../XLog.h"
+#include "../utils/CoordinateUtils.h"
 #include <EGL/egl.h>
 #include <cstdlib>
 
@@ -51,20 +52,17 @@ char fragYUV420P[] =
         "    gl_FragColor = vec4(rgb, 1.0);\n"
         "\n"
         "}";
-static GLfloat vertices[] = { //正方形
-        1.0f, -1.0f, 0.0f, // 右下
-        1.0f, 0.0f,   // 纹理右下
-        -1.0f, -1.0f, 0.0f, // 左下
-        0.0f, 0.0f,//纹理左下
-        -1.0f, 1.0f, 0.0f, // 左上
-        0.0f, 1.0f,// 纹理左上
-        1.0f, 1.0f, 0.0f,  // 右上
-        1.0f, 1.0f // 纹理右上
-};
 
 XShader::~XShader() {
     if (program) {
         glDeleteProgram(program);
+    }
+}
+
+XShader::XShader() {
+    auto coor = const_cast<GLfloat *>(CoordinateUtils::getInputTextureCoordinates());
+    for (int i = 0; i <20; ++i) {
+        vertices[i]=coor[i];
     }
 }
 

@@ -4,6 +4,9 @@
 
 #ifndef XPLAY_XSHADER_H
 #define XPLAY_XSHADER_H
+
+#include <GLES3/gl3.h>
+
 #define MAX_TEXTURES 32
 
 enum XShaderType {
@@ -14,7 +17,9 @@ enum XShaderType {
 
 class XShader {
 public:
-    virtual bool init(XShaderType shaderType =XSHADER_YUV420P);
+    XShader();
+
+    virtual bool init(XShaderType shaderType = XSHADER_YUV420P);
 
     //获取材质并映射到内存
     void getTexture(unsigned int index, int width, int height, unsigned char *buf);
@@ -25,6 +30,7 @@ public:
 
     int inputTextureHandle[MAX_TEXTURES]; // 纹理句柄列表
 
+    GLfloat vertices[20];
 
 protected:
     unsigned int vertexSH = 0;

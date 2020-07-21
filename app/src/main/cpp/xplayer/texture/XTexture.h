@@ -29,6 +29,7 @@ public:
 public:
     int frameWidth;//帧宽度
     int frameHeight;
+    float lastNormalized = 0.0f;//上次裁剪
 
 };
 
