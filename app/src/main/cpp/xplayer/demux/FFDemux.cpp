@@ -137,6 +137,7 @@ void FFDemux::readPacket() {
         output->frame_rate = frame_rate;
         output->time_base = pStream->time_base;
         if (avPacket->stream_index == audioStreamIndex) {
+            LOGI("FFDemux::readPacket video codecpar format=%d", pStream->codecpar->format);
             output->audioOrVideo = MEDIA_TYPE_AUDIO;
             if (audioDecode)audioDecode->pushPacket(output);
         } else if (avPacket->stream_index == videoStreamIndex) {
@@ -156,7 +157,10 @@ XParameter FFDemux::getVideoParameter() {
         return XParameter();
     }
     //获取视频流索引
-    int videoIndex = av_find_best_stream(formatContext, AVMEDIA_TYPE_VIDEO, -1, -1, 0, 0);
+    int videoIndex = av_find_best_stream(
+            formatContext,
+            AVMEDIA_TYPE_VIDEO,
+            -1, -1, 0, 0);
     if (videoIndex < 0) {
         LOGE("av_find_best_stream video is empty");
         mutex.unlock();
@@ -167,6 +171,7 @@ XParameter FFDemux::getVideoParameter() {
     XParameter para;
     AVStream *pStream = formatContext->streams[videoIndex];
     para.parameters = pStream->codecpar;
+
     mutex.unlock();
     return para;
 }

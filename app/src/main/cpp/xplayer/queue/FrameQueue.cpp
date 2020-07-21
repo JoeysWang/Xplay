@@ -106,8 +106,8 @@ void FrameQueue::unrefFrame(XData *vp) {
     memset(vp->decodeDatas, 0, 0);
     vp->size = 0;
     vp->resampleData = 0;
-    vp->width = 0;
-    vp->height = 0;
+    vp->frameWidth = 0;
+    vp->frameHeight = 0;
     vp->format = 0;
     vp->drop();
 }

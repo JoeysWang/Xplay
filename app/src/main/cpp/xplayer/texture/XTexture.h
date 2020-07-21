@@ -17,14 +17,18 @@ public:
 
     static XTexture *create();
 
-    virtual bool init(void *win,
-                      int width, int height,
-                      XTextureType textureType = XTEXTURE_YUV420P
-
+    virtual bool init(
+            void *win,
+            int width,
+            int height,
+            XTextureType textureType = XTEXTURE_YUV420P
     ) = 0;
 
     virtual void draw(unsigned char *data[], int width[], int height) = 0;
 
+public:
+    int frameWidth;//帧宽度
+    int frameHeight;
 
 };
 

@@ -46,13 +46,18 @@ bool IDecode::openDecode(XParameter parameter, AVStream *stream, AVFormatContext
     this->formatCtx = formatContext;
     this->pStream = stream;
     //1.查找解码器
-    AVCodec *avCodec = avcodec_find_decoder(parameters->codec_id);
+    AVCodec *avCodec;
+    avCodec = avcodec_find_decoder_by_name("h264_mediacodec");
+    if (!avCodec) {
+        LOGE("avcodec_find_decoder_by_name h264_mediacodec not found " );
+        avCodec = avcodec_find_decoder(parameters->codec_id);
+    }
 
     if (!avCodec) {
         LOGE("avcodec_find_decoder error %d ", parameters->codec_id);
         return false;
     }
-
+    LOGI("avCodec->name = %s", avCodec->name);
     //2.创建解码器上下文
     mutex.lock();
     codecContext = avcodec_alloc_context3(avCodec);
@@ -72,11 +77,11 @@ bool IDecode::openDecode(XParameter parameter, AVStream *stream, AVFormatContext
         AVDictionaryEntry *entry = av_dict_get(stream->metadata, "rotate", NULL,
                                                AV_DICT_MATCH_CASE);
         if (entry && entry->value) {
-              mRotate = atoi(entry->value);
+            mRotate = atoi(entry->value);
         } else {
-              mRotate = 0;
+            mRotate = 0;
         }
-        LOGI("video rotate = %d",mRotate);
+        LOGI("video rotate = %d", mRotate);
     } else if (codecContext->codec_type == AVMEDIA_TYPE_AUDIO) {
         audioOrVideo = MEDIA_TYPE_AUDIO;
     }

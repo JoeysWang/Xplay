@@ -89,7 +89,7 @@ void GLVideoView::render(XData *data) {
     }
     if (!texture) {
         texture = XTexture::create();
-        texture->init(view, data->width, data->height);
+        texture->init(view, data->frameWidth, data->frameHeight);
     }
     if (!data->decodeDatas[0] || data->size == 0) {
         return;
@@ -100,7 +100,7 @@ void GLVideoView::render(XData *data) {
          data->linesize[1],
          data->linesize[2]
     );
-    texture->draw(data->decodeDatas, data->linesize, data->height);
+    texture->draw(data->decodeDatas, data->linesize, data->frameHeight);
     XEGL::get()->draw();
 }
 

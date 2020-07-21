@@ -37,8 +37,8 @@ struct XData {
     double pts = 0;
     double duration = 0;
 
-    int width = 0;
-    int height = 0;
+    int frameWidth = 0;
+    int frameHeight = 0;
     int format = 0;
     int nb_samples;
     int linesize[3];    // 宽对齐

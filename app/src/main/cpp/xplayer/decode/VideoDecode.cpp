@@ -17,7 +17,7 @@ VideoDecode::VideoDecode(PlayerState *playerState) : IDecode(playerState) {
     mutex.lock();
     frameQueue = new FrameQueue(FRAME_QUEUE_SIZE, 1);
     packetQueue = new Queue<XData>(100);
-    packetQueue->tag="audio";
+    packetQueue->tag = "audio";
     mutex.unlock();
 
 }
@@ -39,7 +39,7 @@ int VideoDecode::decodePacket() {
     AVRational frame_rate = av_guess_frame_rate(formatCtx, pStream, NULL);
     for (;;) {
         if (isExit || playerState->abortRequest) {
-            ret =-1;
+            ret = -1;
             break;
         }
         if (playerState->pauseRequest) {
@@ -74,28 +74,8 @@ int VideoDecode::decodePacket() {
         } else {
             got_picture = 1;
             frame->pts = frame->best_effort_timestamp;
-//            if (masterClock != nullptr) {
-//                double dpts = NAN;
-//
-//                if (frame->pts != AV_NOPTS_VALUE) {
-//                    dpts = av_q2d(pStream->time_base) * frame->pts;
-//                }
-//                // 计算视频帧的长宽比
-                frame->sample_aspect_ratio = av_guess_sample_aspect_ratio(formatCtx, pStream,
-                                                                          frame);
-//                // 是否需要做舍帧操作
-//                if (playerState->frameDrop > 0 ||
-//                    (playerState->frameDrop > 0 && playerState->syncType != AV_SYNC_VIDEO)) {
-//                    if (frame->pts != AV_NOPTS_VALUE) {
-//                        double diff = dpts - masterClock->getClock();
-//                        if (!isnan(diff) && fabs(diff) < AV_NOSYNC_THRESHOLD &&
-//                            diff < 0 && packetQueue->length() > 0) {
-//                            av_frame_unref(frame);
-//                            got_picture = 0;
-//                        }
-//                    }
-//                }
-//            }
+            frame->sample_aspect_ratio = av_guess_sample_aspect_ratio(formatCtx, pStream,
+                                                                      frame);
         }
         if (got_picture) {
             // 取出帧
@@ -103,13 +83,13 @@ int VideoDecode::decodePacket() {
                 ret = -1;
                 break;
             }
-            output->allocType=AVFRAME_TYPE;
+            output->allocType = AVFRAME_TYPE;
             output->linesize[0] = frame->linesize[0];
             output->linesize[1] = frame->linesize[1];
             output->linesize[2] = frame->linesize[2];
-            output->width = frame->width;
-            output->height = frame->height;
-            LOGI("frame->format %d",frame->format);
+            output->frameWidth = frame->width;
+            output->frameHeight = frame->height;
+
             output->format = frame->format;
             output->pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts * av_q2d(tb);
             output->duration = frame_rate.num && frame_rate.den
