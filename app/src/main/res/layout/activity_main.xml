@@ -37,7 +37,7 @@
         android:text="scan" />
 </LinearLayout>
 
-<!--    <com.joeys.xplay.Xplay-->
+<!--    <com.joeys.xplay.com.joeys.xplayer.Xplay-->
 <!--        android:id="@+id/xplay"-->
 <!--        android:layout_width="match_parent"-->
 <!--        android:layout_height="match_parent" />-->

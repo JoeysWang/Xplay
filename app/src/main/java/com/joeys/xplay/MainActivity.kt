@@ -42,8 +42,9 @@ class MainActivity : AppCompatActivity() {
             )
             PlayerActivity.start(file.absolutePath, this)
         }
+
         test.setOnClickListener {
-            CPPHelper().cpptest()
+
         }
         btn_scan.setOnClickListener {
 
@@ -71,7 +72,7 @@ class MainActivity : AppCompatActivity() {
                 if (uri != null) {
                     val uri2File = UriUtils.uri2File(uri)
                     Log.d(TAG, "uri2File: ${uri2File.absolutePath}")
-                    PlayerActivity.start(uri2File.absolutePath, this)
+//                    PlayerActivity.start(uri2File.absolutePath, this)
                 }
             }
         }
