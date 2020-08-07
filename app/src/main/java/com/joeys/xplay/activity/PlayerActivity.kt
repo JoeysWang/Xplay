@@ -4,11 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
-import com.blankj.utilcode.util.ScreenUtils
 import com.joeys.xplay.R
-import com.joeys.xplay.metadata.MediaMetadataRetriever
-import kotlinx.android.synthetic.main.activity_player.*
 
 class PlayerActivity : AppCompatActivity() {
 //

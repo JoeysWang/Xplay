@@ -1,7 +1,6 @@
-package com.joeys.xplay.metadata
+package com.joeys.xplayer.metadata
 
 import android.util.Log
-import androidx.annotation.IntegerRes
 import java.util.*
 
 class MediaMetadataRetriever {

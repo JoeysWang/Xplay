@@ -22,7 +22,7 @@ bool IDecode::openDecode(DecodeParam param, AVFormatContext *formatContext, AVSt
     //1.查找解码器
     AVCodec *avCodec;
     if (!avCodec) {
-//        avCodec = avcodec_find_decoder(parameters->codec_id);
+        avCodec = avcodec_find_decoder(parameters->codec_id);
     }
 //
 //    if (!avCodec) {

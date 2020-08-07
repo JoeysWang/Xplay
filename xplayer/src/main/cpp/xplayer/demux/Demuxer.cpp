@@ -25,7 +25,7 @@ void Demuxer::openSource(const char *url) {
     int re = avformat_open_input(&formatContext, url, 0, 0);
     if (re != 0) {
         char buf[1024] = {0};
-        av_strerror(re, buf, sizeof(buf));
+//        av_strerror(re, buf, sizeof(buf));
         LOGE("open ffdemux failed %s", url);
         return;
     }
@@ -33,7 +33,7 @@ void Demuxer::openSource(const char *url) {
     re = avformat_find_stream_info(formatContext, 0);
     if (re != 0) {
         char buf[1024] = {0};
-        av_strerror(re, buf, sizeof(buf));
+//        av_strerror(re, buf, sizeof(buf));
         LOGE("avformat_find_stream_info failed %s", url);
         return;
     }

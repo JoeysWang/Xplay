@@ -4,7 +4,7 @@
 
 #include <unistd.h>
 #include "MediaMetadataRetriever.h"
-#include "../../XLog.h"
+#include "XLog.h"
 
 
 MediaMetadataRetriever::MediaMetadataRetriever() {

@@ -25,7 +25,6 @@ target_link_libraries(
         android
         xhandler
         yuv
-        xplayer
 )
 
 # Metadata库

@@ -3,7 +3,7 @@
 //
 
 #include <jni.h>
-#include "../../XLog.h"
+#include "XLog.h"
 #include "MediaMetadataRetriever.h"
 #include "../xhandler/XHandler.h"
 //
@@ -26,10 +26,10 @@ static MediaMetadataRetriever *getRetriever(JNIEnv *env, jobject thiz) {
 }
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_joeys_xplay_metadata_MediaMetadataRetriever_00024Companion_native_1init(
+Java_com_joeys_xplayer_metadata_MediaMetadataRetriever_00024Companion_native_1init(
         JNIEnv *env,
         jobject thiz) {
-    jclass clazz = env->FindClass("com/joeys/xplay/metadata/MediaMetadataRetriever");
+    jclass clazz = env->FindClass("com/joeys/xplayer/metadata/MediaMetadataRetriever");
     if (clazz == NULL) {
         LOGE("MediaMetadataRetriever jclazz is null");
         return;
@@ -82,7 +82,7 @@ static jstring newUTFString(JNIEnv *env, const char *data) {
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_joeys_xplay_metadata_MediaMetadataRetriever_native_1setup(JNIEnv *env, jobject thiz) {
+Java_com_joeys_xplayer_metadata_MediaMetadataRetriever_native_1setup(JNIEnv *env, jobject thiz) {
     auto retriever = new MediaMetadataRetriever();
     LOGI("MediaMetadataRetriever_native_1setup  %p",retriever);
     setRetriever(env, thiz, (long) retriever);
@@ -90,12 +90,12 @@ Java_com_joeys_xplay_metadata_MediaMetadataRetriever_native_1setup(JNIEnv *env, 
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_joeys_xplay_metadata_MediaMetadataRetriever_setDataSource(
+Java_com_joeys_xplayer_metadata_MediaMetadataRetriever_setDataSource(
         JNIEnv *env,
         jobject thiz,
         jstring url_) {
     const char *url = env->GetStringUTFChars(url_, 0);
-    LOGI("Java_com_joeys_xplay_MediaMetadataRetriever_setDataSource -> %s", url);
+    LOGI("Java_com_joeys_xplayer_MediaMetadataRetriever_setDataSource -> %s", url);
     auto retriever = getRetriever(env, thiz);
     if (retriever) {
         retriever->setDataSource(url);
@@ -104,7 +104,7 @@ Java_com_joeys_xplay_metadata_MediaMetadataRetriever_setDataSource(
 
 extern "C"
 JNIEXPORT jobject JNICALL
-Java_com_joeys_xplay_metadata_MediaMetadataRetriever__1getAllMetadata(JNIEnv *env, jobject thiz) {
+Java_com_joeys_xplayer_metadata_MediaMetadataRetriever__1getAllMetadata(JNIEnv *env, jobject thiz) {
     auto *retriever = getRetriever(env, thiz);
     if (retriever == nullptr) {
         throwException(env, "java/lang/IllegalStateException", "No retriever available");
@@ -134,7 +134,7 @@ Java_com_joeys_xplay_metadata_MediaMetadataRetriever__1getAllMetadata(JNIEnv *en
     }
 }extern "C"
 JNIEXPORT void JNICALL
-Java_com_joeys_xplay_metadata_MediaMetadataRetriever_release(JNIEnv *env, jobject thiz) {
+Java_com_joeys_xplayer_metadata_MediaMetadataRetriever_release(JNIEnv *env, jobject thiz) {
     auto *retriever = getRetriever(env, thiz);
     delete retriever;
 }

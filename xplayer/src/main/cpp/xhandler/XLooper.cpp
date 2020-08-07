@@ -4,7 +4,7 @@
 
 #include <mutex>
 #include "XLooper.h"
-#include "../XLog.h"
+#include "XLog.h"
 #include "LooperManager.h"
 #include "ThreadUtils.h"
 #include "XHandler.h"

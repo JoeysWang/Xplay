@@ -8,7 +8,7 @@
 #include <mutex>
 #include <map>
 #include "XLooper.h"
-#include "../XLog.h"
+#include "XLog.h"
 
 class LooperManager {
 

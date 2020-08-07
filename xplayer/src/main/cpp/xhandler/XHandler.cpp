@@ -5,7 +5,7 @@
 #include <string>
 #include <thread>
 #include "XHandler.h"
-#include "../../XLog.h"
+#include "XLog.h"
 #include "LooperManager.h"
 #include "ThreadUtils.h"
 
