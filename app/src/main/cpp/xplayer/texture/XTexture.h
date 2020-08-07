@@ -5,6 +5,8 @@
 #ifndef XPLAY_XTEXTURE_H
 #define XPLAY_XTEXTURE_H
 
+#include "XShader.h"
+
 enum XTextureType {
     XTEXTURE_YUV420P = 0,
     XTEXTURE_NV12 = 25,
@@ -19,17 +21,22 @@ public:
 
     virtual bool init(
             void *win,
-            int width,
-            int height,
+
             XTextureType textureType = XTEXTURE_YUV420P
     ) = 0;
 
     virtual void draw(unsigned char *data[], int width[], int height) = 0;
 
+    void setFrameWidthHeight(int width, int height) {
+        frameHeight = height;
+        frameWidth = width;
+    };
+
 public:
     int frameWidth;//帧宽度
     int frameHeight;
     float lastNormalized = 0.0f;//上次裁剪
+    XShader *shader;
 
 };
 

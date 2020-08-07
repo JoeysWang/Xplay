@@ -14,12 +14,8 @@ extern "C" {
 }
 
 VideoDecode::VideoDecode(PlayerState *playerState) : IDecode(playerState) {
-    mutex.lock();
-    frameQueue = new FrameQueue(FRAME_QUEUE_SIZE, 1);
-    packetQueue = new Queue<XData>(100);
+    std::lock_guard<std::mutex> lock(mutex);
     packetQueue->tag = "audio";
-    mutex.unlock();
-
 }
 
 void VideoDecode::start() {

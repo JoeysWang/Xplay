@@ -92,7 +92,6 @@ void MediaPlayer::release() {
     videoDecode = nullptr;
     delete resample;
     resample = nullptr;
-    delete videoView;
     videoView = nullptr;
     delete audioPlay;
     audioPlay = nullptr;
@@ -102,11 +101,11 @@ void MediaPlayer::release() {
     delete jniListener;
     jniListener = nullptr;
 
-    LOGD("IPlayer::release success");
+    LOGE("IPlayer::release success =======");
 }
 
 void MediaPlayer::stop() {
-    mutex.lock();
+
     LOGE("IPlayer::stop ========");
     playerState->abortRequest = 1;
     if (mediaSync) {
@@ -134,7 +133,6 @@ void MediaPlayer::stop() {
         resample->stop();
     }
 
-    mutex.unlock();
 }
 
 int MediaPlayer::getVideoWidth() {
@@ -159,7 +157,7 @@ long MediaPlayer::getDuration() {
         long duration = videoDecode->formatCtx->duration;
         duration = duration * av_q2d(videoDecode->codecContext->time_base);
         
-        return videoDecode->codecContext->height;
+        return duration;
     }
     return 0;
 }
@@ -187,7 +185,7 @@ void MediaPlayer::setDataSource(std::string &url) {
         return;
     }
     demux->playerHandler = getHandler();
-    LOGE("IPlayer::open demux success ");
+    LOGI("IPlayer::open demux success ");
     if (!videoDecode ||
         !videoDecode->openDecode(demux->getVideoParameter(),
                                  demux->getVideoStream(),

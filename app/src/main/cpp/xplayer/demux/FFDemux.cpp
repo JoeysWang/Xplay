@@ -21,14 +21,8 @@ FFDemux::FFDemux(PlayerState *playerState) : IDemux(playerState) {
     LOGI("regsist ffmpeg");
 }
 
-FFDemux::~FFDemux() {
-    avformat_network_deinit();
-    LOGI("~FFDemux");
-}
-
 void FFDemux::getAllStream() {
     if (!formatContext) { return; }
-
     for (int i = 0; i < formatContext->nb_streams; i++) {
         AVStream *in_stream = formatContext->streams[i];
 
@@ -64,7 +58,6 @@ void FFDemux::getAllStream() {
         }
 
     }
-
 }
 
 //打开文件、流媒体 http rtsp
@@ -137,7 +130,7 @@ void FFDemux::readPacket() {
         output->frame_rate = frame_rate;
         output->time_base = pStream->time_base;
         if (avPacket->stream_index == audioStreamIndex) {
-            LOGI("FFDemux::readPacket video codecpar format=%d", pStream->codecpar->format);
+//            LOGI("FFDemux::readPacket video codecpar format=%d", pStream->codecpar->format);
             output->audioOrVideo = MEDIA_TYPE_AUDIO;
             if (audioDecode)audioDecode->pushPacket(output);
         } else if (avPacket->stream_index == videoStreamIndex) {
@@ -209,6 +202,11 @@ AVStream *FFDemux::getVideoStream() {
     return formatContext->streams[videoStreamIndex];
 }
 
+
+FFDemux::~FFDemux() {
+    avformat_network_deinit();
+    LOGI("~FFDemux");
+}
 
 void FFDemux::close() {
     mutex.lock();

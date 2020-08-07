@@ -6,6 +6,7 @@
 #include "../texture/XTexture.h"
 #include "../../XLog.h"
 #include "../texture/XEGL.h"
+#include "../../xhandler/ThreadUtils.h"
 
 const char *GLVideoView::formatString(int formate) {
     switch (formate) {
@@ -76,43 +77,45 @@ const char *GLVideoView::formatString(int formate) {
 
 void GLVideoView::setRender(void *view) {
     std::unique_lock<std::mutex> lock(mutex);
-    LOGI("GLVideoView::setRender %p", view);
     this->view = view;
     noWindowCondition.notify_all();
 }
 
 void GLVideoView::render(XData *data) {
     std::unique_lock<std::mutex> lock(mutex);
+    LOGI("GLVideoView::render thread id=%ld", ThreadUtils::currentId());
     if (!view) {
         LOGE("GLVideoView::render view = null");
         noWindowCondition.wait(lock);
     }
     if (!texture) {
         texture = XTexture::create();
-        texture->init(view, data->frameWidth, data->frameHeight);
+        texture->init(view);
     }
+    texture->setFrameWidthHeight(data->frameWidth, data->frameHeight);
+
     if (!data->decodeDatas[0] || data->size == 0) {
         return;
     }
-    LOGI("format = %s,linesize = [%d , %d , %d] ",
-         formatString(data->format),
-         data->linesize[0],
-         data->linesize[1],
-         data->linesize[2]
-    );
+//    LOGI("format = %s,linesize = [%d , %d , %d] ",
+//         formatString(data->format),
+//         data->linesize[0],
+//         data->linesize[1],
+//         data->linesize[2]
+//    );
     texture->draw(data->decodeDatas, data->linesize, data->frameHeight);
     XEGL::get()->draw();
 }
 
 GLVideoView::~GLVideoView() {
     LOGD("~GLVideoView");
-    terminate();
-}
-
-void GLVideoView::terminate() {
-    LOGD("GLVideoView terminate");
-    XEGL::get()->terminate();
     delete texture;
     texture = nullptr;
     view = nullptr;
+}
+
+void GLVideoView::terminate() {
+    LOGD("GLVideoView::terminate thread id=%ld", ThreadUtils::currentId());
+    XEGL::get()->clear();
+
 }

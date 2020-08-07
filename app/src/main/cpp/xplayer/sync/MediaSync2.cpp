@@ -31,14 +31,14 @@ void MediaSync2::audioPlay() {
             std::this_thread::sleep_for(duration);
             continue;
         }
-        XData *frameWrapper = audioDecode->getFrameQueue()->currentFrame();
+        XData *frameWrapper = audioDecode->currentFrame();
         if (frameWrapper->size == 0 || lastFramePts == 0) {
             std::chrono::milliseconds duration(5);
             std::this_thread::sleep_for(duration);
             continue;
         }
         resample->update(*frameWrapper);
-        audioDecode->getFrameQueue()->popFrame();
+        audioDecode->popFrame();
     }
 }
 
@@ -78,7 +78,10 @@ long MediaSync2::getCurrentPosition() {
 
 void MediaSync2::videoPlay() {
     for (;;) {
-        if (isExist || playerState->abortRequest) { return; }
+        if (isExist || playerState->abortRequest) {
+            videoView->terminate();
+            return;
+        }
         if (playerState->pauseRequest) {
 //            LOGI("MediaSync2::videoPlay sleep for pause");
             resumeAfterPause = true;
@@ -87,7 +90,7 @@ void MediaSync2::videoPlay() {
             continue;
         }
 
-        XData *frameWrapper = videoDecode->getFrameQueue()->currentFrame();
+        XData *frameWrapper = videoDecode->currentFrame();
         if (!frameWrapper || frameWrapper->size == 0) {
             std::chrono::milliseconds duration(5);
             std::this_thread::sleep_for(duration);
@@ -111,7 +114,7 @@ void MediaSync2::videoPlay() {
         videoClock->setClock(frameWrapper->pts);
         lastFramePts = frameWrapper->pts;
         videoView->render(frameWrapper);
-        videoDecode->getFrameQueue()->popFrame();
+        videoDecode->popFrame();
     }
 }
 

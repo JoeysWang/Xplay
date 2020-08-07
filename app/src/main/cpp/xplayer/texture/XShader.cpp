@@ -56,13 +56,14 @@ char fragYUV420P[] =
 XShader::~XShader() {
     if (program) {
         glDeleteProgram(program);
+        program = 0;
     }
 }
 
 XShader::XShader() {
     auto coor = const_cast<GLfloat *>(CoordinateUtils::getInputTextureCoordinates());
-    for (int i = 0; i <20; ++i) {
-        vertices[i]=coor[i];
+    for (int i = 0; i < 20; ++i) {
+        vertices[i] = coor[i];
     }
 }
 
@@ -134,7 +135,6 @@ bool XShader::init(XShaderType shaderType) {
     );
     ////////////////////////
 
-    LOGI("egl 初始化shader  success !");
     glClear(GL_COLOR_BUFFER_BIT);
 
     if (textures[0] == 0) {
@@ -151,6 +151,7 @@ bool XShader::init(XShaderType shaderType) {
         glUniform1i(inputTextureHandle[i], i);
     }
     glBindVertexArray(vaoId);
+    LOGI("egl 初始化shader  success !");
 
     return true;
 }

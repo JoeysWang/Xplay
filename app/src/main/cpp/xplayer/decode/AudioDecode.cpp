@@ -6,12 +6,8 @@
 #include "AudioDecode.h"
 
 AudioDecode::AudioDecode(PlayerState *playerState) : IDecode(playerState) {
-    mutex.lock();
-    frameQueue = new FrameQueue(FRAME_QUEUE_SIZE, 1);
-    packetQueue = new Queue<XData>(100);
+    std::unique_lock<std::mutex> lock(mutex);
     packetQueue->tag = "audio";
-
-    mutex.unlock();
 }
 
 void AudioDecode::start() {

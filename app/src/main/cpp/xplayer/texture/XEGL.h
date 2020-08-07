@@ -12,17 +12,18 @@
 
 class XEGL {
 public:
-    virtual bool init(void *win, int width, int height) = 0;
+    virtual bool init(void *win) = 0;
 
     virtual void draw() = 0;
 
-    virtual void terminate() = 0;
+    virtual void clear() = 0;
 
     static XEGL *get();
 
 protected:
     XEGL() {}
 
+    int terminateRequest = 0;
     std::mutex mutex;
     ANativeWindow *mWindow;             // Surface窗口
     int mSurfaceWidth;                  // 窗口宽度

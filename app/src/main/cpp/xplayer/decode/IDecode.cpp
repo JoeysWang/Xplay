@@ -8,23 +8,26 @@
 
 IDecode::IDecode(PlayerState *playerState) : playerState(playerState) {
     LOGI("IDecode  ");
+    frameQueue = new FrameQueue(FRAME_QUEUE_SIZE, 1);
+    packetQueue = new Queue<XData>(100);
 }
 
 IDecode::~IDecode() {
     LOGD("~IDecode");
-    mutex.lock();
+    std::lock_guard<std::mutex> lock(mutex);
+
     if (packetQueue) {
         packetQueue->quit();
-        packetQueue = nullptr;
+        delete packetQueue;
     }
     if (frameQueue) {
         frameQueue->flush();
-        frameQueue = nullptr;
+        delete frameQueue;
     }
     playerHandler = nullptr;
     avcodec_close(codecContext);
     avcodec_free_context(&codecContext);
-    mutex.unlock();
+
 }
 
 void IDecode::run() {
@@ -41,6 +44,7 @@ void IDecode::run() {
 }
 
 bool IDecode::openDecode(XParameter parameter, AVStream *stream, AVFormatContext *formatContext) {
+    std::lock_guard<std::mutex> lock(mutex);
     AVCodecParameters *parameters = parameter.parameters;
     if (!parameters)return false;
     this->formatCtx = formatContext;
@@ -49,7 +53,7 @@ bool IDecode::openDecode(XParameter parameter, AVStream *stream, AVFormatContext
     AVCodec *avCodec;
     avCodec = avcodec_find_decoder_by_name("h264_mediacodec");
     if (!avCodec) {
-        LOGE("avcodec_find_decoder_by_name h264_mediacodec not found " );
+//        LOGE("avcodec_find_decoder_by_name h264_mediacodec not found " );
         avCodec = avcodec_find_decoder(parameters->codec_id);
     }
 
@@ -59,7 +63,7 @@ bool IDecode::openDecode(XParameter parameter, AVStream *stream, AVFormatContext
     }
     LOGI("avCodec->name = %s", avCodec->name);
     //2.创建解码器上下文
-    mutex.lock();
+
     codecContext = avcodec_alloc_context3(avCodec);
     avcodec_parameters_to_context(codecContext, parameters);
 
@@ -69,7 +73,7 @@ bool IDecode::openDecode(XParameter parameter, AVStream *stream, AVFormatContext
         char buf[1024] = {0};
         av_strerror(re, buf, sizeof(buf) - 1);
         LOGE("avcodec_open2 error %s ", buf);
-        mutex.unlock();
+
         return false;
     }
     if (codecContext->codec_type == AVMEDIA_TYPE_VIDEO) {
@@ -85,7 +89,7 @@ bool IDecode::openDecode(XParameter parameter, AVStream *stream, AVFormatContext
     } else if (codecContext->codec_type == AVMEDIA_TYPE_AUDIO) {
         audioOrVideo = MEDIA_TYPE_AUDIO;
     }
-    mutex.unlock();
+
 
     return true;
 }
@@ -99,21 +103,23 @@ void IDecode::update(XData data) {
     pushPacket(&data);
 }
 
-FrameQueue *IDecode::getFrameQueue() const {
-    return frameQueue;
+XData *IDecode::currentFrame() {
+    return frameQueue->currentFrame();
+}
+
+void *IDecode::popFrame() {
+    frameQueue->popFrame();
 }
 
 int IDecode::pushPacket(XData *data) {
+    std::lock_guard<std::mutex> lock(mutex);
     if (!packetQueue || isExit || playerState->abortRequest)return -1;
     return packetQueue->push(*data);
 }
 
-Queue<XData> *IDecode::getPacketQueue() const {
-    return packetQueue;
-}
 
 int IDecode::getFrameSize() {
-    std::unique_lock<std::mutex> lock(mutex);
+    std::lock_guard<std::mutex> lock(mutex);
     return frameQueue ? frameQueue->getFrameSize() : 0;
 }
 

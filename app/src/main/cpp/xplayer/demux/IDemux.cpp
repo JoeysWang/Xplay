@@ -23,9 +23,9 @@ void IDemux::setVideoDecode(IDecode *videoDecode) {
 }
 
 IDemux::~IDemux() {
-    mutex.lock();
+    std::unique_lock<std::mutex> lock(mutex);
+    LOGD("~IDemux");
     if (formatContext) {
-        LOGD("~IDemux");
         avformat_close_input(&formatContext);
         avformat_free_context(formatContext);
         formatContext = nullptr;
@@ -33,7 +33,7 @@ IDemux::~IDemux() {
     audioDecode = nullptr;
     videoDecode = nullptr;
     playerHandler = nullptr;
-    mutex.unlock();
+
 
 }
 

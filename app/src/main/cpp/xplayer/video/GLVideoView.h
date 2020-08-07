@@ -15,6 +15,7 @@ public:
     void setRender(void *view) override;
 
     void render(XData *data) override;
+
     const char *formatString(int formate);
 
     virtual ~GLVideoView();
@@ -26,8 +27,8 @@ protected:
     float matrix[16];
 
     std::condition_variable noWindowCondition;
-
-    void terminate();
+public:
+    void terminate() override;
 };
 
 

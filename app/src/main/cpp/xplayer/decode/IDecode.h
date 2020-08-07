@@ -9,6 +9,7 @@
 #include "../IObserver.h"
 #include "../data/XParameter.h"
 #include "../queue/Queue.h"
+#include <memory>
 
 extern "C" {
 #include "libavformat/avformat.h"
@@ -44,9 +45,12 @@ public:
     //生产数据，如果是满的，阻塞
     void update(XData data) override;
 
-    FrameQueue *getFrameQueue() const;
+//    FrameQueue *getFrameQueue() const;
 
-    Queue<XData> *getPacketQueue() const;
+    XData *currentFrame();
+
+    void *popFrame();
+
 
     int pushPacket(XData *data);
 
@@ -64,13 +68,14 @@ public:
 
     XHandler *playerHandler = nullptr;
 
+
 protected:
     //消费数据，如果是空的，阻塞
     virtual void run() override;
 
     FrameQueue *frameQueue;
+    Queue<XData> *packetQueue;
 
-    Queue<XData> *packetQueue;       // 数据包队列
     int mRotate;
 };
 

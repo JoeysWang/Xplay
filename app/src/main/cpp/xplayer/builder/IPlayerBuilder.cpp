@@ -23,14 +23,7 @@ MediaPlayer *IPlayerBuilder::buildPlayer() {
     //音频链路
     IResample *resample = createResample(iplayer->playerState);
     IAudioPlay *audioPlay = createAudioPlay(iplayer->playerState);
-    //mediaSync自己去取数据帧
-//    resample->addObserver(audioPlay);
-
-    //视频链路
     IVideoView *videoView = createVideoView();
-    //mediaSync自己去取数据帧
-//    videoDecode->addObserver(videoView);
-
 
     iplayer->demux = demux;
     iplayer->audioPlay = audioPlay;

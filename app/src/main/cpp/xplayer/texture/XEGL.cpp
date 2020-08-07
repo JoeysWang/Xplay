@@ -4,11 +4,13 @@
 
 #include "../../XLog.h"
 #include "XEGL.h"
+#include "../../xhandler/ThreadUtils.h"
 
 class CXEGL : public XEGL {
 public:
-    void terminate() override {
-        LOGD("CXEGL terminate");
+    void clear() override {
+        LOGD("CXEGL::clear thread id=%ld", ThreadUtils::currentId());
+
         mutex.lock();
         mWindow = nullptr;
         if (eglSurface != EGL_NO_SURFACE) {
@@ -30,8 +32,9 @@ public:
             eglContext = EGL_NO_CONTEXT;
         }
         mutex.unlock();
-
     }
+
+
 
     void draw() override {
         if (display == EGL_NO_DISPLAY || eglSurface == EGL_NO_SURFACE) {
@@ -42,20 +45,22 @@ public:
         mutex.unlock();
     }
 
-    bool init(void *win, int width, int height) override {
+    bool init(void *win) override {
+        std::unique_lock<std::mutex> lock(mutex);
         mWindow = static_cast<ANativeWindow *>(win);
         mSurfaceWidth = ANativeWindow_getWidth(mWindow);
         mSurfaceHeight = ANativeWindow_getHeight(mWindow);
-        if (mSurfaceWidth != 0 && mSurfaceHeight != 0) {
-            // 宽高比例不一致时，需要调整缓冲区的大小，这里是以宽度为基准
-            if ((mSurfaceWidth / mSurfaceHeight) != (width / height)) {
-                mSurfaceHeight = mSurfaceWidth * height / width;
-                int windowFormat = ANativeWindow_getFormat(mWindow);
+//        if (mSurfaceWidth != 0 && mSurfaceHeight != 0) {
+//            // 宽高比例不一致时，需要调整缓冲区的大小，这里是以宽度为基准
+//            if ((mSurfaceWidth / mSurfaceHeight) != (width / height)) {
+//                mSurfaceHeight = mSurfaceWidth * height / width;
+//                int windowFormat = ANativeWindow_getFormat(mWindow);
+//
+//                ANativeWindow_setBuffersGeometry(mWindow, mSurfaceWidth, mSurfaceHeight,
+//                                                 windowFormat);
+//            }
+//        }
 
-                ANativeWindow_setBuffersGeometry(mWindow, mSurfaceWidth, mSurfaceHeight,
-                                                 windowFormat);
-            }
-        }
         LOGD("CXEGL init mSurfaceWidth=%d , mSurfaceHeight=%d", mSurfaceWidth, mSurfaceHeight);
         //初始化EGL
         //1。获取EGLDisplay设备
@@ -130,8 +135,6 @@ public:
 
         }
         LOGD("egl eglMakeCurrent  success");
-
-
         return true;
     }
 

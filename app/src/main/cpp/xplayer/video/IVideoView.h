@@ -9,7 +9,7 @@
 #include "../data/XData.h"
 #include "../IObserver.h"
 
-class IVideoView   {
+class IVideoView {
 
 public:
     virtual ~IVideoView();
@@ -19,6 +19,8 @@ public:
     virtual void render(XData *data) = 0;
 
     virtual void setMatrix(float *matrix, int size) {};
+
+    virtual void terminate() = 0;
 
 public:
     std::mutex mutex;
