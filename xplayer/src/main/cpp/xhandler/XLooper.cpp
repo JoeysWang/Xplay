@@ -10,11 +10,19 @@
 #include "XHandler.h"
 
 XLooper::XLooper() {
-    queue = new XMessageQueue(10);
+    queue = std::make_unique<XMessageQueue>(10);
 }
 
 XLooper::~XLooper() {
-    delete (queue);
+    LOGI("XLooper::~XLooper");
+}
+
+void XLooper::quit() {
+    if (isQuit) { return; }
+    std::unique_lock<std::mutex> lock(mutex);
+    isQuit = true;
+    queue->quit();
+    LOGI("XLooper::quit success");
 }
 
 void XLooper::sendMessage(XMessage *message) {
@@ -41,15 +49,13 @@ XLooper *XLooper::myLooper() {
 
 void XLooper::_loop() {
     for (;;) {
-        if (isQuit) { return; }
+        if (isQuit) { break; }
         auto message = new XMessage;
-
         if (queue->pop(*message)) {
             if (message->target) {
                 message->target->dispatchMessage(message);
             }
         }
-
     }
 }
 

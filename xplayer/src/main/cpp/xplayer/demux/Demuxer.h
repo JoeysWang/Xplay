@@ -33,12 +33,13 @@ public:
 
     DecodeParam getAudioParameter();
 
+
 private:
     void readPacket();
 
 private:
     std::shared_ptr<PlayerState> playerState;
-
+    bool isRunning;
 public:
     AVFormatContext *formatContext = 0;
     std::shared_ptr<VideoDecode> videoDecode;

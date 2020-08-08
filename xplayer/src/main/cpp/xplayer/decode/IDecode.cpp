@@ -59,3 +59,13 @@ bool IDecode::openDecode(DecodeParam param, AVFormatContext *formatContext, AVSt
 void IDecode::pushPacket(PacketData *data) {
     packetQueue->push(*data);
 }
+
+IDecode::~IDecode() {
+    LOGI("IDecode::~IDecode");
+    std::unique_lock<std::mutex> lock(mutex);
+    packetQueue->quit();
+    codecContext = nullptr;
+    formatContext = nullptr;
+    stream = nullptr;
+    mRotate = 0;
+}

@@ -28,21 +28,18 @@ Demuxer::Demuxer(std::shared_ptr<PlayerState> const &state) {
 }
 
 void Demuxer::openSource(const char *url) {
-    mutex.lock();
+    std::unique_lock<std::mutex> lock(mutex);
     int re = avformat_open_input(&formatContext, url, 0, 0);
     if (re != 0) {
         LOGE("open ffdemux failed %s", url);
-        mutex.unlock();
         return;
     }
-//    getAllStream();
+
     re = avformat_find_stream_info(formatContext, 0);
     if (re != 0) {
         LOGE("avformat_find_stream_info failed %s", url);
-        mutex.unlock();
         return;
     }
-    mutex.unlock();
     LOGI("Demuxer::openSource success");
 }
 
@@ -52,14 +49,15 @@ void Demuxer::openSource(const char *url) {
 void Demuxer::readPacket() {
     AVPacket *avPacket;
     PacketData *output;
+    isRunning = true;
 
     while (true) {
+        if (!isRunning || !playerState || playerState->abortRequest) {
+            break;
+        }
         if (playerState->pauseRequest) {
             ThreadUtils::sleep(200);
             continue;
-        }
-        if (playerState->abortRequest) {
-            break;
         }
         mutex.lock();
         avPacket = av_packet_alloc();
@@ -69,11 +67,12 @@ void Demuxer::readPacket() {
             if (ret == AVERROR_EOF) {
                 LOGI("demux read 到结尾");
                 mutex.unlock();
-                return;
+                break;
             }
             mutex.unlock();
             continue;
         }
+
         output = new PacketData();
         output->packet = avPacket;
         output->size = avPacket->size;
@@ -91,8 +90,9 @@ void Demuxer::readPacket() {
         }
         LOGI("FFDemux::readPacket size=%d", output->size);
         mutex.unlock();
-
     }
+    isRunning = false;
+    LOGI("Demuxer::readPacket  退出");
 }
 
 AVStream *Demuxer::getAudioStream() {
@@ -147,7 +147,12 @@ DecodeParam Demuxer::getAudioParameter() {
 
 
 Demuxer::~Demuxer() {
+    LOGI("Demuxer::~Demuxer");
+    std::unique_lock<std::mutex> lock(mutex);
     avformat_network_deinit();
+    if (isRunning) {
+        isRunning = false;
+    }
 }
 
 

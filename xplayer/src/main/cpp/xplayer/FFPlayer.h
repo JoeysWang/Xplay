@@ -13,7 +13,7 @@
 #include "decode/VideoDecode.h"
 #include "decode/AudioDecode.h"
 
-class FFPlayer : HandlerThread {
+class FFPlayer : public HandlerThread {
 
 public:
     FFPlayer();
@@ -37,9 +37,12 @@ public:
 private:
     void init();
 
+    void onLooperPrepared() override;
+
+public:
     void handleMessage(XMessage *message) override;
 
-    void onHandlerCreate() override;
+    virtual ~FFPlayer();
 
 protected:
     std::shared_ptr<PlayerState> playerState;
@@ -48,7 +51,10 @@ protected:
 
     std::unique_ptr<MediaSync> mediaSync;
     std::unique_ptr<Demuxer> demuxer;
+    std::unique_ptr<XHandler> handler;
 
+    std::mutex mutex;
+    const char *url = nullptr;
 
 };
 

@@ -38,10 +38,10 @@
             android:text="scan" />
     </LinearLayout>
 
-    <com.joeys.xplayer.XPlayer
-        android:id="@+id/player"
-        android:layout_width="match_parent"
-        android:layout_height="300dp" />
+<!--    <com.joeys.xplayer.XPlayer-->
+<!--        android:id="@+id/player"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="300dp" />-->
 
 
     <!--    <com.joeys.xplay.com.joeys.xplayer.Xplay-->

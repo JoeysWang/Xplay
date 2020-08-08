@@ -6,7 +6,9 @@
 #define XPLAY_HANDLERTHREAD_H
 
 #include "XHandler.h"
+#include "ThreadUtils.h"
 #include <thread>
+#include <XLog.h>
 
 class HandlerThread : public HandleMessageI {
 public:
@@ -15,44 +17,50 @@ public:
         thread.detach();
     }
 
-    virtual void onHandlerCreate(){};
+    virtual void onLooperPrepared() {};
 
     virtual ~HandlerThread() {
-        delete handler;
     }
 
-    void postMessage(XMessage *message) {
-        handler->sendMessage(message);
+    XLooper *getLooper() {
+        if (isQuit) return nullptr;
+        std::unique_lock<std::mutex> lock(internalMutex);
+        while (!isQuit && mLooper == nullptr) {
+            emptyLooper.wait(lock);
+        }
+        return mLooper;
     }
 
-    void postMessage(int what, int arg1, int arg2) {
-        handler->postMessage(what, arg1, arg2);
-    }
-
-    XHandler *getHandler() const {
-        return handler;
+    bool quit() {
+        isQuit = true;
+        XLooper *looper = getLooper();
+        if (looper != nullptr) {
+            looper->quit();
+            return true;
+        }
+        return false;
     }
 
 private:
-    virtual void run() {
-        auto looper = XLooper::prepare();
-        handler = new XHandler(looper);
-        handler->setCallBack(this);
-        onHandlerCreate();
-        looper->loop();
+    void run() {
+        mTid = ThreadUtils::currentId();
+        internalMutex.lock();
+        mLooper = XLooper::prepare();
+        internalMutex.unlock();
+        LOGI("mLooper::prepare =%p ",mLooper);
+        emptyLooper.notify_all();
+        onLooperPrepared();
+        mLooper->loop();
+        mTid = -1;
     };
-
-    virtual void handleMessage(XMessage *message) override = 0;
-
-    virtual void stop() {
-        isQuit = true;
-    }
 
 
 private:
     bool isQuit = false;
-    XHandler *handler;
-
+    long mTid = -1;
+    XLooper *mLooper;
+    std::condition_variable emptyLooper;
+    std::mutex internalMutex;
 
 };
 

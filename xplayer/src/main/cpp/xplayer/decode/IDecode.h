@@ -35,6 +35,7 @@ public:
 
     void pushPacket(PacketData *data);
 
+    virtual ~IDecode();
 
 protected:
     std::mutex mutex;

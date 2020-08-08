@@ -67,6 +67,7 @@ Java_com_joeys_xplayer_XPlayer_initPlayer(
         JNIEnv *env,
         jobject thiz,
         jobject weak_reference) {
+    LOGI("XPlayer_initPlayer");
     auto player = new FFPlayer();
     cachePlayerHander(env, thiz, (long) player);
 }
@@ -91,14 +92,16 @@ Java_com_joeys_xplayer_XPlayer_initView(JNIEnv *env, jobject thiz, jobject holde
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_joeys_xplayer_XPlayer__1start(JNIEnv *env, jobject thiz) {
-
+    auto player = getPlayerHander(env, thiz);
+    if (player) { player->playOrPause(); }
 }
 
 
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_joeys_xplayer_XPlayer__1resume(JNIEnv *env, jobject thiz) {
-
+    auto player = getPlayerHander(env, thiz);
+    if (player) { player->playOrPause(); }
 }
 
 
@@ -126,7 +129,8 @@ Java_com_joeys_xplayer_XPlayer__1release(JNIEnv *env, jobject thiz) {
         ANativeWindow_release(window);
         window = nullptr;
     }
-
+    getPlayerHander(env, thiz)->release();
+//    cachePlayerHander(env,thiz,0);
 }
 
 extern "C"

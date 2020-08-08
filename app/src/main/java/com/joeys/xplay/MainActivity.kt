@@ -40,11 +40,12 @@ class MainActivity : AppCompatActivity() {
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
                 "失落沙洲.mp4"
             )
-            player.setDataSource(file.absolutePath)
+            PlayerActivity.start(file.absolutePath,this)
+//            player.setDataSource(file.absolutePath)
         }
 
         test.setOnClickListener {
-
+//            player.release()
         }
         btn_scan.setOnClickListener {
 

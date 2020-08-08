@@ -9,11 +9,14 @@ FFPlayer::FFPlayer() {
 
 }
 
-void FFPlayer::onHandlerCreate() {
+void FFPlayer::onLooperPrepared() {
     init();
 }
 
 void FFPlayer::init() {
+    LOGI("FFPlayer::init");
+    std::unique_lock<std::mutex> lock(mutex);
+
     playerState = std::make_shared<PlayerState>();
     mediaSync = std::make_unique<MediaSync>(playerState);
     demuxer = std::make_unique<Demuxer>(playerState);
@@ -22,6 +25,15 @@ void FFPlayer::init() {
     demuxer->videoDecode = videoDecode;
     demuxer->audioDecode = audioDecode;
 
+    auto *mylooper = getLooper();
+    LOGI("mylooper =%p", mylooper);
+
+    handler = std::make_unique<XHandler>(mylooper);
+    handler->setCallBack(this);
+    LOGI("FFPlayer::init success");
+    if (url) {
+        handler->postMessage(MSG_OPEN_INPUT, (void *) url);
+    }
 }
 
 void FFPlayer::handleMessage(XMessage *message) {
@@ -35,9 +47,17 @@ void FFPlayer::handleMessage(XMessage *message) {
                                     demuxer->getVideoStream());
             audioDecode->openDecode(demuxer->getAudioParameter(), demuxer->formatContext,
                                     demuxer->getAudioStream());
-
             break;
         }
+        case MSG_REQUEST_PAUSE: {
+            playerState->pauseRequest = 1;
+            break;
+        }
+        case MSG_REQUEST_START: {
+            playerState->pauseRequest = 0;
+            break;
+        }
+
     }
 }
 
@@ -46,15 +66,26 @@ void FFPlayer::setNativeWindow(void *win) {
 }
 
 void FFPlayer::setDataSource(const char *url) {
-    getHandler()->postMessage(MSG_OPEN_INPUT, (void *) url);
+    this->url = url;
+    if (handler)
+        handler->postMessage(MSG_OPEN_INPUT, (void *) url);
 }
 
 void FFPlayer::playOrPause() {
-
+    std::unique_lock<std::mutex> lock(mutex);
+    if (isPlaying()) {
+        handler->postMessage(MSG_REQUEST_PAUSE, 0);
+    } else {
+        handler->postMessage(MSG_REQUEST_START, 0);
+    }
 }
 
 void FFPlayer::release() {
-
+    std::unique_lock<std::mutex> lock(mutex);
+    playerState->abortRequest = 1;
+    url = nullptr;
+    quit();
+    delete this;
 }
 
 int FFPlayer::getVideoWidth() {
@@ -71,5 +102,9 @@ int FFPlayer::getDuration() {
 
 bool FFPlayer::isPlaying() {
     return !playerState->abortRequest && !playerState->pauseRequest;
+}
+
+FFPlayer::~FFPlayer() {
+    LOGI("FFPlayer::~FFPlayer");
 }
 

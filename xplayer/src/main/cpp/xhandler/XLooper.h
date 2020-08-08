@@ -22,18 +22,14 @@ public:
 
     static XLooper *myLooper();
 
-    void quit() {
-        std::unique_lock<std::mutex> lock(mutex);
-        isQuit = true;
-        queue->quit();
-    }
+    void quit();
 
     virtual ~XLooper();
 
 private:
     void _loop();
 
-    XMessageQueue *queue;
+    std::unique_ptr<XMessageQueue> queue;
     std::mutex mutex;
     bool isQuit = false;
 
