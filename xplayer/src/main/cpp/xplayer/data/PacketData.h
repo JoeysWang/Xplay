@@ -17,6 +17,14 @@ public:
     AVRational frame_rate;
     AVRational time_base;
     int mediaType;
+
+public:
+    void release() {
+        av_packet_unref(packet);
+        packet = nullptr;
+        size = 0;
+        delete this;
+    };
 };
 
 

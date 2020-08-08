@@ -10,6 +10,8 @@
 #include "../data/PacketData.h"
 #include "../data/PlayerState.h"
 #include "../data/DecodeParam.h"
+#include "../dataStructure/FrameQueue.h"
+
 extern "C"
 {
 #include <libavcodec/avcodec.h>
@@ -40,11 +42,13 @@ public:
 protected:
     std::mutex mutex;
     std::unique_ptr<Queue<PacketData>> packetQueue;
+    std::unique_ptr<FrameQueue> frameQueue;
     std::shared_ptr<PlayerState> playerState;
 
     AVCodecContext *codecContext;
     AVFormatContext *formatContext;
     AVStream *stream;
+    bool isExit;
 
     DecodeMediaType decodeType;
     int mRotate;

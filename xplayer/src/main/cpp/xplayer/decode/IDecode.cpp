@@ -8,8 +8,9 @@
 
 IDecode::IDecode() {
     packetQueue = std::make_unique<Queue<PacketData>>(100);
-    std::thread th(&IDecode::decode, this);
-    th.detach();
+    frameQueue = std::make_unique<FrameQueue>(FRAME_QUEUE_SIZE, 1);
+
+
 }
 
 bool IDecode::openDecode(DecodeParam param, AVFormatContext *formatContext, AVStream *stream) {
@@ -53,6 +54,9 @@ bool IDecode::openDecode(DecodeParam param, AVFormatContext *formatContext, AVSt
     } else if (codecContext->codec_type == AVMEDIA_TYPE_AUDIO) {
         decodeType = MEDIA_TYPE_AUDIO;
     }
+    LOGI(" IDecode::openDecode open success decodeType=%d",decodeType);
+    std::thread th(&IDecode::decode, this);
+    th.detach();
     return true;
 }
 
@@ -63,7 +67,9 @@ void IDecode::pushPacket(PacketData *data) {
 IDecode::~IDecode() {
     LOGI("IDecode::~IDecode");
     std::unique_lock<std::mutex> lock(mutex);
+    isExit= true;
     packetQueue->quit();
+    frameQueue->flush();
     codecContext = nullptr;
     formatContext = nullptr;
     stream = nullptr;

@@ -23,6 +23,7 @@ add_library(
         data/FrameData.cpp
 
         dataStructure/Queue.cpp
+        dataStructure/FrameQueue.cpp
 
 )
 

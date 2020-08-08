@@ -14,7 +14,6 @@ void FFPlayer::onLooperPrepared() {
 }
 
 void FFPlayer::init() {
-    LOGI("FFPlayer::init");
     std::unique_lock<std::mutex> lock(mutex);
 
     playerState = std::make_shared<PlayerState>();
@@ -25,10 +24,7 @@ void FFPlayer::init() {
     demuxer->videoDecode = videoDecode;
     demuxer->audioDecode = audioDecode;
 
-    auto *mylooper = getLooper();
-    LOGI("mylooper =%p", mylooper);
-
-    handler = std::make_unique<XHandler>(mylooper);
+    handler = std::make_unique<XHandler>(getLooper());
     handler->setCallBack(this);
     LOGI("FFPlayer::init success");
     if (url) {
