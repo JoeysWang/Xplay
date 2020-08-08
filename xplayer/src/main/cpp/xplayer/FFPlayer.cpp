@@ -17,6 +17,11 @@ void FFPlayer::init() {
     playerState = std::make_shared<PlayerState>();
     mediaSync = std::make_unique<MediaSync>(playerState);
     demuxer = std::make_unique<Demuxer>(playerState);
+    videoDecode = std::make_shared<VideoDecode>();
+    audioDecode = std::make_shared<AudioDecode>();
+    demuxer->videoDecode = videoDecode;
+    demuxer->audioDecode = audioDecode;
+
 }
 
 void FFPlayer::handleMessage(XMessage *message) {
@@ -25,6 +30,12 @@ void FFPlayer::handleMessage(XMessage *message) {
             auto url = (const char *) message->obj;
             LOGI("FFPlayer::MSG_OPEN_INPUT %s", url);
             demuxer->openSource(url);
+
+            videoDecode->openDecode(demuxer->getVideoParameter(), demuxer->formatContext,
+                                    demuxer->getVideoStream());
+            audioDecode->openDecode(demuxer->getAudioParameter(), demuxer->formatContext,
+                                    demuxer->getAudioStream());
+
             break;
         }
     }

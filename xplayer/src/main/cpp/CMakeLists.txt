@@ -22,9 +22,6 @@ add_library(
 target_link_libraries(
         cpphelper
         log
-        android
-        xhandler
-        yuv
 )
 
 # Metadata库

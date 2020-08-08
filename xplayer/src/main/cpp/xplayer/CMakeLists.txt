@@ -1,7 +1,6 @@
 
-include_directories(../xhandler)
 add_library(
-        xplayer
+        xplay
 
         SHARED
 
@@ -28,7 +27,7 @@ add_library(
 )
 
 target_link_libraries(
-        xplayer
+        xplay
         ${ffmpeg_libs_names}
         log
         android

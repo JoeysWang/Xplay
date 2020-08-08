@@ -4,10 +4,11 @@ apply plugin: 'kotlin-android-extensions'
 
 android {
     compileSdkVersion 29
+    buildToolsVersion "29.0.3"
 
     defaultConfig {
         applicationId "com.joeys.xplay"
-        minSdkVersion 23
+        minSdkVersion 21
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"

@@ -5,8 +5,14 @@
 #include <thread>
 #include "Demuxer.h"
 #include "XLog.h"
-#include "ThreadUtils.h"
+#include "../../xhandler/ThreadUtils.h"
+#include "../data/PacketData.h"
+#include "../decode/IDecode.h"
 
+extern "C" {
+#include "libavformat/avformat.h"
+#include "libavcodec/avcodec.h"
+}
 
 Demuxer::Demuxer(std::shared_ptr<PlayerState> const &state) {
     formatContext = nullptr;
@@ -22,43 +28,31 @@ Demuxer::Demuxer(std::shared_ptr<PlayerState> const &state) {
 }
 
 void Demuxer::openSource(const char *url) {
+    mutex.lock();
     int re = avformat_open_input(&formatContext, url, 0, 0);
     if (re != 0) {
-        char buf[1024] = {0};
-//        av_strerror(re, buf, sizeof(buf));
         LOGE("open ffdemux failed %s", url);
+        mutex.unlock();
         return;
     }
-    getAllStream();
+//    getAllStream();
     re = avformat_find_stream_info(formatContext, 0);
     if (re != 0) {
-        char buf[1024] = {0};
-//        av_strerror(re, buf, sizeof(buf));
         LOGE("avformat_find_stream_info failed %s", url);
+        mutex.unlock();
         return;
     }
-}
-
-AVStream *Demuxer::getAudioStream() {
-    return nullptr;
-}
-
-AVStream *Demuxer::getVideoStream() {
-    return nullptr;
-}
-
-DecodeParam Demuxer::getVideoParameter() {
-    return DecodeParam();
-}
-
-DecodeParam Demuxer::getAudioParameter() {
-    return DecodeParam();
+    mutex.unlock();
+    LOGI("Demuxer::openSource success");
 }
 
 /**
  * run on New Thread!
  */
 void Demuxer::readPacket() {
+    AVPacket *avPacket;
+    PacketData *output;
+
     while (true) {
         if (playerState->pauseRequest) {
             ThreadUtils::sleep(200);
@@ -67,14 +61,93 @@ void Demuxer::readPacket() {
         if (playerState->abortRequest) {
             break;
         }
+        mutex.lock();
+        avPacket = av_packet_alloc();
+        int ret = av_read_frame(formatContext, avPacket);
+        if (ret != 0) {
+            av_packet_free(&avPacket);
+            if (ret == AVERROR_EOF) {
+                LOGI("demux read 到结尾");
+                mutex.unlock();
+                return;
+            }
+            mutex.unlock();
+            continue;
+        }
+        output = new PacketData();
+        output->packet = avPacket;
+        output->size = avPacket->size;
+        auto pStream = formatContext->streams[avPacket->stream_index];
+        AVRational frame_rate = av_guess_frame_rate(formatContext, pStream, NULL);
+        output->frame_rate = frame_rate;
+        output->time_base = pStream->time_base;
 
+        if (avPacket->stream_index == audioStreamIndex) {
+            output->mediaType = MEDIA_TYPE_AUDIO;
+            if (audioDecode)audioDecode->pushPacket(output);
+        } else if (avPacket->stream_index == videoStreamIndex) {
+            output->mediaType = MEDIA_TYPE_VIDEO;
+            if (videoDecode)videoDecode->pushPacket(output);
+        }
+        LOGI("FFDemux::readPacket size=%d", output->size);
+        mutex.unlock();
 
     }
 }
 
-Demuxer::~Demuxer() {
-//    avformat_network_deinit();
+AVStream *Demuxer::getAudioStream() {
+    return formatContext->streams[audioStreamIndex];
+}
 
+AVStream *Demuxer::getVideoStream() {
+    return formatContext->streams[videoStreamIndex];
+}
+
+DecodeParam Demuxer::getVideoParameter() {
+    if (!formatContext) {
+        LOGE("get video param failed ic is null");
+        return DecodeParam();
+    }
+    //获取视频流索引
+    int videoIndex = av_find_best_stream(
+            formatContext,
+            AVMEDIA_TYPE_VIDEO,
+            -1, -1, 0, 0);
+    if (videoIndex < 0) {
+        LOGE("av_find_best_stream video is empty");
+        return DecodeParam();
+    }
+    this->videoStreamIndex = videoIndex;
+
+    DecodeParam para;
+    AVStream *pStream = formatContext->streams[videoIndex];
+    para.parameters = pStream->codecpar;
+
+    return para;
+}
+
+DecodeParam Demuxer::getAudioParameter() {
+    if (!formatContext) {
+        LOGE("get audio param failed ic is null");
+        return DecodeParam();
+    }
+    //获取音频流索引
+    int audioIndex = av_find_best_stream(formatContext, AVMEDIA_TYPE_AUDIO, -1, -1, 0, 0);
+    if (audioIndex < 0) {
+        LOGE("av_find_best_stream audio is empty");
+        return DecodeParam();
+    }
+    this->audioStreamIndex = audioIndex;
+    DecodeParam para;
+    para.parameters = formatContext->streams[audioIndex]->codecpar;
+    para.channels = formatContext->streams[audioIndex]->codecpar->channels;
+    para.sampleRate = formatContext->streams[audioIndex]->codecpar->sample_rate;
+    return para;
+}
+
+
+Demuxer::~Demuxer() {
+    avformat_network_deinit();
 }
 
 

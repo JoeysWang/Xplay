@@ -10,6 +10,8 @@
 #include "player/MediaSync.h"
 #include "demux/Demuxer.h"
 #include "../xhandler/HandlerThread.h"
+#include "decode/VideoDecode.h"
+#include "decode/AudioDecode.h"
 
 class FFPlayer : HandlerThread {
 
@@ -41,6 +43,9 @@ private:
 
 protected:
     std::shared_ptr<PlayerState> playerState;
+    std::shared_ptr<VideoDecode> videoDecode;
+    std::shared_ptr<AudioDecode> audioDecode;
+
     std::unique_ptr<MediaSync> mediaSync;
     std::unique_ptr<Demuxer> demuxer;
 

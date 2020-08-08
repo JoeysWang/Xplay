@@ -19,15 +19,15 @@ import kotlin.concurrent.thread
 
 
 class XPlayer : TextureView, TextureView.SurfaceTextureListener, IMediaPlayer {
-    private var mEventHandler: EventHandler?
+    private var mEventHandler: EventHandler?=null
 
-    private var mOnPreparedListener: IMediaPlayer.OnPreparedListener? = null
-    private var mOnBufferingUpdateListener: IMediaPlayer.OnBufferingUpdateListener? = null
-    private var mOnCompletionListener: IMediaPlayer.OnCompletionListener? = null
-    private var mOnSeekCompleteListener: IMediaPlayer.OnSeekCompleteListener? = null
-    private var mOnErrorListener: IMediaPlayer.OnErrorListener? = null
-    private var mOnInfoListener: IMediaPlayer.OnInfoListener? = null
-    private var mOnVideoSizeChangedListener: IMediaPlayer.OnVideoSizeChangedListener? = null
+    private var mOnPreparedListener: OnPreparedListener? = null
+    private var mOnBufferingUpdateListener: OnBufferingUpdateListener? = null
+    private var mOnCompletionListener: OnCompletionListener? = null
+    private var mOnSeekCompleteListener: OnSeekCompleteListener? = null
+    private var mOnErrorListener: OnErrorListener? = null
+    private var mOnInfoListener: OnInfoListener? = null
+    private var mOnVideoSizeChangedListener: OnVideoSizeChangedListener? = null
 
     var mNativeContext: Long = 0
 
@@ -47,7 +47,7 @@ class XPlayer : TextureView, TextureView.SurfaceTextureListener, IMediaPlayer {
         private val MEDIA_CURRENT = 0x300
 
         init {
-            System.loadLibrary("xplayer")
+            System.loadLibrary("xplay")
             nativeInit()
         }
 
@@ -71,23 +71,22 @@ class XPlayer : TextureView, TextureView.SurfaceTextureListener, IMediaPlayer {
     constructor(context: Context, attributeSet: AttributeSet) : super(context, attributeSet)
 
     init {
-        val looper = Looper.myLooper()
-
-        when {
-            looper != null -> {
-                mEventHandler = EventHandler(this, looper)
-            }
-            else -> {
-                mEventHandler = EventHandler(this, Looper.getMainLooper())
-            }
-        }
+//        val looper = Looper.myLooper()
+//
+//        when {
+//            looper != null -> {
+//                mEventHandler = EventHandler(this, looper)
+//            }
+//            else -> {
+//                mEventHandler = EventHandler(this, Looper.getMainLooper())
+//            }
+//        }
         initPlayer(WeakReference(this))
         surfaceTextureListener = this
-
     }
 
     private external fun initPlayer(weakReference: WeakReference<XPlayer>)
-    private external fun _setDataSource(url: String): Boolean
+    private external fun setDataSourceInternal(url: String)
     private external fun initView(holder: Surface?)
 
     override fun onSurfaceTextureSizeChanged(surface: SurfaceTexture?, width: Int, height: Int) {
@@ -284,7 +283,7 @@ class XPlayer : TextureView, TextureView.SurfaceTextureListener, IMediaPlayer {
     }
 
     override fun setDataSource(context: Context, uri: Uri) {
-        _setDataSource(UriUtils.uri2File(uri).absolutePath)
+        setDataSourceInternal(UriUtils.uri2File(uri).absolutePath)
     }
 
     override fun setDataSource(context: Context, uri: Uri, headers: MutableMap<String, String>?) {
@@ -292,7 +291,8 @@ class XPlayer : TextureView, TextureView.SurfaceTextureListener, IMediaPlayer {
     }
 
     override fun setDataSource(path: String) {
-        _setDataSource(path)
+        Log.d(TAG, "setDataSource mNativeContext=$mNativeContext path = $path ")
+        setDataSourceInternal(path)
     }
 
     override fun setDataSource(path: String, headers: MutableMap<String, String>?) {

@@ -5,8 +5,9 @@
 #ifndef FFPLAYER_DECODEPARAM_H
 #define FFPLAYER_DECODEPARAM_H
 
-
+extern "C" {
 #include <libavcodec/avcodec.h>
+};
 
 class DecodeParam {
 public:

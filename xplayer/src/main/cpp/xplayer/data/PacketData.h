@@ -6,8 +6,17 @@
 #define FFPLAYER_PACKETDATA_H
 
 
-class PacketData {
+extern "C" {
+#include <libavformat/avformat.h>
+};
 
+class PacketData {
+public:
+    AVPacket *packet;
+    int size;
+    AVRational frame_rate;
+    AVRational time_base;
+    int mediaType;
 };
 
 

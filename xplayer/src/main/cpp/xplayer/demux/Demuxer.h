@@ -7,13 +7,13 @@
 
 #include "../data/PlayerState.h"
 #include "../data/DecodeParam.h"
-extern "C"
-{
-#include <libavcodec/avcodec.h>
-#include <libavformat/avformat.h>
-#include <libswscale/swscale.h>
-#include <libavutil/error.h>
-}
+#include "../decode/VideoDecode.h"
+#include "../decode/AudioDecode.h"
+
+extern "C" {
+#include "libavformat/avformat.h"
+};
+
 class Demuxer {
 public:
 
@@ -29,16 +29,25 @@ public:
 
     virtual ~Demuxer();
 
+    DecodeParam getVideoParameter();
+
+    DecodeParam getAudioParameter();
+
 private:
     void readPacket();
 
 private:
-    AVStream *pStream = 0;
-    AVFormatContext *formatContext = 0;
     std::shared_ptr<PlayerState> playerState;
 
-    DecodeParam getVideoParameter();
-    DecodeParam getAudioParameter();
+public:
+    AVFormatContext *formatContext = 0;
+    std::shared_ptr<VideoDecode> videoDecode;
+    std::shared_ptr<AudioDecode> audioDecode;
+
+protected:
+    std::mutex mutex;
+    int videoStreamIndex;
+    int audioStreamIndex;
 };
 
 
