@@ -5,13 +5,13 @@
 #include <thread>
 #include "IDecode.h"
 #include "XLog.h"
-
-IDecode::IDecode() {
+IDecode::IDecode(const std::shared_ptr<PlayerState> &playerState) : playerState(playerState) {
     packetQueue = std::make_unique<Queue<PacketData>>(100);
     frameQueue = std::make_unique<FrameQueue>(FRAME_QUEUE_SIZE, 1);
 
-
 }
+
+
 
 bool IDecode::openDecode(DecodeParam param, AVFormatContext *formatContext, AVStream *stream) {
     std::lock_guard<std::mutex> lock(mutex);
@@ -54,10 +54,26 @@ bool IDecode::openDecode(DecodeParam param, AVFormatContext *formatContext, AVSt
     } else if (codecContext->codec_type == AVMEDIA_TYPE_AUDIO) {
         decodeType = MEDIA_TYPE_AUDIO;
     }
-    LOGI(" IDecode::openDecode open success decodeType=%d",decodeType);
-    std::thread th(&IDecode::decode, this);
+    LOGI(" IDecode::openDecode open success decodeType=%d", decodeType);
+    std::thread th(&IDecode::readPacket, this);
     th.detach();
     return true;
+}
+
+void IDecode::readPacket() {
+    while (true) {
+        if (playerState->pauseRequest) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            continue;
+        }
+        if (playerState->abortRequest) {
+            break;
+        }
+        if (decode() != 0) {
+            break;
+        }
+    }
+    LOGI("IDecode::readPacket 退出");
 }
 
 void IDecode::pushPacket(PacketData *data) {
@@ -67,11 +83,16 @@ void IDecode::pushPacket(PacketData *data) {
 IDecode::~IDecode() {
     LOGI("IDecode::~IDecode");
     std::unique_lock<std::mutex> lock(mutex);
-    isExit= true;
-    packetQueue->quit();
-    frameQueue->flush();
     codecContext = nullptr;
     formatContext = nullptr;
     stream = nullptr;
     mRotate = 0;
 }
+
+void IDecode::quit() {
+    std::unique_lock<std::mutex> lock(mutex);
+    isExit = true;
+    packetQueue->quit();
+    frameQueue->flush();
+}
+

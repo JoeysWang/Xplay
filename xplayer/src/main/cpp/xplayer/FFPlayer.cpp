@@ -19,8 +19,8 @@ void FFPlayer::init() {
     playerState = std::make_shared<PlayerState>();
     mediaSync = std::make_unique<MediaSync>(playerState);
     demuxer = std::make_unique<Demuxer>(playerState);
-    videoDecode = std::make_shared<VideoDecode>();
-    audioDecode = std::make_shared<AudioDecode>();
+    videoDecode = std::make_shared<VideoDecode>(playerState);
+    audioDecode = std::make_shared<AudioDecode>(playerState);
     demuxer->videoDecode = videoDecode;
     demuxer->audioDecode = audioDecode;
 
@@ -80,6 +80,9 @@ void FFPlayer::release() {
     std::unique_lock<std::mutex> lock(mutex);
     playerState->abortRequest = 1;
     url = nullptr;
+    audioDecode->quit();
+    videoDecode->quit();
+
     quit();
     delete this;
 }

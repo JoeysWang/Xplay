@@ -12,18 +12,17 @@ extern "C" {
 
 class PacketData {
 public:
-    AVPacket *packet;
-    int size;
-    AVRational frame_rate;
-    AVRational time_base;
-    int mediaType;
+    AVPacket *packet = nullptr;
+    int size = 0;
+    AVRational frame_rate = {1, 1};
+    AVRational time_base = {1, 1};
+    int mediaType = 0;
 
 public:
     void release() {
         av_packet_unref(packet);
         packet = nullptr;
         size = 0;
-        delete this;
     };
 };
 

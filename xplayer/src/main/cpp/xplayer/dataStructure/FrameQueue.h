@@ -59,11 +59,11 @@ private:
 public:
     std::mutex mMutex;
     std::condition_variable mNotFull;
-    int abort_request;
+    int abort_request = 0;
     FrameData queue[FRAME_QUEUE_SIZE];
-    int rindex;
-    int windex;
-    int size;
+    int rindex = 0;
+    int windex = 0;
+    int size = 0;
     int max_size;
     int keep_last;
     int show_index;

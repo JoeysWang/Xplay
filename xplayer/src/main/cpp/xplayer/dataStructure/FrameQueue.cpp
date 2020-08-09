@@ -10,7 +10,7 @@ FrameQueue::FrameQueue(int max_size, int keep_last) {
     for (int i = 0; i < this->max_size; ++i) {
         queue[i].frame = av_frame_alloc();
     }
-    abort_request = 1;
+    abort_request = 0;
     rindex = 0;
     windex = 0;
     size = 0;

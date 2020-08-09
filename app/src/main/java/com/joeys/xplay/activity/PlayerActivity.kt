@@ -47,6 +47,12 @@ class PlayerActivity : AppCompatActivity() {
 //        retriever.release()
     }
 
+    override fun onDestroy() {
+        xplay.release()
+        super.onDestroy()
+
+    }
+
     companion object {
         fun start(url: String, context: Context) {
             val intent = Intent(context, PlayerActivity::class.java)

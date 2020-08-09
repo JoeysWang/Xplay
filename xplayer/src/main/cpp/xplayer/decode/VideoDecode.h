@@ -10,9 +10,9 @@
 
 class VideoDecode : public IDecode {
 public:
-    VideoDecode();
+    VideoDecode(const std::shared_ptr<PlayerState> &playerState);
 
-    void decode() override;
+    int decode() override;
 };
 
 

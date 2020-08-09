@@ -10,9 +10,9 @@
 
 class AudioDecode : public IDecode {
 public:
-    AudioDecode();
+    AudioDecode(const std::shared_ptr<PlayerState> &playerState);
 
-    void decode() override;
+    int decode() override;
 
 };
 

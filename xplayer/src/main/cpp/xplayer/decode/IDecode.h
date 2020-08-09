@@ -28,16 +28,25 @@ enum DecodeMediaType {
 class IDecode {
 
 public:
-
-    IDecode();
+    IDecode(const std::shared_ptr<PlayerState> &playerState);
 
     bool openDecode(DecodeParam param, AVFormatContext *formatContext, AVStream *stream);
 
-    virtual void decode() = 0;
+    /**
+     * 真正解码
+     * @return 0 = success, <0 = error
+     */
+    virtual int decode() = 0;
 
     void pushPacket(PacketData *data);
 
+    void quit();
+
     virtual ~IDecode();
+
+
+private:
+    void readPacket();
 
 protected:
     std::mutex mutex;
@@ -45,10 +54,10 @@ protected:
     std::unique_ptr<FrameQueue> frameQueue;
     std::shared_ptr<PlayerState> playerState;
 
-    AVCodecContext *codecContext;
-    AVFormatContext *formatContext;
-    AVStream *stream;
-    bool isExit;
+    AVCodecContext *codecContext = nullptr;
+    AVFormatContext *formatContext = nullptr;
+    AVStream *stream = nullptr;
+    bool isExit = false;
 
     DecodeMediaType decodeType;
     int mRotate;

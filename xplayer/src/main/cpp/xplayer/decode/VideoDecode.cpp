@@ -7,12 +7,12 @@
 #include "../data/FrameData.h"
 #include <thread>
 
-VideoDecode::VideoDecode() {
+VideoDecode::VideoDecode(const std::shared_ptr<PlayerState> &playerState) : IDecode(playerState) {
     LOGI("VideoDecode::VideoDecode");
     packetQueue->tag = "Video";
 }
 
-void VideoDecode::decode() {
+int VideoDecode::decode() {
     LOGI(" VideoDecode::decode");
     AVFrame *frame;
     FrameData *output;
@@ -21,7 +21,9 @@ void VideoDecode::decode() {
     int ret = 0;
     AVPacket *packet;
     AVRational tb = stream->time_base;
+    LOGI(" VideoDecode tb =%f", av_q2d(tb));
     AVRational frame_rate = av_guess_frame_rate(formatContext, stream, NULL);
+    LOGI(" VideoDecode frame_rate =%f", av_q2d(frame_rate));
     for (;;) {
         if (isExit || playerState->abortRequest) {
             ret = -1;
@@ -79,6 +81,7 @@ void VideoDecode::decode() {
             output->size = (frame->linesize[0] +
                             frame->linesize[1] +
                             frame->linesize[2]) * frame->height;
+            LOGI("video frame size=%d  \n=====", output->size);
             memcpy(output->decodeDatas, frame->data, sizeof(frame->data));
             av_frame_unref(output->frame);
             av_frame_move_ref(output->frame, frame);
@@ -98,4 +101,5 @@ void VideoDecode::decode() {
         av_free(packet);
         packet = nullptr;
     }
+    return ret;
 }

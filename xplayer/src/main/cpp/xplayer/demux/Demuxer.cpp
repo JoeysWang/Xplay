@@ -88,7 +88,7 @@ void Demuxer::readPacket() {
             output->mediaType = MEDIA_TYPE_VIDEO;
             if (videoDecode)videoDecode->pushPacket(output);
         }
-        LOGI("FFDemux::readPacket size=%d", output->size);
+//        LOGI("FFDemux::readPacket size=%d", output->size);
         mutex.unlock();
     }
     isRunning = false;
