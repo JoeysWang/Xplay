@@ -33,6 +33,7 @@ public:
 
     DecodeParam getAudioParameter();
 
+    void quit();
 
 private:
     void readPacket();

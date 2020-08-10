@@ -14,8 +14,6 @@ add_library(
         decode/IDecode.cpp
 
         player/MediaSync.cpp
-        player/VideoPlayer.cpp
-        player/AudioPlayer.cpp
 
         data/PlayerState.cpp
         data/DecodeParam.cpp
@@ -24,7 +22,20 @@ add_library(
 
         dataStructure/Queue.cpp
         dataStructure/FrameQueue.cpp
+        dataStructure/MediaClock.cpp
 
+        resampler/Resampler.cpp
+        video/IVideoView.cpp
+        video/GLVideoView.cpp
+        video/texture/XEGL.cpp
+        video/texture/XTexture.cpp
+        video/texture/XShader.cpp
+        audio/SLAudioPlayer.cpp
+        audio/IAudioPlay.cpp
+
+        utils/CoordinateUtils.cpp
+        utils/OpenGLUtils.cpp
+        utils/vecmath.cpp
 )
 
 target_link_libraries(

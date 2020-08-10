@@ -4,6 +4,7 @@
 
 #include "FFPlayer.h"
 #include "player/PlayerMessage.h"
+#include "video/GLVideoView.h"
 
 FFPlayer::FFPlayer() {
 
@@ -17,10 +18,18 @@ void FFPlayer::init() {
     std::unique_lock<std::mutex> lock(mutex);
 
     playerState = std::make_shared<PlayerState>();
-    mediaSync = std::make_unique<MediaSync>(playerState);
     demuxer = std::make_unique<Demuxer>(playerState);
     videoDecode = std::make_shared<VideoDecode>(playerState);
     audioDecode = std::make_shared<AudioDecode>(playerState);
+//    videoView = std::make_shared<GLVideoView>(playerState);
+//    resampler = std::make_shared<Resampler>(playerState);
+
+
+//    mediaSync = std::make_unique<MediaSync>(playerState, videoDecode, audioDecode);
+//    mediaSync->setVideoView(videoView);
+//    mediaSync->setResampler(resampler);
+
+
     demuxer->videoDecode = videoDecode;
     demuxer->audioDecode = audioDecode;
 
@@ -43,6 +52,10 @@ void FFPlayer::handleMessage(XMessage *message) {
                                     demuxer->getVideoStream());
             audioDecode->openDecode(demuxer->getAudioParameter(), demuxer->formatContext,
                                     demuxer->getAudioStream());
+//            if (!resampler->open(demuxer->getAudioParameter(), demuxer->getAudioParameter())) {
+//                LOGE("IPlayer  resample->open error ");
+//            }
+//            mediaSync->start();
             break;
         }
         case MSG_REQUEST_PAUSE: {
@@ -53,12 +66,18 @@ void FFPlayer::handleMessage(XMessage *message) {
             playerState->pauseRequest = 0;
             break;
         }
+        case MSG_SET_SURFACE_WINDOW: {
+//            videoView->setRenderSurface(win);
+            break;
+        }
 
     }
 }
 
 void FFPlayer::setNativeWindow(void *win) {
-
+    this->win = win;
+    if (handler)
+        handler->postMessage(MSG_SET_SURFACE_WINDOW, (void *) win);
 }
 
 void FFPlayer::setDataSource(const char *url) {
@@ -77,13 +96,16 @@ void FFPlayer::playOrPause() {
 }
 
 void FFPlayer::release() {
+    LOGI("FFPlayer::release");
     std::unique_lock<std::mutex> lock(mutex);
+    quit();
     playerState->abortRequest = 1;
     url = nullptr;
+    demuxer->quit();
     audioDecode->quit();
     videoDecode->quit();
+//    mediaSync->stop();
 
-    quit();
     delete this;
 }
 

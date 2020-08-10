@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity() {
             .permission(Permission.Group.STORAGE)
             .onGranted { permissions: List<String?>? ->
                 initExternalReportPath()
-//                initBreakPad()
+                initBreakPad()
             }
             .onDenied { permissions: List<String?>? ->
 

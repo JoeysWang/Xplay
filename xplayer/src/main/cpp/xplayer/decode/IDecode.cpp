@@ -5,6 +5,7 @@
 #include <thread>
 #include "IDecode.h"
 #include "XLog.h"
+
 IDecode::IDecode(const std::shared_ptr<PlayerState> &playerState) : playerState(playerState) {
     packetQueue = std::make_unique<Queue<PacketData>>(100);
     frameQueue = std::make_unique<FrameQueue>(FRAME_QUEUE_SIZE, 1);
@@ -12,6 +13,13 @@ IDecode::IDecode(const std::shared_ptr<PlayerState> &playerState) : playerState(
 }
 
 
+FrameData *IDecode::currentFrame() {
+    return frameQueue->currentFrame();
+}
+
+void *IDecode::popFrame() {
+    frameQueue->popFrame();
+}
 
 bool IDecode::openDecode(DecodeParam param, AVFormatContext *formatContext, AVStream *stream) {
     std::lock_guard<std::mutex> lock(mutex);
@@ -62,6 +70,9 @@ bool IDecode::openDecode(DecodeParam param, AVFormatContext *formatContext, AVSt
 
 void IDecode::readPacket() {
     while (true) {
+        if (isExit || !playerState) {
+            return;
+        }
         if (playerState->pauseRequest) {
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
             continue;
@@ -82,7 +93,7 @@ void IDecode::pushPacket(PacketData *data) {
 
 IDecode::~IDecode() {
     LOGI("IDecode::~IDecode");
-    std::unique_lock<std::mutex> lock(mutex);
+    isExit = true;
     codecContext = nullptr;
     formatContext = nullptr;
     stream = nullptr;
@@ -90,6 +101,7 @@ IDecode::~IDecode() {
 }
 
 void IDecode::quit() {
+    LOGI("IDecode::quit");
     std::unique_lock<std::mutex> lock(mutex);
     isExit = true;
     packetQueue->quit();

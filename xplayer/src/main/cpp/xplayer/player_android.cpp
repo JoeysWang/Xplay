@@ -130,7 +130,7 @@ Java_com_joeys_xplayer_XPlayer__1release(JNIEnv *env, jobject thiz) {
         window = nullptr;
     }
     getPlayerHander(env, thiz)->release();
-//    cachePlayerHander(env,thiz,0);
+    cachePlayerHander(env,thiz,0);
 }
 
 extern "C"

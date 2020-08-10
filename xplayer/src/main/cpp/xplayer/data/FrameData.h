@@ -27,6 +27,17 @@ public:
     void release() {
 
     }
+    bool allocResampleData(int size, const char *data) {
+
+        if (size <= 0) { return false; }
+        this->resampleData = new unsigned char[size];
+        if (!this->resampleData) { return false; }
+        if (data) {
+            memcpy(this->resampleData, data, size);
+        }
+        this->size = size;
+        return true;
+    }
 
 };
 

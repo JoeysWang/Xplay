@@ -145,11 +145,16 @@ DecodeParam Demuxer::getAudioParameter() {
     return para;
 }
 
+void Demuxer::quit() {
+    LOGI("Demuxer::quit");
+    avformat_network_deinit();
+    if (isRunning) {
+        isRunning = false;
+    }
+}
 
 Demuxer::~Demuxer() {
     LOGI("Demuxer::~Demuxer");
-    std::unique_lock<std::mutex> lock(mutex);
-    avformat_network_deinit();
     if (isRunning) {
         isRunning = false;
     }

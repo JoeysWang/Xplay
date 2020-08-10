@@ -15,6 +15,7 @@
 
 #define MSG_INIT                        0x01    // 初始化
 #define MSG_OPEN_INPUT                  0x50    // 打开文件
+#define MSG_SET_SURFACE_WINDOW          0x49    // videoView->setRenderSurface(win);
 #define MSG_FIND_STREAM_INFO            0x51    // 查找媒体流信息
 #define MSG_PREPARE_DECODER             0x52    // 准备解码器
 #define MSG_VIDEO_SIZE_CHANGED          0x53    // 视频大小变化

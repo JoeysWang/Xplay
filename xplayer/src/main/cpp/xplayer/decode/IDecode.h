@@ -44,18 +44,23 @@ public:
 
     virtual ~IDecode();
 
+    FrameData *currentFrame();
+
+    void *popFrame();
 
 private:
     void readPacket();
 
+public:
+    AVCodecContext *codecContext = nullptr;
+    AVFormatContext *formatContext = nullptr;
 protected:
     std::mutex mutex;
     std::unique_ptr<Queue<PacketData>> packetQueue;
     std::unique_ptr<FrameQueue> frameQueue;
     std::shared_ptr<PlayerState> playerState;
 
-    AVCodecContext *codecContext = nullptr;
-    AVFormatContext *formatContext = nullptr;
+
     AVStream *stream = nullptr;
     bool isExit = false;
 

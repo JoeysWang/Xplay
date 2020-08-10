@@ -12,6 +12,8 @@
 #include "../xhandler/HandlerThread.h"
 #include "decode/VideoDecode.h"
 #include "decode/AudioDecode.h"
+#include "resampler/Resampler.h"
+#include "video/IVideoView.h"
 
 class FFPlayer : public HandlerThread {
 
@@ -48,6 +50,8 @@ protected:
     std::shared_ptr<PlayerState> playerState;
     std::shared_ptr<VideoDecode> videoDecode;
     std::shared_ptr<AudioDecode> audioDecode;
+    std::shared_ptr<Resampler> resampler;
+    std::shared_ptr<IVideoView> videoView;
 
     std::unique_ptr<MediaSync> mediaSync;
     std::unique_ptr<Demuxer> demuxer;
@@ -55,6 +59,7 @@ protected:
 
     std::mutex mutex;
     const char *url = nullptr;
+    void *win;
 
 };
 
