@@ -7,44 +7,28 @@
 
 IAudioPlay::IAudioPlay(const std::shared_ptr<PlayerState> &playerState) : playerState(
         playerState) {
+    frames = std::make_unique<Queue<FrameData>>(10);
+    frames->tag = "IAudioPlay";
 }
 
 IAudioPlay::~IAudioPlay() {
     LOGI("IAudioPlay::~IAudioPlay");
     isExit = true;
-    notEmpty.notify_all();
-    notFull.notify_all();
-    frames.clear();
+    frames->clear();
     callback = NULL;
     callbackContext = nullptr;
 }
 
 void IAudioPlay::update(FrameData data) {
     //压入缓冲队列
-    std::unique_lock<std::mutex> lock(framesMutex);
-    if (data.size <= 0)
-        return;
-
-    if (frames.size() > maxFrameBuffer) {
-        notFull.wait(lock);
-    }
-    frames.push_back(data);
-    notEmpty.notify_all();
+    if (isExit) { return; }
+    frames->push(data);
 }
 
 FrameData IAudioPlay::getData() {
     FrameData d;
-    std::unique_lock<std::mutex> lock(framesMutex);
-    if (frames.empty()) {
-        notEmpty.wait(lock);
-    }
-    if (isExit) {
-        return d;
-    }
-    d = frames.front();
-    pts = d.pts;
-    frames.pop_front();
-    notFull.notify_all();
+    if (isExit) { return d; }
+    frames->pop(d);
     return d;
 }
 

@@ -84,6 +84,7 @@ bool SLAudioPlayer::startPlay(DecodeParam out) {
     (*pcmQueue)->RegisterCallback(pcmQueue, pcmCallback, this);
     (*iplayer)->SetPlayState(iplayer, SL_PLAYSTATE_PLAYING);
     (*pcmQueue)->Enqueue(pcmQueue, "", 1);
+    LOGI("SLAudioPlayer::startPlay  success");
 
     return true;
 }
@@ -123,7 +124,7 @@ void SLAudioPlayer::playCall(void *bufferQueue) {
         LOGE("SLAudioPlay::playCall getData size =0 ");
         return;
     }
-
+    LOGI("SLAudioPlayer::playCall size=%d", data.size);
     memcpy(buffer, data.resampleData, data.size);
 
     (*bf)->Enqueue(bf, buffer, data.size);

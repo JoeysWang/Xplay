@@ -20,11 +20,11 @@ public:
 public:
     HandleMessageI *callBack = nullptr;
 
-    XLooper *looper = nullptr;
+    std::shared_ptr<XLooper> looper = nullptr;
 public:
     XHandler();
 
-    XHandler(XLooper *looper);
+    XHandler(const std::shared_ptr<XLooper> &looper);
 
     void setCallBack(HandleMessageI *callBack);
 
@@ -33,7 +33,6 @@ public:
     void postMessage(int what, int arg1, int arg2);
 
     void postMessage(int what, void *obj);
-
 
     void dispatchMessage(XMessage *message);
 

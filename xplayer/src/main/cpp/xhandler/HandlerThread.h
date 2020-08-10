@@ -8,6 +8,7 @@
 #include "XHandler.h"
 #include "ThreadUtils.h"
 #include <thread>
+#include <memory>
 #include <XLog.h>
 
 class HandlerThread : public HandleMessageI {
@@ -22,7 +23,7 @@ public:
     virtual ~HandlerThread() {
     }
 
-    XLooper *getLooper() {
+    std::shared_ptr<XLooper> getLooper() {
         if (isQuit) return nullptr;
         std::unique_lock<std::mutex> lock(internalMutex);
         while (!isQuit && mLooper == nullptr) {
@@ -33,7 +34,7 @@ public:
 
     bool quit() {
         isQuit = true;
-        XLooper *looper = getLooper();
+        auto looper = getLooper();
         if (looper != nullptr) {
             looper->quit();
             return true;
@@ -47,7 +48,7 @@ private:
         internalMutex.lock();
         mLooper = XLooper::prepare();
         internalMutex.unlock();
-        LOGI("mLooper::prepare =%p ",mLooper);
+        LOGI("mLooper::prepare ");
         emptyLooper.notify_all();
         onLooperPrepared();
         mLooper->loop();
@@ -56,9 +57,9 @@ private:
 
 
 private:
-    bool isQuit = false;
+    std::atomic_bool isQuit{false};
     long mTid = -1;
-    XLooper *mLooper;
+    std::shared_ptr<XLooper> mLooper;
     std::condition_variable emptyLooper;
     std::mutex internalMutex;
 

@@ -50,8 +50,7 @@ void Demuxer::readPacket() {
     AVPacket *avPacket;
     PacketData *output;
     isRunning = true;
-
-    while (true) {
+    while (isRunning) {
         if (!isRunning || !playerState || playerState->abortRequest) {
             break;
         }
@@ -88,7 +87,7 @@ void Demuxer::readPacket() {
             output->mediaType = MEDIA_TYPE_VIDEO;
             if (videoDecode)videoDecode->pushPacket(output);
         }
-//        LOGI("FFDemux::readPacket size=%d", output->size);
+//        LOGI("FFDemux::readPacket mediaType=%d size=%d", output->mediaType, output->size);
         mutex.unlock();
     }
     isRunning = false;
@@ -198,4 +197,8 @@ void Demuxer::getAllStream() {
         }
 
     }
+}
+
+void Demuxer::setPlayerHandler(const std::shared_ptr<XHandler> &playerHandler) {
+    Demuxer::playerHandler = playerHandler;
 }

@@ -5,6 +5,7 @@
 #include "FFPlayer.h"
 #include "player/PlayerMessage.h"
 #include "video/GLVideoView.h"
+#include "utils/MediaPlayerListener.h"
 
 FFPlayer::FFPlayer() {
 
@@ -21,24 +22,30 @@ void FFPlayer::init() {
     demuxer = std::make_unique<Demuxer>(playerState);
     videoDecode = std::make_shared<VideoDecode>(playerState);
     audioDecode = std::make_shared<AudioDecode>(playerState);
-//    videoView = std::make_shared<GLVideoView>(playerState);
-//    resampler = std::make_shared<Resampler>(playerState);
+    videoView = std::make_shared<GLVideoView>(playerState);
+    resampler = std::make_shared<Resampler>(playerState);
 
 
-//    mediaSync = std::make_unique<MediaSync>(playerState, videoDecode, audioDecode);
-//    mediaSync->setVideoView(videoView);
-//    mediaSync->setResampler(resampler);
+    mediaSync = std::make_unique<MediaSync>(playerState, videoDecode, audioDecode);
+    mediaSync->setVideoView(videoView);
+    mediaSync->setResampler(resampler);
 
 
     demuxer->videoDecode = videoDecode;
     demuxer->audioDecode = audioDecode;
 
-    handler = std::make_unique<XHandler>(getLooper());
+    handler = std::make_shared<XHandler>(getLooper());
     handler->setCallBack(this);
     LOGI("FFPlayer::init success");
+
+    videoDecode->setPlayerHandler(handler);
+    audioDecode->setPlayerHandler(handler);
+
     if (url) {
         handler->postMessage(MSG_OPEN_INPUT, (void *) url);
     }
+
+
 }
 
 void FFPlayer::handleMessage(XMessage *message) {
@@ -48,14 +55,21 @@ void FFPlayer::handleMessage(XMessage *message) {
             LOGI("FFPlayer::MSG_OPEN_INPUT %s", url);
             demuxer->openSource(url);
 
-            videoDecode->openDecode(demuxer->getVideoParameter(), demuxer->formatContext,
-                                    demuxer->getVideoStream());
-            audioDecode->openDecode(demuxer->getAudioParameter(), demuxer->formatContext,
-                                    demuxer->getAudioStream());
-//            if (!resampler->open(demuxer->getAudioParameter(), demuxer->getAudioParameter())) {
-//                LOGE("IPlayer  resample->open error ");
-//            }
-//            mediaSync->start();
+            videoDecode->openDecode(
+                    demuxer->getVideoParameter(),
+                    demuxer->formatContext,
+                    demuxer->getVideoStream());
+
+            audioDecode->openDecode(
+                    demuxer->getAudioParameter(),
+                    demuxer->formatContext,
+                    demuxer->getAudioStream());
+
+            if (!resampler->open(demuxer->getAudioParameter(), demuxer->getAudioParameter())) {
+                LOGE("IPlayer  resample->open error ");
+            }
+
+            mediaSync->start();
             break;
         }
         case MSG_REQUEST_PAUSE: {
@@ -67,7 +81,11 @@ void FFPlayer::handleMessage(XMessage *message) {
             break;
         }
         case MSG_SET_SURFACE_WINDOW: {
-//            videoView->setRenderSurface(win);
+            videoView->setRenderSurface(win);
+            break;
+        }
+        case MSG_SAR_CHANGED: {
+            javaHandler->notify(MSG_SAR_CHANGED, message->arg1, message->arg2, nullptr);
             break;
         }
 
@@ -104,7 +122,7 @@ void FFPlayer::release() {
     demuxer->quit();
     audioDecode->quit();
     videoDecode->quit();
-//    mediaSync->stop();
+    mediaSync->stop();
 
     delete this;
 }
@@ -127,5 +145,9 @@ bool FFPlayer::isPlaying() {
 
 FFPlayer::~FFPlayer() {
     LOGI("FFPlayer::~FFPlayer");
+}
+
+void FFPlayer::setJavaHandler(const std::shared_ptr<MediaPlayerListener> &javaHandler) {
+    FFPlayer::javaHandler = javaHandler;
 }
 

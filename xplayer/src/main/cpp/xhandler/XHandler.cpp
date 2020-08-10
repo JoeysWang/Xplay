@@ -11,11 +11,11 @@
 
 XHandler::XHandler() {
     looper = XLooper::myLooper();
-    LOGI("XHandler::XHandler() looper=%p", looper);
+    LOGI("XHandler::XHandler() ");
 }
 
-XHandler::XHandler(XLooper *looper) : looper(looper) {
-    LOGI("XHandler::XHandler(XLooper *looper) looper=%p", looper);
+XHandler::XHandler(const std::shared_ptr<XLooper> &looper) : looper(looper) {
+    LOGI("XHandler::XHandler(XLooper *looper) ");
 }
 
 void XHandler::sendMessage(XMessage *message) {
@@ -56,9 +56,8 @@ void XHandler::enqueueMessage(XMessage *message) {
 }
 
 XHandler::~XHandler() {
-    if (looper)looper->quit();
-    LooperManager::getInstance()->deleteLooper(ThreadUtils::currentId());
-    looper = nullptr;
+    if (looper)
+        looper->quit();
     LOGI("XHandler::~XHandler success");
 }
 

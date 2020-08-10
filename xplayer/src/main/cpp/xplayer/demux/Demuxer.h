@@ -35,16 +35,19 @@ public:
 
     void quit();
 
+    void setPlayerHandler(const std::shared_ptr<XHandler> &playerHandler);
+
 private:
     void readPacket();
 
 private:
     std::shared_ptr<PlayerState> playerState;
-    bool isRunning;
+    bool isRunning=true;
 public:
     AVFormatContext *formatContext = 0;
     std::shared_ptr<VideoDecode> videoDecode;
     std::shared_ptr<AudioDecode> audioDecode;
+    std::shared_ptr<XHandler> playerHandler;
 
 protected:
     std::mutex mutex;

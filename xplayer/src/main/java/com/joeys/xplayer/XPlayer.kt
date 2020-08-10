@@ -11,6 +11,7 @@ import android.util.Log
 import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.TextureView
+import com.blankj.utilcode.util.ScreenUtils
 import com.blankj.utilcode.util.UriUtils
 import com.joeys.xplayer.IMediaPlayer.*
 import java.io.FileDescriptor
@@ -19,7 +20,7 @@ import kotlin.concurrent.thread
 
 
 class XPlayer : TextureView, TextureView.SurfaceTextureListener, IMediaPlayer {
-    private var mEventHandler: EventHandler?=null
+    private var mEventHandler: EventHandler? = null
 
     private var mOnPreparedListener: OnPreparedListener? = null
     private var mOnBufferingUpdateListener: OnBufferingUpdateListener? = null
@@ -40,11 +41,11 @@ class XPlayer : TextureView, TextureView.SurfaceTextureListener, IMediaPlayer {
         private val MEDIA_PLAYBACK_COMPLETE = 0x2
         private val MEDIA_BUFFERING_UPDATE = 0x3
         private val MEDIA_SEEK_COMPLETE = 0x4
-        private val MEDIA_SET_VIDEO_SIZE = 0x5
         private val MEDIA_TIMED_TEXT = 0x99
         private val MEDIA_ERROR = 0x100
         private val MEDIA_INFO = 0x200
         private val MEDIA_CURRENT = 0x300
+        private val MSG_SAR_CHANGED = 54
 
         init {
             System.loadLibrary("xplay")
@@ -59,6 +60,7 @@ class XPlayer : TextureView, TextureView.SurfaceTextureListener, IMediaPlayer {
             mediaplayer_ref: Any,
             what: Int, arg1: Int, arg2: Int, obj: Any?
         ) {
+            Log.d(TAG, "postEventFromNative: $what $arg1 $arg2 ")
             val mp: XPlayer = (mediaplayer_ref as WeakReference<*>).get() as XPlayer? ?: return
             mp.mEventHandler?.let {
                 val m: Message = it.obtainMessage(what, arg1, arg2, obj)
@@ -71,16 +73,15 @@ class XPlayer : TextureView, TextureView.SurfaceTextureListener, IMediaPlayer {
     constructor(context: Context, attributeSet: AttributeSet) : super(context, attributeSet)
 
     init {
-//        val looper = Looper.myLooper()
-//
-//        when {
-//            looper != null -> {
-//                mEventHandler = EventHandler(this, looper)
-//            }
-//            else -> {
-//                mEventHandler = EventHandler(this, Looper.getMainLooper())
-//            }
-//        }
+        val looper = Looper.myLooper()
+        when {
+            looper != null -> {
+                mEventHandler = EventHandler(this, looper)
+            }
+            else -> {
+                mEventHandler = EventHandler(this, Looper.getMainLooper())
+            }
+        }
         initPlayer(WeakReference(this))
         surfaceTextureListener = this
     }
@@ -122,10 +123,10 @@ class XPlayer : TextureView, TextureView.SurfaceTextureListener, IMediaPlayer {
                 )
                 return
             }
-//            Log.w(
-//                com.joeys.xplayer.Xplay.TAG,
-//                "EventHandler handleMessage what=${msg.what} arg1=${msg.arg1}"
-//            )
+            Log.w(
+                TAG,
+                "EventHandler handleMessage  $msg "
+            )
             when (msg.what) {
                 MEDIA_PREPARED -> {
                     mOnPreparedListener?.onPrepared(mMediaPlayer)
@@ -150,20 +151,8 @@ class XPlayer : TextureView, TextureView.SurfaceTextureListener, IMediaPlayer {
                     }
                     return
                 }
-                MEDIA_SET_VIDEO_SIZE -> {
-                    if (mOnVideoSizeChangedListener != null) {
-                        mOnVideoSizeChangedListener?.onVideoSizeChanged(
-                            mMediaPlayer,
-                            msg.arg1,
-                            msg.arg2
-                        )
-                    }
-                    return
-                }
-                MEDIA_ERROR -> {
 
-                    // For PV specific error values (msg.arg2) look in
-                    // opencore/pvmi/pvmf/include/pvmf_return_codes.h
+                MEDIA_ERROR -> {
                     Log.e(
                         XPlayer.TAG,
                         "Error (" + msg.arg1 + "," + msg.arg2 + ")"
@@ -189,24 +178,29 @@ class XPlayer : TextureView, TextureView.SurfaceTextureListener, IMediaPlayer {
                     if (mOnInfoListener != null) {
                         mOnInfoListener?.onInfo(mMediaPlayer, msg.arg1, msg.arg2)
                     }
-                    // No real default action so far.
                     return
                 }
                 MEDIA_TIMED_TEXT -> {
-
-                    // do nothing
                     return
                 }
                 MEDIA_NOP -> {
                 }
                 MEDIA_CURRENT -> {
-//                    Log.d(TAG, "handleMessage: MEDIA_CURRENT")
-//                    if (mOnCurrentPositionListener != null) {
-//                        mOnCurrentPositionListener.onCurrentPosition(
-//                            msg.arg1.toLong(),
-//                            msg.arg2.toLong()
-//                        )
-//                    }
+
+                }
+                MSG_SAR_CHANGED -> {
+                    if (mOnVideoSizeChangedListener != null) {
+                        mOnVideoSizeChangedListener?.onVideoSizeChanged(
+                            mMediaPlayer,
+                            msg.arg1,
+                            msg.arg2
+                        )
+                    }
+                    val lp = layoutParams
+                    lp.width = ScreenUtils.getScreenWidth()
+                    lp.height = ScreenUtils.getScreenWidth() * msg.arg2 / msg.arg1
+                    layoutParams = lp
+                    return
                 }
                 else -> {
                     Log.e(

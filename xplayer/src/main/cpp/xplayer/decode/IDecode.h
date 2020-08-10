@@ -11,6 +11,7 @@
 #include "../data/PlayerState.h"
 #include "../data/DecodeParam.h"
 #include "../dataStructure/FrameQueue.h"
+#include "../../xhandler/XHandler.h"
 
 extern "C"
 {
@@ -48,6 +49,8 @@ public:
 
     void *popFrame();
 
+    void setPlayerHandler(const std::shared_ptr<XHandler> &playerHandler);
+
 private:
     void readPacket();
 
@@ -56,9 +59,10 @@ public:
     AVFormatContext *formatContext = nullptr;
 protected:
     std::mutex mutex;
-    std::unique_ptr<Queue<PacketData>> packetQueue;
+    std::unique_ptr<Queue<PacketData *>> packetQueue;
     std::unique_ptr<FrameQueue> frameQueue;
     std::shared_ptr<PlayerState> playerState;
+    std::shared_ptr<XHandler> playerHandler;
 
 
     AVStream *stream = nullptr;

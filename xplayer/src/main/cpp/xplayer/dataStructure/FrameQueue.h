@@ -33,7 +33,7 @@ public:
 
     void start();
 
-    void abort();
+    void quit();
 
     FrameData *currentFrame();
 
@@ -59,7 +59,7 @@ private:
 public:
     std::mutex mMutex;
     std::condition_variable mNotFull;
-    int abort_request = 0;
+    std::atomic_int abort_request = {0};
     FrameData queue[FRAME_QUEUE_SIZE];
     int rindex = 0;
     int windex = 0;

@@ -19,6 +19,10 @@ public:
     int mediaType = 0;
 
 public:
+    virtual ~PacketData() {
+        release();
+    }
+
     void release() {
         av_packet_unref(packet);
         packet = nullptr;

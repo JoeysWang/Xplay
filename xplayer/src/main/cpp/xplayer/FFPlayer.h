@@ -14,6 +14,8 @@
 #include "decode/AudioDecode.h"
 #include "resampler/Resampler.h"
 #include "video/IVideoView.h"
+#include "utils/MediaPlayerListener.h"
+#include <memory>
 
 class FFPlayer : public HandlerThread {
 
@@ -36,6 +38,8 @@ public:
 
     bool isPlaying();
 
+    void setJavaHandler(const std::shared_ptr<MediaPlayerListener> &javaHandler);
+
 private:
     void init();
 
@@ -52,10 +56,12 @@ protected:
     std::shared_ptr<AudioDecode> audioDecode;
     std::shared_ptr<Resampler> resampler;
     std::shared_ptr<IVideoView> videoView;
+    std::shared_ptr<MediaPlayerListener> javaHandler;
+    std::shared_ptr<XHandler> handler;
 
     std::unique_ptr<MediaSync> mediaSync;
     std::unique_ptr<Demuxer> demuxer;
-    std::unique_ptr<XHandler> handler;
+
 
     std::mutex mutex;
     const char *url = nullptr;

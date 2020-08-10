@@ -22,40 +22,43 @@ void XLooper::quit() {
     std::unique_lock<std::mutex> lock(mutex);
     isQuit = true;
     queue->quit();
-    LOGI("XLooper::quit success");
+    LooperManager::getInstance()->deleteLooper(ThreadUtils::currentId());
 }
 
 void XLooper::sendMessage(XMessage *message) {
     std::unique_lock<std::mutex> lock(mutex);
     if (isQuit) { return; }
-    queue->push(*message);
+    queue->push(message);
 }
 
-XLooper *XLooper::prepare() {
+std::shared_ptr<XLooper> XLooper::prepare() {
     return LooperManager::getInstance()->createLooper(ThreadUtils::currentId());
 }
 
 void XLooper::loop() {
-    XLooper *looper = myLooper();
-    LOGI(" XLooper::loop %p", looper);
+    std::shared_ptr<XLooper> looper = myLooper();
     if (looper) {
         looper->_loop();
     }
 }
 
-XLooper *XLooper::myLooper() {
+std::shared_ptr<XLooper> XLooper::myLooper() {
     return LooperManager::getInstance()->getLooper(ThreadUtils::currentId());
 }
 
 void XLooper::_loop() {
     for (;;) {
-        if (isQuit) { break; }
-        auto message = new XMessage;
-        if (queue->pop(*message)) {
+        if (isQuit) {
+            break;
+        }
+        auto message = queue->pop();
+        if (message != nullptr) {
             if (message->target) {
                 message->target->dispatchMessage(message);
             }
         }
     }
+
+    LOGI("XLooper::_loop 退出 success");
 }
 

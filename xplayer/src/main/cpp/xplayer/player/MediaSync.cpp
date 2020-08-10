@@ -19,9 +19,9 @@ MediaSync::MediaSync(std::shared_ptr<PlayerState> const &state,
 }
 
 void MediaSync::start() {
-//    std::thread audioThread(&MediaSync::audioPlay, this);
+    std::thread audioThread(&MediaSync::audioPlay, this);
 //    std::thread videoThread(&MediaSync::videoPlay, this);
-//    audioThread.detach();
+    audioThread.detach();
 //    videoThread.detach();
 }
 
@@ -40,16 +40,16 @@ void MediaSync::setVideoView(const std::shared_ptr<IVideoView> &videoView) {
 
 void MediaSync::stop() {
     isExist = true;
-    playerHandler = nullptr;
-    resampler->quit();
-    videoView->quit();
+//    playerHandler = nullptr;
+//    resampler->quit();
+//    videoView->quit();
 }
 
 void MediaSync::audioPlay() {
-    for (;;) {
+    while (!isExist) {
         if (isExist || playerState->abortRequest) {
             resampler->quit();
-            return;
+            break;
         }
         if (playerState->pauseRequest) {
             LOGI("MediaSync2::audioPlay sleep for pause");
@@ -57,22 +57,23 @@ void MediaSync::audioPlay() {
             std::this_thread::sleep_for(duration);
             continue;
         }
-        auto *frameWrapper = audioDecode->currentFrame();
-        if (frameWrapper->size == 0 || lastFramePts == 0) {
+        auto frame = audioDecode->currentFrame();
+        if (frame->size == 0  ) {
             std::chrono::milliseconds duration(5);
             std::this_thread::sleep_for(duration);
             continue;
         }
-        resampler->update(*frameWrapper);
+        resampler->update(frame);
         audioDecode->popFrame();
     }
+    LOGI("MediaSync::audioPlay 退出");
 }
 
 void MediaSync::videoPlay() {
-    for (;;) {
+    while (!isExist) {
         if (isExist || playerState->abortRequest) {
             videoView->quit();
-            return;
+            break;
         }
         if (playerState->pauseRequest) {
 //            LOGI("MediaSync2::videoPlay sleep for pause");
@@ -108,6 +109,8 @@ void MediaSync::videoPlay() {
         videoView->render(frameWrapper);
         videoDecode->popFrame();
     }
+    LOGI("MediaSync::videoPlay 退出");
+
 }
 
 double MediaSync::calculateDelay(double delay) {
@@ -156,11 +159,11 @@ void MediaSync::audioCallBack(double pts, uint8_t *stream, int len, void *contex
     auto mediaSync = (MediaSync *) context;
     mediaSync->lastAudioPts = pts;
     mediaSync->audioClock->setClock(pts);
-    if (mediaSync->playerHandler) {
-        mediaSync->playerHandler->postMessage(MSG_CURRENT_POSITON,
-                                              mediaSync->getCurrentPosition(),
-                                              0);
-    }
+//    if (mediaSync->playerHandler) {
+//        mediaSync->playerHandler->postMessage(MSG_CURRENT_POSITON,
+//                                              mediaSync->getCurrentPosition(),
+//                                              0);
+//    }
 }
 
 MediaSync::~MediaSync() {

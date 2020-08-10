@@ -9,6 +9,7 @@
 #include <memory>
 #include <mutex>
 #include <queue>
+#include <XLog.h>
 
 template<class T>
 class Queue {
@@ -27,7 +28,7 @@ protected:
     std::atomic_bool _finished; // { false };
 public:
     int serial;
-    std::string tag="";
+    std::string tag = "";
 
 public:
     Queue(const size_t size_max) : _size_max(size_max) {
@@ -35,17 +36,20 @@ public:
         _finished = ATOMIC_VAR_INIT(false);
     }
 
+    virtual ~Queue() {
+        LOGI("~Queue %s", tag.c_str());
+    }
+
     bool push(T &data) {
         std::unique_lock<std::mutex> lock(_mutex);
         while (!_quit && !_finished) {
             if (_queue.size() < _size_max) {
                 _queue.push(std::move(data));
-                //_queue.push(data);
                 _empty.notify_all();
                 return true;
             } else {
                 // wait的时候自动释放锁，如果wait到了会获取锁
-//                LOGE("%s packet queue is full wait ", tag.c_str());
+                LOGE("%s packet queue is full wait ", tag.c_str());
                 _fullQue.wait(lock);
             }
         }
@@ -92,7 +96,7 @@ public:
             } else if (_queue.empty() && _finished) {
                 return false;
             } else {
-//                LOGE("packet queue is empty wait");
+                LOGE("%s packet queue is empty wait ", tag.c_str());
                 _empty.wait(lock);
             }
         }
@@ -113,6 +117,12 @@ public:
         _quit = true;
         _empty.notify_all();
         _fullQue.notify_all();
+        clear();
+    }
+
+    void clear() {
+        std::queue<T> empty;
+        std::swap(empty, _queue);
     }
 
     int length() {

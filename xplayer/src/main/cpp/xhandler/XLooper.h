@@ -14,13 +14,13 @@ class XLooper {
 public:
     XLooper();
 
+    static std::shared_ptr<XLooper> prepare();
+
+    static std::shared_ptr<XLooper> myLooper();
+
     void sendMessage(XMessage *);
 
-    static XLooper *prepare();
-
     static void loop();
-
-    static XLooper *myLooper();
 
     void quit();
 

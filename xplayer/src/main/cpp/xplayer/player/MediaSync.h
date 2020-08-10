@@ -54,7 +54,7 @@ protected:
     std::shared_ptr<IVideoView> videoView;
     std::unique_ptr<MediaClock> audioClock;                 // 音频时钟
     std::unique_ptr<MediaClock> videoClock;
-    std::unique_ptr<XHandler> playerHandler = nullptr;
+//    std::unique_ptr<XHandler> playerHandler = nullptr;
     bool isExist = false;
 private:
     void audioPlay();

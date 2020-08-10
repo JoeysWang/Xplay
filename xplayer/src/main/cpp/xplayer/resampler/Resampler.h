@@ -17,13 +17,13 @@ public:
 
     virtual bool open(DecodeParam in, DecodeParam out);
 
-    virtual FrameData resample(FrameData in) ;
+    virtual FrameData resample(FrameData *in);
 
-    void setCallback(AudioPCMCallback pcmCallback, void *context){
+    void setCallback(AudioPCMCallback pcmCallback, void *context) {
         audioPlayer->setCallback(pcmCallback, context);
     };
 
-    void update(FrameData data);
+    void update(FrameData *data);
 
     void quit();
 

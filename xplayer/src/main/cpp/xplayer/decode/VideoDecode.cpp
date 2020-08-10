@@ -33,21 +33,21 @@ int VideoDecode::decode() {
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
             continue;
         }
-        PacketData input;
+        PacketData *input;
         if (!packetQueue->pop(input)) {
             ret = -1;
             break;
         }
-        packet = input.packet;
+        packet = input->packet;
         // 送去解码
         ret = avcodec_send_packet(codecContext, packet);
         if (ret < 0 && ret != AVERROR(EAGAIN) && ret != AVERROR_EOF) {
             av_packet_unref(packet);
-            input.release();
+            delete input;
             LOGE("videodecode avcodec_send_packet %s", av_err2str(ret));
             continue;
         }
-        input.release();
+        delete input;
         // 得到解码帧
         frame = av_frame_alloc();
         ret = avcodec_receive_frame(codecContext, frame);
@@ -81,7 +81,7 @@ int VideoDecode::decode() {
             output->size = (frame->linesize[0] +
                             frame->linesize[1] +
                             frame->linesize[2]) * frame->height;
-            LOGI("video frame size=%d  \n=====", output->size);
+//            LOGI("video frame size=%d  \n=====", output->size);
             memcpy(output->decodeDatas, frame->data, sizeof(frame->data));
             av_frame_unref(output->frame);
             av_frame_move_ref(output->frame, frame);

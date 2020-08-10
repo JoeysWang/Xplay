@@ -5,11 +5,11 @@
 #include <thread>
 #include "IDecode.h"
 #include "XLog.h"
+#include "../player/PlayerMessage.h"
 
 IDecode::IDecode(const std::shared_ptr<PlayerState> &playerState) : playerState(playerState) {
-    packetQueue = std::make_unique<Queue<PacketData>>(100);
+    packetQueue = std::make_unique<Queue<PacketData *>>(100);
     frameQueue = std::make_unique<FrameQueue>(FRAME_QUEUE_SIZE, 1);
-
 }
 
 
@@ -58,7 +58,10 @@ bool IDecode::openDecode(DecodeParam param, AVFormatContext *formatContext, AVSt
         } else {
             mRotate = 0;
         }
-        LOGI("video rotate = %d", mRotate);
+        if (playerHandler) {
+            playerHandler->postMessage(MSG_SAR_CHANGED, codecContext->width, codecContext->height);
+        }
+        LOGI("video rotate = %d ,width =%d , height=%d", mRotate, codecContext->width,codecContext->height);
     } else if (codecContext->codec_type == AVMEDIA_TYPE_AUDIO) {
         decodeType = MEDIA_TYPE_AUDIO;
     }
@@ -88,7 +91,7 @@ void IDecode::readPacket() {
 }
 
 void IDecode::pushPacket(PacketData *data) {
-    packetQueue->push(*data);
+    packetQueue->push(data);
 }
 
 IDecode::~IDecode() {
@@ -106,5 +109,9 @@ void IDecode::quit() {
     isExit = true;
     packetQueue->quit();
     frameQueue->flush();
+}
+
+void IDecode::setPlayerHandler(const std::shared_ptr<XHandler> &playerHandler) {
+    IDecode::playerHandler = playerHandler;
 }
 

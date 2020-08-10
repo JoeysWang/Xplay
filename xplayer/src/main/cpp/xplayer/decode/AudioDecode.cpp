@@ -26,13 +26,13 @@ int AudioDecode::decode() {
             std::this_thread::sleep_for(duration);
             continue;
         }
-        PacketData input;
+        PacketData *input;
         if (!packetQueue->pop(input)) {
             ret = -1;
             break;
         }
 
-        AVPacket *pkt = input.packet;
+        AVPacket *pkt = input->packet;
 
         // 将数据包解码
         ret = avcodec_send_packet(codecContext, pkt);
@@ -42,11 +42,11 @@ int AudioDecode::decode() {
             if (ret == AVERROR(EAGAIN)) {
                 continue;
             } else {
-                input.release();
+                delete input;
             }
             continue;
         }
-        input.release();
+        delete input;
         frame = av_frame_alloc();
         // 获取解码得到的音频帧AVFrame
         ret = avcodec_receive_frame(codecContext, frame);

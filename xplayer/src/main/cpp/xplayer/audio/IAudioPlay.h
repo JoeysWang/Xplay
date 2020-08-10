@@ -5,12 +5,12 @@
 #ifndef XPLAY_IAUDIOPLAY_H
 #define XPLAY_IAUDIOPLAY_H
 
-#include <list>
 #include <thread>
 #include <memory>
 #include "../data/PlayerState.h"
 #include "../data/FrameData.h"
 #include "../data/DecodeParam.h"
+#include "../dataStructure/Queue.h"
 
 typedef void (*AudioPCMCallback)(double pts, uint8_t *stream, int len, void *context);
 
@@ -33,11 +33,9 @@ public:
     int pts;
 
 protected:
-    std::list<FrameData> frames;
-    std::mutex framesMutex;
     std::mutex mutex;
-    std::condition_variable notEmpty;
-    std::condition_variable notFull;
+    std::unique_ptr<Queue<FrameData>> frames;
+
     AudioPCMCallback callback;  // 音频回调
     void *callbackContext = nullptr;
     bool isExit = false;

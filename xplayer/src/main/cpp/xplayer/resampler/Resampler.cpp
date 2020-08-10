@@ -40,11 +40,11 @@ bool Resampler::open(DecodeParam in, DecodeParam out) {
     }
 
     LOGW("音频重采样初始化成功");
-
+    audioPlayer->startPlay(out);
     return true;
 }
 
-FrameData Resampler::resample(FrameData in) {
+FrameData Resampler::resample(FrameData *in) {
 
     //输出空间分配
     FrameData out;
@@ -52,36 +52,37 @@ FrameData Resampler::resample(FrameData in) {
 
     if (!swrContext) {
         LOGE("!swrContext");
-        return FrameData();
+        return out;
     }
 
     int size =
-            outChannels * in.nb_samples * av_get_bytes_per_sample((AVSampleFormat) outFormat);
+            outChannels * in->nb_samples * av_get_bytes_per_sample((AVSampleFormat) outFormat);
     if (!size) {
         LOGE("!size");
-        return FrameData();
+        return out;
     }
     out.allocResampleData(size, 0);
     uint8_t *outArr[2] = {0};
     outArr[0] = out.resampleData;
     int len = swr_convert(swrContext,
                           outArr,
-                          in.nb_samples,
-                          (const uint8_t **) in.decodeDatas,
-                          in.nb_samples
+                          in->nb_samples,
+                          (const uint8_t **) in->decodeDatas,
+                          in->nb_samples
     );
 
     if (len <= 0) {
         out.release();
         LOGE("音频重采样 swr_convert 失败  ");
-        return FrameData();
+        return out;
     }
+    LOGI("音频重采样 swr_convert 成功  size=%d", size);
     out.size = size;
-    out.pts = in.pts;
+    out.pts = in->pts;
     return out;
 }
 
-void Resampler::update(FrameData data) {
+void Resampler::update(FrameData *data) {
     FrameData out = resample(data);
     if (out.size > 0) {
         audioPlayer->update(out);

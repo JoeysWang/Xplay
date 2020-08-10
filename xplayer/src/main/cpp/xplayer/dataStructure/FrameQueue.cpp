@@ -32,11 +32,9 @@ void FrameQueue::start() {
     mMutex.unlock();
 }
 
-void FrameQueue::abort() {
-    mMutex.lock();
+void FrameQueue::quit() {
     abort_request = 1;
     mNotFull.notify_all();
-    mMutex.unlock();
 }
 
 FrameData *FrameQueue::currentFrame() {

@@ -2265,7 +2265,7 @@ bool CallFrameInfo::ReadEntryPrologue(const uint8_t *cursor, Entry *entry) {
    cursor += offset_size;
  
   // The fields specific to this kind of entry start here.
-  entry->fields = cursor;
+  entry->javaFields = cursor;
 
   entry->cie = NULL;
 
@@ -2273,7 +2273,7 @@ bool CallFrameInfo::ReadEntryPrologue(const uint8_t *cursor, Entry *entry) {
 }
 
 bool CallFrameInfo::ReadCIEFields(CIE *cie) {
-  const uint8_t *cursor = cie->fields;
+  const uint8_t *cursor = cie->javaFields;
   size_t len;
 
   assert(cie->kind == kCIE);
@@ -2471,7 +2471,7 @@ bool CallFrameInfo::ReadCIEFields(CIE *cie) {
 }
 
 bool CallFrameInfo::ReadFDEFields(FDE *fde) {
-  const uint8_t *cursor = fde->fields;
+  const uint8_t *cursor = fde->javaFields;
   size_t size;
 
   fde->address = reader_->ReadEncodedPointer(cursor, fde->cie->pointer_encoding,

@@ -7,13 +7,14 @@
 
 #include <queue>
 #include <mutex>
+#include <XLog.h>
 #include "XMessage.h"
 
 class XMessageQueue {
 protected:
     // Data
-    std::queue<XMessage> _queue;
-    typename std::queue<XMessage>::size_type _size_max;
+    std::queue<XMessage *> _queue;
+    typename std::queue<XMessage *>::size_type _size_max;
 
     // Thread gubbins
     std::mutex _mutex;
@@ -22,8 +23,8 @@ protected:
 
     // Exit
     // 原子操作
-    std::atomic_bool _quit; //{ false };
-    std::atomic_bool _finished; // { false };
+    std::atomic_bool _quit{false}; //{ false };
+    std::atomic_bool _finished{false}; // { false };
 public:
     int serial;
 public:
@@ -32,20 +33,20 @@ public:
         _finished = false;
     }
 
-    bool push(XMessage &data) {
+    bool push(XMessage *data) {
         std::unique_lock<std::mutex> lock(_mutex);
         while (!_quit && !_finished) {
             if (_queue.size() < _size_max) {
-                _queue.push(std::move(data));
-                //_queue.push(data);
+                _queue.push(data);
                 _empty.notify_all();
                 return true;
             } else {
-                // wait的时候自动释放锁，如果wait到了会获取锁
-//                LOGE("packet queue is full wait");
+                LOGE("XMessageQueue is full wait");
                 _fullQue.wait(lock);
+                LOGE("XMessageQueue full awake");
             }
         }
+        LOGE("XMessageQueue is _quit ,push  return;");
 
         return false;
     }
@@ -54,7 +55,7 @@ public:
         std::unique_lock<std::mutex> lock(_mutex);
         while (!_quit) {
             if (!_queue.empty()) {
-                return &_queue.front();
+                return _queue.front();
             } else if (_queue.empty() && _finished) {
                 return nullptr;
             } else {
@@ -67,7 +68,7 @@ public:
         std::unique_lock<std::mutex> lock(_mutex);
         while (!_quit) {
             if (!_queue.empty()) {
-                return &_queue.back();
+                return _queue.back();
             } else if (_queue.empty() && _finished) {
                 return nullptr;
             } else {
@@ -76,24 +77,25 @@ public:
         }
     }
 
-    bool pop(XMessage &data) {
+    XMessage *pop() {
         std::unique_lock<std::mutex> lock(_mutex);
         while (!_quit) {
             if (!_queue.empty()) {
                 //data = std::move(_queue.front());
-                data = _queue.front();
+                XMessage *data = _queue.front();
                 _queue.pop();
-
                 _fullQue.notify_all();
-                return true;
+                return data;
             } else if (_queue.empty() && _finished) {
-                return false;
+                return nullptr;
             } else {
-//                LOGE("packet queue is empty wait");
+                LOGE("XMessageQueue is empty wait");
                 _empty.wait(lock);
+                LOGE("XMessageQueue empty awake");
             }
         }
-        return false;
+        LOGE("XMessageQueue is _quit ,pop return;");
+        return nullptr;
     }
 
     // The queue has finished accepting input
@@ -110,6 +112,13 @@ public:
         _quit = true;
         _empty.notify_all();
         _fullQue.notify_all();
+        clear();
+        LOGE("XMessageQueue quit notify_all");
+    }
+
+    void clear() {
+        std::queue<XMessage *> empty;
+        std::swap(empty, _queue);
     }
 
     int length() {

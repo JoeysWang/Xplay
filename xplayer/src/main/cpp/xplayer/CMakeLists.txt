@@ -36,6 +36,7 @@ add_library(
         utils/CoordinateUtils.cpp
         utils/OpenGLUtils.cpp
         utils/vecmath.cpp
+        utils/MediaPlayerListener.cpp
 )
 
 target_link_libraries(
