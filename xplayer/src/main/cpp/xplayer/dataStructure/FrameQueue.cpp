@@ -8,7 +8,7 @@ FrameQueue::FrameQueue(int max_size, int keep_last) {
     this->max_size = FFMIN(max_size, FRAME_QUEUE_SIZE);
     this->keep_last = (keep_last != 0);
     for (int i = 0; i < this->max_size; ++i) {
-        queue[i].frame = av_frame_alloc();
+//        queue[i].frame = av_frame_alloc();
     }
     abort_request = 0;
     rindex = 0;
@@ -21,7 +21,7 @@ FrameQueue::~FrameQueue() {
     for (int i = 0; i < max_size; ++i) {
         FrameData *vp = &queue[i];
         unrefFrame(vp);
-        av_frame_free((&vp->frame));
+//        av_frame_free((&vp->frame));
     }
 }
 
@@ -101,7 +101,6 @@ int FrameQueue::getFrameSize() {
 }
 
 void FrameQueue::unrefFrame(FrameData *vp) {
-    av_frame_unref((vp->frame));
     memset(vp->decodeDatas, 0, 0);
     vp->size = 0;
     vp->resampleData = 0;

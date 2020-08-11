@@ -41,6 +41,7 @@ public:
     }
 
     bool push(T &data) {
+        if (_quit) { return false; }
         std::unique_lock<std::mutex> lock(_mutex);
         while (!_quit && !_finished) {
             if (_queue.size() < _size_max) {
@@ -49,7 +50,7 @@ public:
                 return true;
             } else {
                 // wait的时候自动释放锁，如果wait到了会获取锁
-                LOGE("%s packet queue is full wait ", tag.c_str());
+//                LOGE("%s packet queue is full wait ", tag.c_str ());
                 _fullQue.wait(lock);
             }
         }
@@ -58,6 +59,7 @@ public:
     }
 
     T *peek() {
+        if (_quit) { return nullptr; }
         std::unique_lock<std::mutex> lock(_mutex);
         while (!_quit) {
             if (!_queue.empty()) {
@@ -71,6 +73,7 @@ public:
     }
 
     T *last() {
+        if (_quit) { return nullptr; }
         std::unique_lock<std::mutex> lock(_mutex);
         while (!_quit) {
             if (!_queue.empty()) {
@@ -83,7 +86,27 @@ public:
         }
     }
 
+    T pop() {
+        if (_quit) { return 0; }
+        std::unique_lock<std::mutex> lock(_mutex);
+        while (!_quit) {
+            if (!_queue.empty()) {
+                T data = _queue.front();
+                _queue.pop();
+                _fullQue.notify_all();
+                return data;
+            } else if (_queue.empty() && _finished) {
+                return 0;
+            } else {
+//                LOGE("%s packet queue is empty wait \n", tag.c_str());
+                _empty.wait(lock);
+            }
+        }
+        return 0;
+    }
+
     bool pop(T &data) {
+        if (_quit) { return false; }
         std::unique_lock<std::mutex> lock(_mutex);
         while (!_quit) {
             if (!_queue.empty()) {
@@ -96,10 +119,11 @@ public:
             } else if (_queue.empty() && _finished) {
                 return false;
             } else {
-                LOGE("%s packet queue is empty wait ", tag.c_str());
+//                LOGE("%s packet queue is empty wait ", tag.c_str());
                 _empty.wait(lock);
             }
         }
+        LOGE("%s packet queue quit return ", tag.c_str());
         return false;
     }
 
@@ -114,10 +138,11 @@ public:
     }
 
     void quit() {
+        std::unique_lock<std::mutex> lock(_mutex);
+        clear();
         _quit = true;
         _empty.notify_all();
         _fullQue.notify_all();
-        clear();
     }
 
     void clear() {
@@ -126,6 +151,7 @@ public:
     }
 
     int length() {
+        if (_quit) { return false; }
         std::unique_lock<std::mutex> lock(_mutex);
         return static_cast<int>(_queue.size());
     }

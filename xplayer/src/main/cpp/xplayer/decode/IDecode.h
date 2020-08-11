@@ -47,7 +47,9 @@ public:
 
     FrameData *currentFrame();
 
-    void *popFrame();
+    FrameData *popFrame();
+
+    void popFrame(FrameData *&);
 
     void setPlayerHandler(const std::shared_ptr<XHandler> &playerHandler);
 
@@ -60,13 +62,19 @@ public:
 protected:
     std::mutex mutex;
     std::unique_ptr<Queue<PacketData *>> packetQueue;
-    std::unique_ptr<FrameQueue> frameQueue;
+    std::unique_ptr<std::thread> decodeThread;
+//    std::unique_ptr<FrameQueue> frameQueue;
+    std::unique_ptr<Queue<FrameData *>> frameQueue;
     std::shared_ptr<PlayerState> playerState;
     std::shared_ptr<XHandler> playerHandler;
 
+    const char *tag = "";
 
     AVStream *stream = nullptr;
-    bool isExit = false;
+    std::atomic_bool isExit{false};
+    bool isLooping = false;
+    std::condition_variable loopingSignal;
+
 
     DecodeMediaType decodeType;
     int mRotate;

@@ -52,10 +52,13 @@ protected:
     std::shared_ptr<AudioDecode> audioDecode;
     std::shared_ptr<Resampler> resampler;
     std::shared_ptr<IVideoView> videoView;
+//    std::unique_ptr<std::thread> audioThread;
+//    std::unique_ptr<std::thread> videoThread;
     std::unique_ptr<MediaClock> audioClock;                 // 音频时钟
     std::unique_ptr<MediaClock> videoClock;
+
 //    std::unique_ptr<XHandler> playerHandler = nullptr;
-    bool isExist = false;
+    bool isExit=false;
 private:
     void audioPlay();
 

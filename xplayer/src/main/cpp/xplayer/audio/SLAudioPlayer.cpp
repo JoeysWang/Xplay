@@ -124,7 +124,7 @@ void SLAudioPlayer::playCall(void *bufferQueue) {
         LOGE("SLAudioPlay::playCall getData size =0 ");
         return;
     }
-    LOGI("SLAudioPlayer::playCall size=%d", data.size);
+//    LOGI("SLAudioPlayer::playCall size=%d", data.size);
     memcpy(buffer, data.resampleData, data.size);
 
     (*bf)->Enqueue(bf, buffer, data.size);
@@ -134,7 +134,7 @@ void SLAudioPlayer::playCall(void *bufferQueue) {
     data.release();
 }
 
-void SLAudioPlayer::stop() {
+void SLAudioPlayer::quit() {
     LOGI("SLAudioPlayer::stop");
 }
 

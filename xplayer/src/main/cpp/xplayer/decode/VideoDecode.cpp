@@ -9,71 +9,70 @@
 
 VideoDecode::VideoDecode(const std::shared_ptr<PlayerState> &playerState) : IDecode(playerState) {
     LOGI("VideoDecode::VideoDecode");
+    tag = "Video";
     packetQueue->tag = "Video";
+    frameQueue->tag = "VideoFrame";
 }
 
 int VideoDecode::decode() {
     LOGI(" VideoDecode::decode");
-    AVFrame *frame;
-    FrameData *output;
-
-    int got_picture;
     int ret = 0;
-    AVPacket *packet;
     AVRational tb = stream->time_base;
-    LOGI(" VideoDecode tb =%f", av_q2d(tb));
     AVRational frame_rate = av_guess_frame_rate(formatContext, stream, NULL);
-    LOGI(" VideoDecode frame_rate =%f", av_q2d(frame_rate));
-    for (;;) {
-        if (isExit || playerState->abortRequest) {
+    while (!isExit) {
+        isLooping = true;
+
+        if (isExit || playerState->abortRequest || !codecContext) {
             ret = -1;
             break;
         }
         if (playerState->pauseRequest) { ;
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            mutex.unlock();
             continue;
         }
+
         PacketData *input;
         if (!packetQueue->pop(input)) {
             ret = -1;
+            mutex.unlock();
             break;
         }
-        packet = input->packet;
-        // 送去解码
+        mutex.lock();
+        AVPacket *packet = input->packet;
         ret = avcodec_send_packet(codecContext, packet);
-        if (ret < 0 && ret != AVERROR(EAGAIN) && ret != AVERROR_EOF) {
+
+        if (ret < 0) {
             av_packet_unref(packet);
             delete input;
             LOGE("videodecode avcodec_send_packet %s", av_err2str(ret));
+            mutex.unlock();
             continue;
         }
+
+        av_packet_unref(packet);
         delete input;
-        // 得到解码帧
-        frame = av_frame_alloc();
+        AVFrame *frame = av_frame_alloc();
         ret = avcodec_receive_frame(codecContext, frame);
-        if (ret < 0 && ret != AVERROR_EOF) {
+        if (ret < 0) {
             LOGE("video avcodec_receive_frame error %s", av_err2str(ret));
             av_frame_unref(frame);
             av_packet_unref(packet);
+            mutex.unlock();
+
             continue;
         } else {
-            got_picture = 1;
             frame->pts = frame->best_effort_timestamp;
             frame->sample_aspect_ratio = av_guess_sample_aspect_ratio(formatContext, stream,
                                                                       frame);
-        }
-        if (got_picture) {
             // 取出帧
-            if (!(output = frameQueue->peekWritable())) {
-                ret = -1;
-                break;
-            }
+
+            auto *output = new FrameData;
             output->linesize[0] = frame->linesize[0];
             output->linesize[1] = frame->linesize[1];
             output->linesize[2] = frame->linesize[2];
             output->frameWidth = frame->width;
             output->frameHeight = frame->height;
-
             output->format = frame->format;
             output->pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts * av_q2d(tb);
             output->duration = frame_rate.num && frame_rate.den
@@ -83,23 +82,12 @@ int VideoDecode::decode() {
                             frame->linesize[2]) * frame->height;
 //            LOGI("video frame size=%d  \n=====", output->size);
             memcpy(output->decodeDatas, frame->data, sizeof(frame->data));
-            av_frame_unref(output->frame);
-            av_frame_move_ref(output->frame, frame);
-            frameQueue->pushFrame();
-        }
-        av_frame_unref(frame);
-        av_packet_unref(packet);
-    }
+            frameQueue->push(output);
+            mutex.unlock();
 
-    if (frame) {
-        av_frame_free(&frame);
-        av_free(frame);
-        frame = nullptr;
+        }
     }
-    if (packet) {
-        av_packet_free(&packet);
-        av_free(packet);
-        packet = nullptr;
-    }
+    isLooping = false;
+    loopingSignal.notify_all();
     return ret;
 }

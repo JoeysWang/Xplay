@@ -31,7 +31,7 @@ void GLVideoView::render(FrameData *data) {
     if (!data->decodeDatas[0] || data->size == 0) {
         return;
     }
-//    LOGI("format = %s,linesize = [%d , %d , %d] ",
+//    LOGI("GLVideoView::render \nformat = %s,linesize = [%d , %d , %d] ",
 //         formatString(data->format),
 //         data->linesize[0],
 //         data->linesize[1],
@@ -42,7 +42,7 @@ void GLVideoView::render(FrameData *data) {
 }
 
 void GLVideoView::quit() {
-    LOGI("GLVideoView::clear");
+    LOGI("GLVideoView::quit");
     xegl->clear();
 }
 

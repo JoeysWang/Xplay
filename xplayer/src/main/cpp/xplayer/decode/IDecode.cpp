@@ -9,16 +9,24 @@
 
 IDecode::IDecode(const std::shared_ptr<PlayerState> &playerState) : playerState(playerState) {
     packetQueue = std::make_unique<Queue<PacketData *>>(100);
-    frameQueue = std::make_unique<FrameQueue>(FRAME_QUEUE_SIZE, 1);
+    frameQueue = std::make_unique<Queue<FrameData *>>(100);
 }
 
 
 FrameData *IDecode::currentFrame() {
-    return frameQueue->currentFrame();
+    return *frameQueue->peek();
 }
 
-void *IDecode::popFrame() {
-    frameQueue->popFrame();
+FrameData *IDecode::popFrame() {
+    if (isExit)
+        return nullptr;
+    return frameQueue->pop();
+}
+
+void IDecode::popFrame(FrameData *&data) {
+    if (isExit)
+        return;
+    frameQueue->pop(data);
 }
 
 bool IDecode::openDecode(DecodeParam param, AVFormatContext *formatContext, AVStream *stream) {
@@ -61,54 +69,65 @@ bool IDecode::openDecode(DecodeParam param, AVFormatContext *formatContext, AVSt
         if (playerHandler) {
             playerHandler->postMessage(MSG_SAR_CHANGED, codecContext->width, codecContext->height);
         }
-        LOGI("video rotate = %d ,width =%d , height=%d", mRotate, codecContext->width,codecContext->height);
+        LOGI("video rotate = %d ,width =%d , height=%d", mRotate, codecContext->width,
+             codecContext->height);
     } else if (codecContext->codec_type == AVMEDIA_TYPE_AUDIO) {
         decodeType = MEDIA_TYPE_AUDIO;
     }
     LOGI(" IDecode::openDecode open success decodeType=%d", decodeType);
-    std::thread th(&IDecode::readPacket, this);
-    th.detach();
+    decodeThread = std::make_unique<std::thread>(&IDecode::readPacket, this);
+    decodeThread->detach();
     return true;
 }
 
 void IDecode::readPacket() {
-    while (true) {
-        if (isExit || !playerState) {
-            return;
-        }
-        if (playerState->pauseRequest) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(500));
-            continue;
-        }
-        if (playerState->abortRequest) {
-            break;
-        }
-        if (decode() != 0) {
-            break;
-        }
-    }
-    LOGI("IDecode::readPacket 退出");
+//    while (!isExit) {
+//        if (isExit || !playerState) {
+//            LOGI("IDecode::readPacket %s 退出 return ", tag);
+//            return;
+//        }
+//        if (playerState->pauseRequest) {
+//            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+//            continue;
+//        }
+//        if (playerState->abortRequest) {
+//            break;
+//        }
+    decode();
+//    }
+
+
+    LOGI("IDecode::readPacket %s 退出 ", tag);
 }
 
 void IDecode::pushPacket(PacketData *data) {
+    if (isExit) { return; }
     packetQueue->push(data);
 }
 
 IDecode::~IDecode() {
-    LOGI("IDecode::~IDecode");
+
     isExit = true;
+    avcodec_free_context(&codecContext);
     codecContext = nullptr;
     formatContext = nullptr;
     stream = nullptr;
     mRotate = 0;
+
 }
 
 void IDecode::quit() {
-    LOGI("IDecode::quit");
+    LOGI("IDecode::quit %s", tag);
     std::unique_lock<std::mutex> lock(mutex);
     isExit = true;
     packetQueue->quit();
-    frameQueue->flush();
+    frameQueue->quit();
+    while (isLooping) {
+        loopingSignal.wait(lock);
+    }
+
+    LOGI("IDecode::quit %s success ", tag);
+
 }
 
 void IDecode::setPlayerHandler(const std::shared_ptr<XHandler> &playerHandler) {

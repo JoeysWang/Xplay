@@ -23,7 +23,7 @@ public:
 
     void playCall(void *bufferQueue);
 
-    void stop() override;
+    void quit() override;
 
     virtual ~SLAudioPlayer();
 

@@ -8,6 +8,7 @@
 // Message what
 
 #define MSG_FLUSH                        00    // 默认
+#define MSG_RELEASE                      -1    // 退出
 #define MSG_ERROR                        10    // 出错回调
 #define MSG_PREPARED                     20    // 准备完成回调
 #define MSG_STARTED                      30    // 已经开始

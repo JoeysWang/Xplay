@@ -34,6 +34,7 @@ public:
     }
 
     bool push(XMessage *data) {
+        if (_quit) { return false; }
         std::unique_lock<std::mutex> lock(_mutex);
         while (!_quit && !_finished) {
             if (_queue.size() < _size_max) {
@@ -52,6 +53,7 @@ public:
     }
 
     XMessage *peek() {
+        if (_quit) { return nullptr; }
         std::unique_lock<std::mutex> lock(_mutex);
         while (!_quit) {
             if (!_queue.empty()) {
@@ -65,6 +67,7 @@ public:
     }
 
     XMessage *last() {
+        if (_quit) { return nullptr; }
         std::unique_lock<std::mutex> lock(_mutex);
         while (!_quit) {
             if (!_queue.empty()) {
@@ -78,6 +81,7 @@ public:
     }
 
     XMessage *pop() {
+        if (_quit) { return nullptr; }
         std::unique_lock<std::mutex> lock(_mutex);
         while (!_quit) {
             if (!_queue.empty()) {
@@ -122,6 +126,7 @@ public:
     }
 
     int length() {
+        if (_quit) { return false; }
         std::unique_lock<std::mutex> lock(_mutex);
         return static_cast<int>(_queue.size());
     }

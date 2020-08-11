@@ -29,6 +29,7 @@ FrameData IAudioPlay::getData() {
     FrameData d;
     if (isExit) { return d; }
     frames->pop(d);
+//    LOGI("IAudioPlay::getData size=%d",d.size);
     return d;
 }
 
@@ -37,7 +38,7 @@ void IAudioPlay::setCallback(AudioPCMCallback pcmCallback, void *context) {
     IAudioPlay::callbackContext = context;
 }
 
-void IAudioPlay::stop() {
+void IAudioPlay::quit() {
     LOGD("IAudioPlay::stop");
 }
 

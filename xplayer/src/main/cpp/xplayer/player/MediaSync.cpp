@@ -20,9 +20,9 @@ MediaSync::MediaSync(std::shared_ptr<PlayerState> const &state,
 
 void MediaSync::start() {
     std::thread audioThread(&MediaSync::audioPlay, this);
-//    std::thread videoThread(&MediaSync::videoPlay, this);
+    std::thread videoThread(&MediaSync::videoPlay, this);
     audioThread.detach();
-//    videoThread.detach();
+    videoThread.detach();
 }
 
 void MediaSync::pause() {
@@ -39,51 +39,48 @@ void MediaSync::setVideoView(const std::shared_ptr<IVideoView> &videoView) {
 }
 
 void MediaSync::stop() {
-    isExist = true;
-//    playerHandler = nullptr;
-//    resampler->quit();
-//    videoView->quit();
+    isExit = true;
 }
 
 void MediaSync::audioPlay() {
-    while (!isExist) {
-        if (isExist || playerState->abortRequest) {
+    while (true) {
+        if (isExit || playerState->abortRequest) {
+            LOGI("MediaSync::audioPlay isExit=true");
             resampler->quit();
             break;
         }
         if (playerState->pauseRequest) {
-            LOGI("MediaSync2::audioPlay sleep for pause");
             std::chrono::milliseconds duration(500);
             std::this_thread::sleep_for(duration);
             continue;
         }
-        auto frame = audioDecode->currentFrame();
-        if (frame->size == 0  ) {
+        FrameData *frame = nullptr;
+        audioDecode->popFrame(frame);
+        if (!frame || frame->size == 0) {
             std::chrono::milliseconds duration(5);
             std::this_thread::sleep_for(duration);
             continue;
         }
         resampler->update(frame);
-        audioDecode->popFrame();
     }
     LOGI("MediaSync::audioPlay 退出");
 }
 
 void MediaSync::videoPlay() {
-    while (!isExist) {
-        if (isExist || playerState->abortRequest) {
+    while (true) {
+        if (isExit || playerState->abortRequest) {
             videoView->quit();
+            LOGI("MediaSync::videoPlay isExit=true");
             break;
         }
         if (playerState->pauseRequest) {
-//            LOGI("MediaSync2::videoPlay sleep for pause");
             resumeAfterPause = true;
             std::chrono::milliseconds duration(500);
             std::this_thread::sleep_for(duration);
             continue;
         }
-
-        auto *frameWrapper = videoDecode->currentFrame();
+        FrameData *frameWrapper = nullptr;
+        videoDecode->popFrame(frameWrapper);
         if (!frameWrapper || frameWrapper->size == 0) {
             std::chrono::milliseconds duration(5);
             std::this_thread::sleep_for(duration);
@@ -107,10 +104,8 @@ void MediaSync::videoPlay() {
         videoClock->setClock(frameWrapper->pts);
         lastFramePts = frameWrapper->pts;
         videoView->render(frameWrapper);
-        videoDecode->popFrame();
     }
     LOGI("MediaSync::videoPlay 退出");
-
 }
 
 double MediaSync::calculateDelay(double delay) {

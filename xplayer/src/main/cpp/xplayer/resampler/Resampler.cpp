@@ -55,12 +55,12 @@ FrameData Resampler::resample(FrameData *in) {
         return out;
     }
 
-    int size =
-            outChannels * in->nb_samples * av_get_bytes_per_sample((AVSampleFormat) outFormat);
+    int size = outChannels * in->nb_samples * av_get_bytes_per_sample((AVSampleFormat) outFormat);
     if (!size) {
         LOGE("!size");
         return out;
     }
+    delete in;
     out.allocResampleData(size, 0);
     uint8_t *outArr[2] = {0};
     outArr[0] = out.resampleData;
@@ -76,7 +76,7 @@ FrameData Resampler::resample(FrameData *in) {
         LOGE("音频重采样 swr_convert 失败  ");
         return out;
     }
-    LOGI("音频重采样 swr_convert 成功  size=%d", size);
+//    LOGI("音频重采样 swr_convert 成功  size=%d", size);
     out.size = size;
     out.pts = in->pts;
     return out;
@@ -90,7 +90,7 @@ void Resampler::update(FrameData *data) {
 }
 
 void Resampler::quit() {
-    audioPlayer->stop();
+    audioPlayer->quit();
     if (swrContext) {
         swr_free(&swrContext);
         swrContext = nullptr;

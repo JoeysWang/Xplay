@@ -10,7 +10,6 @@ extern "C" {
 
 class FrameData {
 public:
-    AVFrame *frame;
     double pts = 0;
     double duration = 0;
 
@@ -24,14 +23,19 @@ public:
     unsigned char *resampleData = 0;
     unsigned char *decodeDatas[8] = {0};
 public:
+
     void release() {
 
     }
+
+
     bool allocResampleData(int size, const char *data) {
 
         if (size <= 0) { return false; }
         this->resampleData = new unsigned char[size];
-        if (!this->resampleData) { return false; }
+        if (!this->resampleData) {
+            return false;
+        }
         if (data) {
             memcpy(this->resampleData, data, size);
         }

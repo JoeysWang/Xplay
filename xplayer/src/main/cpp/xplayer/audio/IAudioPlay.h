@@ -44,7 +44,7 @@ protected:
 public:
     void setCallback(AudioPCMCallback pcmCallback, void *context);
 
-    virtual void stop();
+    virtual void quit();
 };
 
 

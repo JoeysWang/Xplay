@@ -88,6 +88,18 @@ void FFPlayer::handleMessage(XMessage *message) {
             javaHandler->notify(MSG_SAR_CHANGED, message->arg1, message->arg2, nullptr);
             break;
         }
+        case MSG_RELEASE:{
+            std::unique_lock<std::mutex> lock(mutex);
+            quit();
+            playerState->abortRequest = 1;
+            url = nullptr;
+            mediaSync->stop();
+            demuxer->quit();
+            audioDecode->quit();
+            videoDecode->quit();
+
+            delete this;
+        }
 
     }
 }
@@ -115,16 +127,9 @@ void FFPlayer::playOrPause() {
 
 void FFPlayer::release() {
     LOGI("FFPlayer::release");
-    std::unique_lock<std::mutex> lock(mutex);
-    quit();
-    playerState->abortRequest = 1;
-    url = nullptr;
-    demuxer->quit();
-    audioDecode->quit();
-    videoDecode->quit();
-    mediaSync->stop();
+    if (handler)
+        handler->postMessage(MSG_RELEASE, (void *) url);
 
-    delete this;
 }
 
 int FFPlayer::getVideoWidth() {

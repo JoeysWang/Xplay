@@ -87,11 +87,10 @@ void Demuxer::readPacket() {
             output->mediaType = MEDIA_TYPE_VIDEO;
             if (videoDecode)videoDecode->pushPacket(output);
         }
-//        LOGI("FFDemux::readPacket mediaType=%d size=%d", output->mediaType, output->size);
         mutex.unlock();
     }
     isRunning = false;
-    LOGI("Demuxer::readPacket  退出");
+//    LOGI("Demuxer::readPacket  退出");
 }
 
 AVStream *Demuxer::getAudioStream() {
@@ -157,6 +156,7 @@ Demuxer::~Demuxer() {
     if (isRunning) {
         isRunning = false;
     }
+    avformat_free_context(formatContext);
 }
 
 
