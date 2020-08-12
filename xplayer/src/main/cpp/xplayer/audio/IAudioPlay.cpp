@@ -12,7 +12,7 @@ IAudioPlay::IAudioPlay(const std::shared_ptr<PlayerState> &playerState) : player
 }
 
 IAudioPlay::~IAudioPlay() {
-    LOGI("IAudioPlay::~IAudioPlay");
+    LOGI("~IAudioPlay");
     isExit = true;
     frames->clear();
     callback = NULL;

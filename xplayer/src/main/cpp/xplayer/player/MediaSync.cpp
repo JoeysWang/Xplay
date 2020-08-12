@@ -40,10 +40,23 @@ void MediaSync::setVideoView(const std::shared_ptr<IVideoView> &videoView) {
 
 void MediaSync::stop() {
     isExit = true;
+    std::unique_lock<std::mutex> lockVideo(videoThreadMutex);
+    while (videoPlaying) {
+        videoPlayingWaitting.wait(lockVideo);
+    }
+    lockVideo.unlock();
+
+    std::unique_lock<std::mutex> lockAudio(audioThreadMutex);
+    while (audioPlaying) {
+        audioPlayingWaitting.wait(lockAudio);
+    }
+    lockAudio.unlock();
+    LOGI("MediaSync::stop success");
 }
 
 void MediaSync::audioPlay() {
     while (true) {
+        audioPlaying = true;
         if (isExit || playerState->abortRequest) {
             LOGI("MediaSync::audioPlay isExit=true");
             resampler->quit();
@@ -63,14 +76,17 @@ void MediaSync::audioPlay() {
         }
         resampler->update(frame);
     }
+    audioPlaying = false;
+    audioPlayingWaitting.notify_all();
     LOGI("MediaSync::audioPlay 退出");
 }
 
 void MediaSync::videoPlay() {
     while (true) {
+        videoPlaying = true;
         if (isExit || playerState->abortRequest) {
-            videoView->quit();
             LOGI("MediaSync::videoPlay isExit=true");
+            videoView->quit();
             break;
         }
         if (playerState->pauseRequest) {
@@ -105,6 +121,9 @@ void MediaSync::videoPlay() {
         lastFramePts = frameWrapper->pts;
         videoView->render(frameWrapper);
     }
+    videoPlaying = false;
+    videoPlayingWaitting.notify_all();
+
     LOGI("MediaSync::videoPlay 退出");
 }
 

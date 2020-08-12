@@ -58,7 +58,17 @@ protected:
     std::unique_ptr<MediaClock> videoClock;
 
 //    std::unique_ptr<XHandler> playerHandler = nullptr;
-    bool isExit=false;
+    std::atomic_bool isExit = {false};
+
+    std::mutex videoThreadMutex;
+    std::mutex audioThreadMutex;
+
+    std::condition_variable videoPlayingWaitting;
+    std::condition_variable audioPlayingWaitting;
+    std::atomic_bool videoPlaying = {false};
+    std::atomic_bool audioPlaying = {false};
+
+
 private:
     void audioPlay();
 

@@ -14,7 +14,7 @@ class IVideoView {
 public:
     IVideoView(const std::shared_ptr<PlayerState> &playerState);
 
-    virtual void quit() = 0;
+    virtual void quit() ;
     virtual void render(FrameData *frameData) = 0;
     virtual void setRenderSurface(void *win) = 0;
 

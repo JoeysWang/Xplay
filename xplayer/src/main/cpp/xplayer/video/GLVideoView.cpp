@@ -47,5 +47,5 @@ void GLVideoView::quit() {
 }
 
 GLVideoView::~GLVideoView() {
-    LOGI("GLVideoView::~GLVideoView");
+    LOGI("~GLVideoView");
 }

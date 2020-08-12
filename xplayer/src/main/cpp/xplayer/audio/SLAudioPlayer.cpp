@@ -139,7 +139,7 @@ void SLAudioPlayer::quit() {
 }
 
 SLAudioPlayer::~SLAudioPlayer() {
-    LOGI("SLAudioPlayer::~SLAudioPlayer");
+    LOGI("~SLAudioPlayer");
     isExit = true;
     engineSL = NULL;
     engineItf = NULL;

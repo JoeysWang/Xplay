@@ -106,6 +106,7 @@ void IDecode::pushPacket(PacketData *data) {
 }
 
 IDecode::~IDecode() {
+    LOGI("~IDecode  %s", tag);
 
     isExit = true;
     avcodec_free_context(&codecContext);

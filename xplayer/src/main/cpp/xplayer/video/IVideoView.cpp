@@ -6,3 +6,7 @@
 
 IVideoView::IVideoView(const std::shared_ptr<PlayerState> &playerState) : playerState(
         playerState) {}
+
+void IVideoView::quit() {
+
+}

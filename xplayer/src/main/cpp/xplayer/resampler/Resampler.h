@@ -9,6 +9,7 @@
 #include "../data/PlayerState.h"
 #include "../data/FrameData.h"
 #include "../audio/IAudioPlay.h"
+#include "../audio/SLAudioPlayer.h"
 
 class Resampler {
 
@@ -29,7 +30,7 @@ public:
 
 private:
     std::shared_ptr<PlayerState> playerState;
-    std::unique_ptr<IAudioPlay> audioPlayer;
+    std::unique_ptr<SLAudioPlayer> audioPlayer;
     SwrContext *swrContext;
     int outChannels = 2;
     int outFormat = 1;//AV_SAMPLE_FMT_S16

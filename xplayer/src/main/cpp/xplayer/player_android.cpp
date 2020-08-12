@@ -60,9 +60,14 @@ JNIMediaPlayerListener::JNIMediaPlayerListener(JNIEnv *env, jobject thiz, jobjec
 }
 
 JNIMediaPlayerListener::~JNIMediaPlayerListener() {
-    JNIEnv *env = getJNIEnv();
-    env->DeleteGlobalRef(mObject);
-    env->DeleteGlobalRef(mClass);
+    LOGI("~JNIMediaPlayerListener");
+
+//        JNIEnv *env = getJNIEnv();
+//        env->DeleteGlobalRef(mObject);
+//        env->DeleteGlobalRef(mClass);
+
+    LOGI("~JNIMediaPlayerListener success");
+
 }
 
 void JNIMediaPlayerListener::notify(int msg, int ext1, int ext2, void *obj) {
