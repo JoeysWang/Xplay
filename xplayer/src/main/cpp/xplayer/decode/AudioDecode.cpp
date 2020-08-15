@@ -72,7 +72,7 @@ int AudioDecode::decode() {
                            * 2;
             output->format = frame->format;
             output->nb_samples = frame->nb_samples;
-//            LOGI("audio frame size=%d  \n=====", output->size);
+            LOGI("audio frame size=%d  \n=====", output->size);
             output->pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts * av_q2d(tb);
             memcpy(output->decodeDatas, frame->data, sizeof(frame->data));
 

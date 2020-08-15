@@ -136,6 +136,7 @@ void SLAudioPlayer::playCall(void *bufferQueue) {
 
 void SLAudioPlayer::quit() {
     LOGI("SLAudioPlayer::stop");
+    frames->quit();
 }
 
 SLAudioPlayer::~SLAudioPlayer() {

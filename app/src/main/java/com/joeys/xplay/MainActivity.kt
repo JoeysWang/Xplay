@@ -74,6 +74,8 @@ class MainActivity : AppCompatActivity() {
                     val uri2File = UriUtils.uri2File(uri)
                     Log.d(TAG, "uri2File: ${uri2File.absolutePath}")
 //                    PlayerActivity.start(uri2File.absolutePath, this)
+                    PlayerActivity.start(uri2File.absolutePath,this)
+
                 }
             }
         }

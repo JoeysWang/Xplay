@@ -40,6 +40,8 @@ void MediaSync::setVideoView(const std::shared_ptr<IVideoView> &videoView) {
 
 void MediaSync::stop() {
     isExit = true;
+    videoView->quit();
+    resampler->quit();
     std::unique_lock<std::mutex> lockVideo(videoThreadMutex);
     while (videoPlaying) {
         videoPlayingWaitting.wait(lockVideo);
@@ -57,24 +59,32 @@ void MediaSync::stop() {
 void MediaSync::audioPlay() {
     while (true) {
         audioPlaying = true;
+        audioThreadMutex.lock();
         if (isExit || playerState->abortRequest) {
             LOGI("MediaSync::audioPlay isExit=true");
-            resampler->quit();
+            audioThreadMutex.unlock();
             break;
         }
         if (playerState->pauseRequest) {
             std::chrono::milliseconds duration(500);
             std::this_thread::sleep_for(duration);
+            audioThreadMutex.unlock();
             continue;
         }
         FrameData *frame = nullptr;
         audioDecode->popFrame(frame);
-        if (!frame || frame->size == 0) {
+        if (!isExit && (!frame || frame->size == 0)) {
             std::chrono::milliseconds duration(5);
             std::this_thread::sleep_for(duration);
+            audioThreadMutex.unlock();
             continue;
+        } else if (isExit) {
+            audioThreadMutex.unlock();
+            break;
         }
         resampler->update(frame);
+        audioThreadMutex.unlock();
+
     }
     audioPlaying = false;
     audioPlayingWaitting.notify_all();
@@ -86,7 +96,6 @@ void MediaSync::videoPlay() {
         videoPlaying = true;
         if (isExit || playerState->abortRequest) {
             LOGI("MediaSync::videoPlay isExit=true");
-            videoView->quit();
             break;
         }
         if (playerState->pauseRequest) {
@@ -97,11 +106,12 @@ void MediaSync::videoPlay() {
         }
         FrameData *frameWrapper = nullptr;
         videoDecode->popFrame(frameWrapper);
-        if (!frameWrapper || frameWrapper->size == 0) {
+        if (!isExit && (!frameWrapper || frameWrapper->size == 0)) {
             std::chrono::milliseconds duration(5);
             std::this_thread::sleep_for(duration);
             continue;
-        }
+        } else if (isExit)
+            break;
 
         if (resumeAfterPause) {
             resumeAfterPause = false;

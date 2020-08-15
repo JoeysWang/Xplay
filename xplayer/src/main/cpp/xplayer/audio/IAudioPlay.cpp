@@ -14,14 +14,16 @@ IAudioPlay::IAudioPlay(const std::shared_ptr<PlayerState> &playerState) : player
 IAudioPlay::~IAudioPlay() {
     LOGI("~IAudioPlay");
     isExit = true;
-    frames->clear();
     callback = NULL;
     callbackContext = nullptr;
 }
 
 void IAudioPlay::update(FrameData data) {
     //压入缓冲队列
-    if (isExit) { return; }
+    if (isExit || playerState->abortRequest) {
+        frames->quit();
+        return;
+    }
     frames->push(data);
 }
 
@@ -40,5 +42,7 @@ void IAudioPlay::setCallback(AudioPCMCallback pcmCallback, void *context) {
 
 void IAudioPlay::quit() {
     LOGD("IAudioPlay::stop");
+    frames->quit();
+
 }
 

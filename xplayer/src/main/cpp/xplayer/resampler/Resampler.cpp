@@ -41,6 +41,7 @@ bool Resampler::open(DecodeParam in, DecodeParam out) {
 
     LOGW("音频重采样初始化成功");
     audioPlayer->startPlay(out);
+
     return true;
 }
 
@@ -76,7 +77,7 @@ FrameData Resampler::resample(FrameData *in) {
         LOGE("音频重采样 swr_convert 失败  ");
         return out;
     }
-//    LOGI("音频重采样 swr_convert 成功  size=%d", size);
+    LOGI("音频重采样 swr_convert 成功  size=%d", size);
     out.size = size;
     out.pts = in->pts;
     return out;
@@ -90,6 +91,7 @@ void Resampler::update(FrameData *data) {
 }
 
 void Resampler::quit() {
+    LOGI("Resampler::quit");
     audioPlayer->quit();
     if (swrContext) {
         swr_free(&swrContext);

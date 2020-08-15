@@ -93,10 +93,10 @@ void FFPlayer::handleMessage(XMessage *message) {
             quit();
             playerState->abortRequest = 1;
             url = nullptr;
-            mediaSync->stop();
             demuxer->quit();
             audioDecode->quit();
             videoDecode->quit();
+            mediaSync->stop();
 
             delete this;
         }
